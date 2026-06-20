@@ -523,8 +523,8 @@ function toggleReady(){
   }
 }
 
-function hostStartGame(){
-  ws.send(JSON.stringify({ type:'START_GAME' }));
+function hostStartGame(force){
+  ws.send(JSON.stringify({ type:'START_GAME', force:!!force }));
 }
 
 function renderLobby(state){
@@ -586,6 +586,14 @@ function handleServerMsg(msg){
         lobbyErr.textContent=msg.message; lobbyErr.classList.add('show');
         setTimeout(()=>lobbyErr.classList.remove('show'),4000);
       }
+      break;
+    }
+
+    case 'NOT_READY_WARNING':{
+      // スタンバイしていないメンバーがいる場合、確認のうえ強制開始できるようにする
+      const names=msg.notReady.join('、');
+      const ok=confirm(`スタンバイしていないプレイヤーがいます：${names}\nこのまま開始しますか？`);
+      if(ok) hostStartGame(true);
       break;
     }
 

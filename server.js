@@ -107,15 +107,17 @@ wss.on('connection', (ws) => {
         const room = rooms.get(currentRoomId);
         if (!room || ws !== room.hostWs) return;
 
-        // 全員スタンバイチェック（ホスト自身は除外してもよいが、ここでは全員対象）
+        // 全員スタンバイチェック（ホスト自身は対象外）
+        // msg.force が true の場合は警告を無視して開始する
         const notReady = [];
-        for (const [, p] of room.players) {
+        for (const [pw, p] of room.players) {
+          if (pw === room.hostWs) continue; // ホストは対象外
           if (!p.ready) notReady.push(p.name);
         }
-        if (notReady.length > 0) {
+        if (notReady.length > 0 && !msg.force) {
           ws.send(JSON.stringify({
-            type: 'ERROR',
-            message: `スタンバイしていないプレイヤーがいます：${notReady.join('、')}`,
+            type: 'NOT_READY_WARNING',
+            notReady,
           }));
           return;
         }
