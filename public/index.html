@@ -169,6 +169,10 @@ input[type="file"]{display:none;}
     このツールは、オリジナルの課題文をtxtファイルで読み込ませて使用することを想定しています（マルチプレイ時は部屋のホストがファイルを用意します）。<br>
     課題文は<b>半角文字を含まず、すべて全角文字で記述されたもの</b>を使用してください。半角文字を含む場合、改行処理が正確に動作しない可能性があります。
   </div>
+  <div class="btn-pair">
+    <button class="btn-primary" onclick="showScreen('solo-menu-screen')">ソロプレイ</button>
+    <button class="btn-primary" onclick="showScreen('multi-name-screen')">マルチプレイ</button>
+  </div>
   <div class="mcard">
     <div class="mcard-title">競技ルール</div>
     <ul class="rule-list">
@@ -206,7 +210,7 @@ input[type="file"]{display:none;}
       <b>誤字の例</b>：「最新版」を「さいしんばん」「saisinban」「再審判」と入力した場合、「最新版」が3文字なのですべて3エラー。
     </div>
   </div>
-  <div class="mcard"></u>
+  <div class="mcard">
     <div class="mcard-title">採点ルール2：毎日パソコン入力コンクール</div>
     <ul class="rule-list">
       <li>小学生～高校生を中心に全国の参加者が集う大規模なコンクール。<br>変換学習や辞書登録は認められていない。ミス数に応じた特別点が存在するため、正確な入力が重要。</li>
@@ -231,10 +235,6 @@ input[type="file"]{display:none;}
     <div class="err-example">
       <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6ミス。「さ」と入力した場合、誤字1＋脱字1の2ミス。
     </div>
-  </div>
-  <div class="btn-pair">
-    <button class="btn-primary" onclick="showScreen('solo-menu-screen')">ソロプレイ</button>
-    <button class="btn-primary" onclick="showScreen('multi-name-screen')">マルチプレイ</button>
   </div>
 </div>
 </div>
@@ -286,6 +286,10 @@ input[type="file"]{display:none;}
   <div class="page-hero"><h1>ルームを作る</h1></div>
   <div class="mcard">
     <div class="mcard-title">課題文を指定</div>
+    <div class="text-select" id="host-text-select">
+      <button class="text-btn" data-idx="0">① 富士山（短文・動作確認用）</button>
+      <button class="text-btn" data-idx="1">② 日本国憲法（長文・動作確認用）</button>
+    </div>
     <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="host-file-input" accept=".txt">
     <div id="host-selected-info"></div>
@@ -559,12 +563,24 @@ function connectWS(callback){
 // マルチプレイ：ホスト設定
 // =====================================================================
 let hostText=null;
+// ホスト：サンプル文章の選択
+document.querySelectorAll('#host-text-select .text-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#host-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    const t=SAMPLE_TEXTS[parseInt(btn.dataset.idx)];
+    hostText={name:t.name, content:t.content};
+    document.getElementById('host-selected-info').textContent='選択中：'+t.name;
+  });
+});
 document.getElementById('host-file-input').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f)return;
   const r=new FileReader();
   r.onload=ev=>{
     hostText={name:f.name,content:ev.target.result};
     document.getElementById('host-selected-info').textContent='選択中：'+f.name;
+    // サンプルボタンの選択状態を解除
+    document.querySelectorAll('#host-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
   };
   r.readAsText(f,'UTF-8');
 });
