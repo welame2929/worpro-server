@@ -69,6 +69,7 @@ wss.on('connection', (ws) => {
           hostWs: ws,
           text: msg.text || '',
           textName: msg.textName || '課題文',
+          defaultRule: msg.defaultRule || 'warpro',
           players: new Map(),
           gameState: 'waiting',
           timerInterval: null,
@@ -139,6 +140,7 @@ wss.on('connection', (ws) => {
           startAt,
           text: room.text,
           textName: room.textName,
+          defaultRule: room.defaultRule,
         });
         console.log(`Game started in room ${currentRoomId}`);
 
@@ -160,15 +162,15 @@ wss.on('connection', (ws) => {
         if (!player) return;
         player.result = {
           totalChars: msg.totalChars,
-          errors: msg.errors,
-          pure: msg.pure,
+          scores: msg.scores, // {warpro:{points,miss}, mainichi:{...}, intersteno:{...}}
         };
         // 全員の結果を集計して配信
         const results = [];
         for (const [, p] of room.players) {
           results.push({
             name: p.name,
-            result: p.result,
+            totalChars: p.result ? p.result.totalChars : null,
+            scores: p.result ? p.result.scores : null,
           });
         }
         broadcast(room, { type: 'RESULTS_UPDATE', results });
