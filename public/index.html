@@ -9,7 +9,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --navy:#1A1E3F;--blue:#8098D6;--blue-mid:#b8c8ea;
-  --white:#ffffff;--bg:#f5f7fc;--text:#1a1e3f;--muted:#5a6490;--border:#d0d8ee;
+  --white:#ffffff;--bg:#94ADE4;--text:#1a1e3f;--muted:#5a6490;--border:#d0d8ee;
   --del-bg:#fde8e8;--del-text:#8b1c1c;--ins-bg:#e6f4ea;--ins-text:#14532d;
 }
 body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);}
@@ -21,22 +21,23 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .page-hero{text-align:center;padding:1.5rem 0 1.25rem;}
 .page-hero h1{font-size:20px;font-weight:500;color:var(--white);}
 .page-hero p{font-size:13px;color:var(--blue-mid);margin-top:4px;}
-.mcard{background:rgba(255,255,255,0.07);border:1px solid rgba(128,152,214,0.3);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
-.mcard-title{font-size:12px;font-weight:500;color:var(--blue);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;}
-.rule-list{list-style:none;font-size:13px;color:var(--blue-mid);}
-.rule-list li{padding:4px 0;border-bottom:1px solid rgba(128,152,214,0.15);}
+.mcard{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
+.mcard-title{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;}
+.rule-list{list-style:none;font-size:13px;color:#2e3658;}
+.rule-list li{padding:4px 0;border-bottom:1.5px solid #8098D6;}
 .rule-list li:last-child{border-bottom:none;}
-.rule-list li b{color:var(--white);font-weight:500;}
+.rule-list li b{color:var(--navy);font-weight:500;}
 .err-table{width:100%;border-collapse:collapse;font-size:12px;}
-.err-table th{background:rgba(128,152,214,0.2);color:var(--blue);padding:5px 8px;text-align:left;font-weight:400;}
-.err-table td{padding:5px 8px;border-bottom:1px solid rgba(128,152,214,0.12);color:var(--blue-mid);vertical-align:top;}
+.err-table th{background:#8098D6;color:#ffffff;padding:5px 8px;text-align:left;font-weight:500;}
+.err-table td{padding:5px 8px;border-bottom:1.5px solid #8098D6;color:#2e3658;vertical-align:top;}
 .err-table tr:last-child td{border-bottom:none;}
-.warn-row td{color:var(--white)!important;}
-.warn-row td:last-child{text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(248,180,80,0.8);}
-.err-example{margin-top:8px;background:rgba(0,0,0,0.2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--blue-mid);line-height:1.8;}
-.err-example b{color:var(--white);font-weight:500;}
-.notice-box{background:rgba(248,180,80,0.12);border:1px solid rgba(248,180,80,0.4);border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:#f8d080;line-height:1.7;}
-.notice-box b{color:#fde68a;font-weight:500;}
+.warn-row td{color:var(--navy)!important;font-weight:500;}
+.warn-row td:last-child{text-decoration:underline;text-underline-offset:3px;text-decoration-color:#c4781a;}
+.err-example{margin-top:8px;background:#dfe7f5;border:1px solid #b3c3e2;border-radius:6px;padding:8px 10px;font-size:12px;color:#2e3658;line-height:1.8;}
+.err-example b{color:var(--navy);font-weight:500;}
+.notice-box{background:#fdf4e0;border:1px solid #f0cd84;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:15px;color:#5f4310;line-height:1.7;}
+.notice-box b{color:#42300a;font-weight:500;}
+.notice-title{font-size:15px;font-weight:500;color:#42300a;margin-bottom:6px;letter-spacing:.04em;}
 
 /* ボタン類 */
 .btn-primary{width:100%;padding:13px;background:var(--blue);color:var(--navy);border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;}
@@ -48,19 +49,19 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .btn-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
 
 /* テキスト入力 */
-.text-input{width:100%;padding:10px 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(128,152,214,0.35);border-radius:8px;color:var(--white);font-size:14px;font-family:inherit;outline:none;}
-.text-input:focus{border-color:var(--blue);}
-.text-input::placeholder{color:rgba(128,152,214,0.5);}
-.input-label{font-size:12px;color:var(--blue-mid);margin-bottom:6px;display:block;}
+.text-input{width:100%;padding:10px 12px;background:#eaf0fa;border:1px solid #aebfe0;border-radius:8px;color:var(--navy);font-size:14px;font-family:inherit;outline:none;}
+.text-input:focus{border-color:var(--navy);background:#ffffff;}
+.text-input::placeholder{color:#8794ba;}
+.input-label{font-size:12px;color:#3a4aa0;margin-bottom:6px;display:block;}
 .input-group{margin-bottom:12px;}
 input[type="file"]{display:none;}
-.upload-area{border:1.5px dashed rgba(128,152,214,0.4);border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:13px;color:var(--blue-mid);transition:all .15s;}
-.upload-area:hover{border-color:var(--blue);background:rgba(128,152,214,0.1);color:var(--white);}
+.upload-area{border:1.5px dashed #9fb1da;border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:13px;color:#3a4aa0;transition:all .15s;}
+.upload-area:hover{border-color:var(--navy);background:#dfe7f5;color:var(--navy);}
 .text-select{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
-.text-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(128,152,214,0.35);border-radius:8px;padding:9px 12px;text-align:left;cursor:pointer;font-size:13px;color:var(--blue-mid);transition:all .15s;font-family:inherit;}
-.text-btn:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
-.text-btn.selected{background:rgba(128,152,214,0.22);border-color:var(--blue);color:var(--white);}
-#solo-selected-info,#host-selected-info{margin-top:6px;font-size:12px;color:var(--blue);min-height:16px;}
+.text-btn{background:#eaf0fa;border:1px solid #aebfe0;border-radius:8px;padding:9px 12px;text-align:left;cursor:pointer;font-size:13px;color:#2e3658;transition:all .15s;font-family:inherit;}
+.text-btn:hover{background:#dfe7f5;border-color:var(--navy);color:var(--navy);}
+.text-btn.selected{background:#b7c6e6;border-color:var(--navy);color:var(--navy);font-weight:500;}
+#solo-selected-info,#host-selected-info{margin-top:6px;font-size:12px;color:#3a4aa0;min-height:16px;}
 
 /* エラーメッセージ */
 .err-msg{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:8px 12px;font-size:13px;color:#fca5a5;margin-bottom:8px;display:none;}
@@ -68,12 +69,12 @@ input[type="file"]{display:none;}
 
 /* ===ロビー画面=== */
 .player-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
-.player-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);border-radius:6px;padding:8px 12px;}
-.player-name{font-size:14px;color:var(--white);}
+.player-row{display:flex;align-items:center;justify-content:space-between;background:#eaf0fa;border:1px solid #b3c3e2;border-radius:6px;padding:8px 12px;}
+.player-name{font-size:14px;color:var(--navy);}
 .player-badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500;}
-.badge-host{background:rgba(128,152,214,0.3);color:var(--blue);}
-.badge-ready{background:rgba(74,222,128,0.2);color:#4ade80;}
-.badge-notready{background:rgba(255,255,255,0.08);color:var(--muted);}
+.badge-host{background:#dde3f7;color:#3a4aa0;}
+.badge-ready{background:#d6f0dd;color:#1f7a3a;}
+.badge-notready{background:#eceef5;color:#7a82a0;}
 .room-id-display{text-align:center;margin-bottom:12px;}
 .room-id-display .label{font-size:11px;color:var(--blue-mid);margin-bottom:4px;}
 .room-id-display .id{font-size:28px;font-weight:500;color:var(--white);letter-spacing:.15em;}
@@ -102,15 +103,15 @@ input[type="file"]{display:none;}
   user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;}
 .input-pane{display:flex;flex-direction:column;align-items:center;overflow:hidden;background:var(--bg);padding:8px;border-left:1px solid var(--border);}
 .pane-head-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-shrink:0;}
-.pane-head-row span{font-size:11px;color:var(--muted);}
-.page-indicator{font-size:11px;color:var(--muted);}
-.input-char-count{font-size:12px;font-weight:500;color:var(--text);}
+.pane-head-row span{font-size:14px;color:var(--navy);}
+.page-indicator{font-size:14px;color:var(--navy);}
+.input-char-count{font-size:15px;font-weight:500;color:var(--text);}
 #source-frame{border:2px solid var(--navy);border-radius:4px;background:var(--white);flex-shrink:0;overflow:hidden;}
 #source-display{overflow:hidden;}
 .src-row{display:flex;align-items:stretch;}
 .src-text{font-family:'BIZ UDGothic',monospace;white-space:pre;color:var(--text);flex:1;}
 .src-count-wrap{display:flex;align-items:center;flex-shrink:0;border-left:1px solid var(--border);}
-.src-count{font-size:10px;color:#aab4cc;text-align:right;padding:0 6px;}
+.src-count{font-size:10px;color:#aab4cc;text-align:right;padding:0 5px 0 2px;white-space:nowrap;}
 #ta-frame{border:2px solid var(--navy);border-radius:4px;background:var(--white);flex-shrink:0;overflow:hidden;}
 #ta-wrapper{overflow:hidden;background:var(--white);}
 #typing-area{display:block;border:none;resize:none;padding:0;margin:0;font-family:'BIZ UDGothic',monospace;background:var(--white);color:var(--text);outline:none;overflow-y:scroll;overflow-x:hidden;
@@ -120,26 +121,26 @@ input[type="file"]{display:none;}
 
 /* ===リザルト画面=== */
 .score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
-.score-card{background:rgba(255,255,255,0.07);border:1px solid rgba(128,152,214,0.25);border-radius:8px;padding:12px;}
-.sc-label{font-size:11px;color:var(--blue-mid);margin-bottom:3px;}
-.sc-value{font-size:28px;font-weight:500;color:var(--white);}
-.score-card.pure .sc-value{color:#93c5fd;}
-.diff-card{background:rgba(255,255,255,0.05);border:1px solid rgba(128,152,214,0.25);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
-.diff-card h2{font-size:12px;font-weight:500;color:var(--blue);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;}
+.score-card{background:#CAD7EE;border:1px solid #aebfe0;border-radius:8px;padding:12px;}
+.sc-label{font-size:14px;color:#3a4aa0;margin-bottom:3px;}
+.sc-value{font-size:28px;font-weight:500;color:var(--navy);}
+.score-card.pure .sc-value{color:#2f5bd0;}
+.diff-card{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
+.diff-card h2{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;}
 .legend{display:flex;gap:14px;margin-bottom:8px;}
-.ld{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--blue-mid);}
+.ld{display:flex;align-items:center;gap:4px;font-size:12px;color:#3a4aa0;}
 .ld-dot{width:12px;height:12px;border-radius:2px;}
-.diff-content{font-size:13px;line-height:2;white-space:pre-wrap;font-family:'Noto Sans JP',sans-serif;color:rgba(255,255,255,0.8);}
+.diff-content{font-size:13px;line-height:2;white-space:pre-wrap;font-family:'Noto Sans JP',sans-serif;color:#2e3658;}
 .d-del{background:var(--del-bg);color:var(--del-text);text-decoration:line-through;border-radius:2px;}
 .d-ins{background:var(--ins-bg);color:var(--ins-text);border-radius:2px;}
 
 /* マルチリザルト：順位表 */
 .ranking-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px;}
-.ranking-table th{background:rgba(128,152,214,0.2);color:var(--blue);padding:6px 10px;text-align:left;font-weight:400;}
-.ranking-table td{padding:7px 10px;border-bottom:1px solid rgba(128,152,214,0.12);color:var(--white);}
+.ranking-table th{background:#8098D6;color:#ffffff;padding:6px 10px;text-align:left;font-weight:500;}
+.ranking-table td{padding:7px 10px;border-bottom:1.5px solid #8098D6;color:#2e3658;}
 .ranking-table tr:last-child td{border-bottom:none;}
-.rank-1 td{color:#fde68a;}
-.waiting-result{color:var(--muted);font-style:italic;}
+.rank-1 td{color:#9a6b08;font-weight:500;}
+.waiting-result{color:#8794ba;font-style:italic;}
 </style>
 </head>
 <body>
@@ -152,9 +153,13 @@ input[type="file"]{display:none;}
     <h1>実用タイピング採点用ツール</h1>
   </div>
   <div class="notice-box">
-    <b>はじめにご確認ください</b><br>
-    文字サイズはウィンドウ幅をもとに自動設定されます。<b>まずサンプル文章でゲームを開始し</b>、表示を確認してください。<br>
-    また、文字幅を揃えて正確に採点するため、課題文は<b>半角文字（英数字・記号）を含まず、すべて全角文字で記述されたもの</b>を使用してください。
+    <div class="notice-title">はじめにご確認ください</div>
+    文字サイズはウィンドウ幅をもとに自動設定されます。<b>まずサンプル文章でゲームを開始し</b>、表示を確認してください。
+  </div>
+  <div class="notice-box">
+    <div class="notice-title">課題文ファイルの注意事項</div>
+    このツールは、オリジナルの課題文をtxtファイルで読み込ませて使用することを想定しています（マルチプレイ時は部屋のホストがファイルを用意します）。<br>
+    課題文は<b>半角文字を含まず、すべて全角文字で記述されたもの</b>を使用してください。半角文字を含む場合、改行処理が正確に動作しない可能性があります。
   </div>
   <div class="mcard">
     <div class="mcard-title">競技ルール</div>
@@ -162,7 +167,7 @@ input[type="file"]{display:none;}
       <li>制限時間 <b>10分間</b>。課題文を正確に入力し純字数を競う。</li>
       <li><b>純字数</b> ＝ 総字数 − エラー数</li>
       <li>残り <b>2分</b> および残り <b>10秒</b> で画面が1秒間赤く点滅して通知</li>
-      <li>課題文は <b>1行30文字・30行ずつ</b>ページ切り替え表示</li>
+      <li>課題文は <b>1行30文字の配置で30行ずつ表示</b>。次のページに達すると表示部分が自動で切り替わる。</li>
     </ul>
   </div>
   <div class="mcard">
@@ -174,8 +179,6 @@ input[type="file"]{display:none;}
         <tr><td>脱字</td><td>入力しなかった文字数分がエラー</td></tr>
         <tr class="warn-row"><td>脱行</td><td>1行まるごと抜けた場合、その文字数分（最大30字）がエラー。見落としに注意。</td></tr>
         <tr><td>余分字</td><td>余分に入力した箇所を1エラー</td></tr>
-        <tr><td>スペース</td><td>不正なスペースの増減で1エラー</td></tr>
-        <tr><td>改行</td><td>改行のミス1箇所につき1エラー</td></tr>
       </tbody>
     </table>
     <div class="err-example">
@@ -196,13 +199,13 @@ input[type="file"]{display:none;}
   <div class="mcard">
     <div class="mcard-title">課題文を選択</div>
     <div class="text-select" id="solo-text-select">
-      <button class="text-btn" data-idx="0">① 富士山（サンプル）</button>
-      <button class="text-btn" data-idx="1">② 地球温暖化（サンプル）</button>
+      <button class="text-btn" data-idx="0">① 富士山（短文・動作確認用）</button>
+      <button class="text-btn" data-idx="1">② 日本国憲法（長文・動作確認用）</button>
     </div>
     <div class="upload-area" onclick="document.getElementById('solo-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="solo-file-input" accept=".txt">
     <div id="solo-selected-info"></div>
-    <div style="font-size:11px;color:var(--blue-mid);margin-top:6px;">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
+    <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
   </div>
   <div class="btn-row">
     <button class="btn-primary" id="solo-start-btn" disabled onclick="startSoloGame()">ゲームを開始する</button>
@@ -239,7 +242,7 @@ input[type="file"]{display:none;}
     <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="host-file-input" accept=".txt">
     <div id="host-selected-info"></div>
-    <div style="font-size:11px;color:var(--blue-mid);margin-top:6px;">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
+    <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
   </div>
   <div id="host-err" class="err-msg">課題文を選択してください</div>
   <div class="btn-row">
@@ -279,7 +282,7 @@ input[type="file"]{display:none;}
   <div class="mcard">
     <div class="mcard-title">参加者</div>
     <div class="player-list" id="lobby-player-list"></div>
-    <div id="lobby-text-info" style="font-size:12px;color:var(--blue-mid);margin-top:4px;"></div>
+    <div id="lobby-text-info" style="font-size:12px;color:#4658a8;margin-top:4px;"></div>
   </div>
   <div id="lobby-err" class="err-msg"></div>
   <!-- ホスト用 -->
@@ -379,11 +382,11 @@ input[type="file"]{display:none;}
 // 定数・状態変数
 // =====================================================================
 const COLS=30, PAGE_ROWS=30;
-const PAD_L=14, PAD_R=14, COUNT_W=40, SCROLLBAR_W=17;
+const PAD_L=14, PAD_R=14, COUNT_W=48, SCROLLBAR_W=17;
 
 const SAMPLE_TEXTS=[
-  {name:"① 富士山",content:`　富士山の高さは３７７６メートル。子どものころに学校で習ったこの数字は、大正時代の測量により決定されたもので、長い間この数字が使われてきた。\n　ところが、最新の技術を利用して正確に測り直したところ、従来の高さより６５センチ程度低いことがわかった。`},
-  {name:"② 地球温暖化",content:`　もしも、地球の温暖化により現在の海面が上昇すると、農業においてはどのような影響が出るだろうか。これについて検討している国際機関では、４０年後には地球の平均海面が、今より１８センチ上がると推定している。\n　農地は平野に多く、水位が上がると塩による被害にさらされる。現実に１８センチも上昇すると、広い地域にわたって堤防のかさ上げや、強力な排水ポンプが必要になるということだ。温暖化による被害は、想像よりも深刻になりそうだ。`}
+  {name:"① 富士山（短文・動作確認用）",content:`　富士山の高さは３７７６メートル。子どものころに学校で習ったこの数字は、大正時代の測量により決定されたもので、長い間この数字が使われてきた。\n　ところが、最新の技術を利用して正確に測り直したところ、従来の高さより６５センチ程度低いことがわかった。`},
+  {name:"② 日本国憲法（長文・動作確認用）",content:`日本国憲法（前文＋全１１章１０３条より冒頭を抜粋）\n\n　日本国民は、正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたつて自由のもたらす恵沢を確保し、政府の行為によつて再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。そもそも国政は、国民の厳粛な信託によるものであつて、その権威は国民に由来し、その権力は国民の代表者がこれを行使し、その福利は国民がこれを享受する。これは人類普遍の原理であり、この憲法は、かかる原理に基くものである。われらは、これに反する一切の憲法、法令及び詔勅を排除する。\n\n　日本国民は、恒久の平和を念願し、人間相互の関係を支配する崇高な理想を深く自覚するのであつて、平和を愛する諸国民の公正と信義に信頼して、われらの安全と生存を保持しようと決意した。われらは、平和を維持し、専制と隷従、圧迫と偏狭を地上から永遠に除去しようと努めてゐる国際社会において、名誉ある地位を占めたいと思ふ。われらは、全世界の国民が、ひとしく恐怖と欠乏から免かれ、平和のうちに生存する権利を有することを確認する。\n\n　われらは、いづれの国家も、自国のことのみに専念して他国を無視してはならないのであつて、政治道徳の法則は、普遍的なものであり、この法則に従ふことは、自国の主権を維持し、他国と対等関係に立たうとする各国の責務であると信ずる。\n\n　日本国民は、国家の名誉にかけ、全力をあげてこの崇高な理想と目的を達成することを誓ふ。\n\n第一条\n天皇は、日本国の象徴であり日本国民統合の象徴であつて、この地位は、主権の存する日本国民の総意に基く。\n\n第二条\n皇位は、世襲のものであつて、国会の議決した皇室典範の定めるところにより、これを継承する。\n\n第三条\n天皇の国事に関するすべての行為には、内閣の助言と承認を必要とし、内閣が、その責任を負ふ。\n\n第四条\n天皇は、この憲法の定める国事に関する行為のみを行ひ、国政に関する権能を有しない。\n天皇は、法律の定めるところにより、その国事に関する行為を委任することができる。\n\n第五条\n皇室典範の定めるところにより摂政を置くときは、摂政は、天皇の名でその国事に関する行為を行ふ。この場合には、前条第一項の規定を準用する。\n\n第六条\n天皇は、国会の指名に基いて、内閣総理大臣を任命する。\n天皇は、内閣の指名に基いて、最高裁判所の長たる裁判官を任命する。\n\n第七条\n天皇は、内閣の助言と承認により、国民のために、左の国事に関する行為を行ふ。憲法改正、法律、政令及び条約を公布すること。国会を召集すること。衆議院を解散すること。国会議員の総選挙の施行を公示すること。国務大臣及び法律の定めるその他の官吏の任免並びに全権委任状及び大使及び公使の信任状を認証すること。大赦、特赦、減刑、刑の執行の免除及び復権を認証すること。栄典を授与すること。批准書及び法律の定めるその他の外交文書を認証すること。外国の大使及び公使を接受すること。儀式を行ふこと。`}
 ];
 
 // ゲーム状態
@@ -440,8 +443,15 @@ document.getElementById('solo-file-input').addEventListener('change',e=>{
 function startSoloGame(){
   if(!selectedText)return;
   isMulti=false;
-  document.getElementById('retry-btn').onclick=()=>{ isMulti=false; startGame(selectedText); };
-  startGame(selectedText);
+  // 再戦ボタンもカウントダウン経由で開始する
+  document.getElementById('retry-btn').onclick=()=>{ isMulti=false; soloCountdownStart(); };
+  soloCountdownStart();
+}
+
+// ソロプレイ用：3秒カウントダウンを挟んでからゲーム開始
+function soloCountdownStart(){
+  gameStartAt=Date.now()+3000; // 3秒後に開始
+  startCountdown();
 }
 
 // =====================================================================
@@ -630,7 +640,8 @@ function startCountdown(){
     const remaining=Math.ceil((gameStartAt-Date.now())/1000);
     if(remaining<=0){
       clearInterval(countdownInterval);
-      startGame(selectedText, gameStartAt);
+      // マルチ時はサーバー時刻(gameStartAt)を渡してドリフト補正、ソロ時は補正不要
+      startGame(selectedText, isMulti ? gameStartAt : null);
     } else {
       el.textContent=remaining;
     }
@@ -685,7 +696,7 @@ function wrapToLines(text){
 function renderSourcePage(page,fs){
   const lhPx=Math.round(fs*lineHRatio(fs));
   currentLhPx=lhPx;
-  const countFs=Math.max(9,fs-3);
+  const countFs=Math.min(13,Math.max(9,fs-3));
   const startRow=page*PAGE_ROWS, endRow=Math.min(startRow+PAGE_ROWS,allSourceLines.length);
   const totalPages=Math.ceil(allSourceLines.length/PAGE_ROWS);
   const display=document.getElementById('source-display');
@@ -877,11 +888,15 @@ function renderRanking(results){
   sorted.forEach((r,i)=>{
     const tr=document.createElement('tr');
     if(i===0&&r.result) tr.className='rank-1';
-    tr.innerHTML=`<td>${r.result?i+1:'—'}</td>
-      <td>${r.name}</td>
-      <td>${r.result?r.result.pure:'<span class="waiting-result">集計中</span>'}</td>
-      <td>${r.result?r.result.totalChars:''}</td>
-      <td>${r.result?r.result.errors:''}</td>`;
+    // セルはtextContentで安全に組み立てる（プレイヤー名にHTMLが含まれても実行されない）
+    const tdRank=document.createElement('td'); tdRank.textContent=r.result?(i+1):'—';
+    const tdName=document.createElement('td'); tdName.textContent=r.name;
+    const tdPure=document.createElement('td');
+    if(r.result){ tdPure.textContent=r.result.pure; }
+    else { const w=document.createElement('span'); w.className='waiting-result'; w.textContent='集計中'; tdPure.appendChild(w); }
+    const tdTotal=document.createElement('td'); tdTotal.textContent=r.result?r.result.totalChars:'';
+    const tdErr=document.createElement('td'); tdErr.textContent=r.result?r.result.errors:'';
+    tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdPure); tr.appendChild(tdTotal); tr.appendChild(tdErr);
     tbody.appendChild(tr);
   });
 }

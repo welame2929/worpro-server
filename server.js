@@ -50,6 +50,16 @@ wss.on('connection', (ws) => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
 
+    // ハンドルネーム・課題文名をサーバー側でも正規化する
+    // （クライアントのmaxlengthは回避され得るため、サーバーでも上限を設ける）
+    const sanitizeName = (s) => {
+      if (typeof s !== 'string') return '名無し';
+      const trimmed = s.replace(/[\r\n\t]/g, ' ').trim().slice(0, 20);
+      return trimmed.length > 0 ? trimmed : '名無し';
+    };
+    if (typeof msg.name === 'string') msg.name = sanitizeName(msg.name);
+    if (typeof msg.textName === 'string') msg.textName = msg.textName.replace(/[\r\n\t]/g, ' ').trim().slice(0, 80);
+
     switch (msg.type) {
 
       // ── ルーム作成 ───────────────────────────────────────────
