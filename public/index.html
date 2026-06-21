@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>実用タイピング採点用ツール</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&family=BIZ+UDGothic:wght@400;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --navy:#1A1E3F;--blue:#8098D6;--blue-mid:#b8c8ea;
@@ -98,7 +98,8 @@ input[type="file"]{display:none;}
 .end-btn{font-size:12px;padding:4px 12px;cursor:pointer;background:transparent;border:1px solid rgba(128,152,214,0.5);border-radius:6px;color:var(--blue-mid);font-family:inherit;transition:all .15s;white-space:nowrap;}
 .end-btn:hover{background:rgba(128,152,214,0.2);border-color:var(--blue);color:var(--white);}
 .play-body{flex:1;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;}
-.source-pane{display:flex;flex-direction:column;align-items:center;overflow:hidden;background:var(--bg);padding:8px;}
+.source-pane{display:flex;flex-direction:column;align-items:center;overflow:hidden;background:var(--bg);padding:8px;
+  user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;}
 .input-pane{display:flex;flex-direction:column;align-items:center;overflow:hidden;background:var(--bg);padding:8px;border-left:1px solid var(--border);}
 .pane-head-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-shrink:0;}
 .pane-head-row span{font-size:11px;color:var(--muted);}
@@ -107,12 +108,13 @@ input[type="file"]{display:none;}
 #source-frame{border:2px solid var(--navy);border-radius:4px;background:var(--white);flex-shrink:0;overflow:hidden;}
 #source-display{overflow:hidden;}
 .src-row{display:flex;align-items:stretch;}
-.src-text{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;white-space:pre;color:var(--text);flex:1;}
+.src-text{font-family:'BIZ UDGothic',monospace;white-space:pre;color:var(--text);flex:1;}
 .src-count-wrap{display:flex;align-items:center;flex-shrink:0;border-left:1px solid var(--border);}
 .src-count{font-size:10px;color:#aab4cc;text-align:right;padding:0 6px;}
 #ta-frame{border:2px solid var(--navy);border-radius:4px;background:var(--white);flex-shrink:0;overflow:hidden;}
 #ta-wrapper{overflow:hidden;background:var(--white);}
-#typing-area{display:block;border:none;resize:none;padding:0;margin:0;font-family:'Noto Sans JP','Hiragino Sans',sans-serif;background:var(--white);color:var(--text);outline:none;overflow-y:scroll;overflow-x:hidden;}
+#typing-area{display:block;border:none;resize:none;padding:0;margin:0;font-family:'BIZ UDGothic',monospace;background:var(--white);color:var(--text);outline:none;overflow-y:scroll;overflow-x:hidden;
+  white-space:pre-wrap;line-break:anywhere;word-break:break-all;overflow-wrap:anywhere;}
 .flash-border{position:fixed;pointer-events:none;top:0;left:0;right:0;bottom:0;z-index:999;animation:flashB .5s step-end infinite;}
 @keyframes flashB{0%,100%{box-shadow:inset 0 0 0 7px rgba(248,113,113,.8);}50%{box-shadow:inset 0 0 0 7px transparent;}}
 
@@ -151,7 +153,8 @@ input[type="file"]{display:none;}
   </div>
   <div class="notice-box">
     <b>はじめにご確認ください</b><br>
-    文字サイズはウィンドウ幅をもとに自動設定されます。<b>まずサンプル文章でゲームを開始し</b>、表示を確認してください。
+    文字サイズはウィンドウ幅をもとに自動設定されます。<b>まずサンプル文章でゲームを開始し</b>、表示を確認してください。<br>
+    また、文字幅を揃えて正確に採点するため、課題文は<b>半角文字（英数字・記号）を含まず、すべて全角文字で記述されたもの</b>を使用してください。
   </div>
   <div class="mcard">
     <div class="mcard-title">競技ルール</div>
@@ -199,6 +202,7 @@ input[type="file"]{display:none;}
     <div class="upload-area" onclick="document.getElementById('solo-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="solo-file-input" accept=".txt">
     <div id="solo-selected-info"></div>
+    <div style="font-size:11px;color:var(--blue-mid);margin-top:6px;">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
   </div>
   <div class="btn-row">
     <button class="btn-primary" id="solo-start-btn" disabled onclick="startSoloGame()">ゲームを開始する</button>
@@ -235,6 +239,7 @@ input[type="file"]{display:none;}
     <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="host-file-input" accept=".txt">
     <div id="host-selected-info"></div>
+    <div style="font-size:11px;color:var(--blue-mid);margin-top:6px;">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
   </div>
   <div id="host-err" class="err-msg">課題文を選択してください</div>
   <div class="btn-row">
@@ -285,6 +290,7 @@ input[type="file"]{display:none;}
   <div id="guest-controls" style="display:none;">
     <button class="btn-primary" id="ready-btn" onclick="toggleReady()">スタンバイする</button>
   </div>
+  <button class="btn-secondary" onclick="leaveRoom()" style="margin-top:8px;">ルームを退出する</button>
 </div>
 </div>
 
@@ -641,7 +647,7 @@ function lineHRatio(fs){ return fs>=18?1.45:fs>=14?1.50:1.55; }
 function measureCharWidth(fs){
   const el=document.createElement('span');
   el.style.cssText=`position:absolute;visibility:hidden;white-space:pre;`+
-    `font-family:'Noto Sans JP','Hiragino Sans',sans-serif;font-size:${fs}px;`;
+    `font-family:'BIZ UDGothic',monospace;font-size:${fs}px;`;
   el.textContent='あ'.repeat(20);
   document.body.appendChild(el);
   const w=el.offsetWidth/20;
@@ -689,7 +695,8 @@ function renderSourcePage(page,fs){
     const div=document.createElement('div'); div.className='src-row'; div.style.height=lhPx+'px';
     const txt=document.createElement('span'); txt.className='src-text';
     txt.style.fontSize=fs+'px'; txt.style.lineHeight=lhPx+'px'; txt.style.paddingLeft=PAD_L+'px';
-    txt.textContent=row.text; div.appendChild(txt);
+    fillTextWithFixedWidthSpaces(txt, row.text, fs);
+    div.appendChild(txt);
     const cntWrap=document.createElement('span'); cntWrap.className='src-count-wrap';
     cntWrap.style.width=COUNT_W+'px'; cntWrap.style.height=lhPx+'px';
     if(row.text.length>0){
@@ -702,12 +709,36 @@ function renderSourcePage(page,fs){
   document.getElementById('page-indicator').textContent=totalPages>1?(page+1)+' / '+totalPages+' ページ':'';
 }
 
+/* 全角スペース(U+3000)はフォントによって他の全角文字より見た目の幅が
+   狭く描画されることがあるため、全角スペースだけを「フォントサイズと
+   同じ幅を持つinline-block」に置き換えて確実に幅を揃える。
+   それ以外の文字はテキストノードとしてそのまま流し込む（フォント本来の
+   字形・カーニングを保つため、不要な装飾は避ける）。 */
+function fillTextWithFixedWidthSpaces(container, text, fs){
+  container.innerHTML='';
+  let buf='';
+  const flushBuf=()=>{
+    if(buf){ container.appendChild(document.createTextNode(buf)); buf=''; }
+  };
+  for(const ch of text){
+    if(ch==='\u3000'){
+      flushBuf();
+      const sp=document.createElement('span');
+      sp.style.cssText=`display:inline-block;width:${fs}px;`;
+      container.appendChild(sp);
+    } else {
+      buf+=ch;
+    }
+  }
+  flushBuf();
+}
+
 function applyLayout(){
   const fs=calcFontSize(); currentFontSize=fs;
   const cw=measureCharWidth(fs);
   const lhPx=Math.round(fs*lineHRatio(fs)); currentLhPx=lhPx;
   const frameH=lhPx*PAGE_ROWS;
-  const textAreaW=Math.ceil(cw*COLS);
+  const textAreaW=Math.floor(cw*COLS);
   const srcFrameW=PAD_L+textAreaW+COUNT_W+PAD_R;
   const srcFrame=document.getElementById('source-frame');
   srcFrame.style.width=srcFrameW+'px'; srcFrame.style.height=frameH+'px';
@@ -780,6 +811,14 @@ function startGame(textObj, startAt){
       updateSourcePage();
     };
     ta.oninput=onUpdate; ta.onkeyup=onUpdate; ta.onclick=onUpdate;
+    // 課題文・自分の入力内容のコピー＆ペーストを禁止する
+    ta.onpaste=e=>e.preventDefault();
+    ta.oncopy=e=>e.preventDefault();
+    ta.oncut=e=>e.preventDefault();
+    ta.ondragstart=e=>e.preventDefault();
+    ta.oncontextmenu=e=>e.preventDefault();
+    const srcDisp=document.getElementById('source-display');
+    if(srcDisp) srcDisp.oncontextmenu=e=>e.preventDefault();
 
     // マルチの場合はサーバーのstartAtに合わせてタイマーをスタート
     if(isMulti && startAt){
@@ -855,6 +894,19 @@ function returnToLobby(){
   document.getElementById('ready-btn').textContent='スタンバイする';
   document.getElementById('ready-btn').style.cssText='';
   showScreen('lobby-screen');
+}
+
+function leaveRoom(){
+  // WebSocket接続を切ることでサーバー側のルーム退出処理（close ハンドラ）を発火させる
+  if(ws&&ws.readyState===WebSocket.OPEN){
+    ws.close();
+  }
+  ws=null;
+  currentRoomId=''; isHost=false; isReady=false; isMulti=false;
+  document.getElementById('ready-btn').textContent='スタンバイする';
+  document.getElementById('ready-btn').style.cssText='';
+  document.getElementById('lobby-err').classList.remove('show');
+  showScreen('menu-screen');
 }
 
 function goHome(){
