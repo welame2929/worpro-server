@@ -40,7 +40,8 @@ function roomState(room, roomId) {
   for (const [ws, p] of room.players) {
     players.push({ name: p.name, ready: p.ready, isHost: ws === room.hostWs });
   }
-  return { type: 'ROOM_STATE', roomId, players, gameState: room.gameState };
+  return { type: 'ROOM_STATE', roomId, players, gameState: room.gameState,
+           textName: room.textName, duration: room.duration, defaultRule: room.defaultRule };
 }
 
 wss.on('connection', (ws) => {
@@ -65,11 +66,14 @@ wss.on('connection', (ws) => {
       // ── ルーム作成 ───────────────────────────────────────────
       case 'CREATE_ROOM': {
         const roomId = genRoomId();
+        // プレイ時間は300秒(5分)または600秒(10分)のみ許可
+        const duration = (msg.duration === 300) ? 300 : 600;
         const room = {
           hostWs: ws,
           text: msg.text || '',
           textName: msg.textName || '課題文',
           defaultRule: msg.defaultRule || 'warpro',
+          duration,
           players: new Map(),
           gameState: 'waiting',
           timerInterval: null,
@@ -79,7 +83,7 @@ wss.on('connection', (ws) => {
         currentRoomId = roomId;
         ws.send(JSON.stringify({ type: 'ROOM_CREATED', roomId }));
         broadcast(room, roomState(room, roomId));
-        console.log(`Room created: ${roomId} by ${msg.name}`);
+        console.log(`Room created: ${roomId} by ${msg.name} (duration ${duration}s)`);
         break;
       }
 
@@ -141,16 +145,17 @@ wss.on('connection', (ws) => {
           text: room.text,
           textName: room.textName,
           defaultRule: room.defaultRule,
+          duration: room.duration,
         });
-        console.log(`Game started in room ${currentRoomId}`);
+        console.log(`Game started in room ${currentRoomId} (duration ${room.duration}s)`);
 
-        // サーバー側タイマー（600秒後に強制終了）
+        // サーバー側タイマー（指定時間後に強制終了）
         room.timerInterval = setTimeout(() => {
           if (rooms.has(currentRoomId)) {
             room.gameState = 'finished';
             broadcast(room, { type: 'TIME_UP' });
           }
-        }, 600000 + 3000);
+        }, room.duration * 1000 + 3000);
         break;
       }
 

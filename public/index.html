@@ -22,6 +22,22 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .page-hero h1{font-size:20px;font-weight:500;color:var(--white);}
 .page-hero p{font-size:13px;color:var(--blue-mid);margin-top:4px;}
 .mcard{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
+/* 折りたたみ可能な説明カード（details要素ベース） */
+.mcard-collapsible{padding:0;}
+.mcard-collapsible > summary{
+  list-style:none; cursor:pointer; padding:0.85rem 1.25rem;
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:0; /* mcard-titleのmargin-bottomを打ち消し */
+}
+.mcard-collapsible > summary::-webkit-details-marker{display:none;}
+.mcard-collapsible > summary::before{
+  content:'▶'; font-size:11px; color:var(--navy);
+  transition:transform .15s; flex-shrink:0;
+}
+.mcard-collapsible[open] > summary::before{transform:rotate(90deg);}
+.mcard-collapsible > *:not(summary){margin-left:1.25rem;margin-right:1.25rem;}
+.mcard-collapsible[open] > *:last-child{margin-bottom:1rem;}
+.mcard-collapsible[open] > summary{padding-bottom:0.5rem;}
 .mcard-title{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;}
 .rule-list{list-style:none;font-size:13px;color:#2e3658;}
 .rule-list li{padding:4px 0;border-bottom:1.5px solid #8098D6;}
@@ -176,7 +192,7 @@ input[type="file"]{display:none;}
   <div class="mcard">
     <div class="mcard-title">競技ルール</div>
     <ul class="rule-list">
-      <li>制限時間 <b>10分間</b>。画面左側に表示される課題文を正確に入力する。</li>
+      <li>制限時間は<b>5分または10分</b>。画面左側に表示される課題文を正確に入力する。</li>
       <li><b>採点は下記の3大会のルールに従ってそれぞれ行う。結果画面では3通りの得点表示が可能。</b><br>（採点処理は擬似的なものであり、各大会における実際の採点と異なる可能性があります。）</li>
       <li>残り <b>2分</b> および残り <b>10秒</b> になると、画面周囲が赤く点滅して通知される。</li>
       <li>課題文は <b>1行30文字の配置で30行ずつ表示</b>。次のページに達すると表示部分が自動で切り替わる。</li>
@@ -197,45 +213,45 @@ input[type="file"]{display:none;}
       この他に毎日パソコン入力コンクールでは「未変換」、Interstenoでは「反転」がありますが、このソフトでは扱いません。
     </div>
   </div>
-  <div class="mcard">
-    <div class="mcard-title">採点ルール1：全国高等学校ワープロ競技大会</div>
+  <details class="mcard mcard-collapsible">
+    <summary class="mcard-title">採点ルール1：全国高等学校ワープロ競技大会</summary>
     <ul class="rule-list">
       <li>全国の商業高校生が参加するワープロ大会。<br>変換学習の使用や、入力字数を超えるものも含めた辞書登録が認められている。</li>
       <li><b>誤字</b>：対象箇所の<u>課題文側の文字数</u>をカウント。</li>
-      <li><b>脱字</b>：1文字につき1ミス。<u>脱行はその文字数分（最大30字）がエラー。</u></li>
-      <li><b>余字</b>：1<u>箇所</u>につき1ミス。（連続する余字はまとめて1エラー扱い。）</li>
-      <li><b>得点</b>：総字数 − ミスカウント（誤字＋脱字＋余字）×10。</li>
+      <li><b>脱字</b>：1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></li>
+      <li><b>余字</b>：1<u>箇所</u>につき1エラー。（連続する余字はまとめて1エラー扱い。）</li>
+      <li><b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字）×10。</li>
     </ul>
     <div class="err-example">
       <b>誤字の例</b>：「最新版」を「さいしんばん」「saisinban」「再審判」と入力した場合、「最新版」が3文字なのですべて3エラー。
     </div>
-  </div>
-  <div class="mcard">
-    <div class="mcard-title">採点ルール2：毎日パソコン入力コンクール</div>
+  </details>
+  <details class="mcard mcard-collapsible">
+    <summary class="mcard-title">採点ルール2:毎日パソコン入力コンクール</summary>
     <ul class="rule-list">
-      <li>小学生～高校生を中心に全国の参加者が集う大規模なコンクール。<br>変換学習や辞書登録は認められていない。ミス数に応じた特別点が存在するため、正確な入力が重要。</li>
-      <li><b>誤字</b>：1文字につき1ミス。課題文側と入力側の文字数が異なる場合、少ない方を誤字とし、残りを脱字（入力が少ない）または余字（入力が多い）としてカウント。</li>
-      <li><b>脱字</b>：1文字につき1ミス。<u>脱行はその文字数分（最大30字）がエラー。</u></li>
-      <li><b>余字</b>：1文字につき1ミス。</li>
-      <li><b>得点</b>：総字数 − ミスカウント（誤字＋脱字＋余字） ＋ 特別点。<br><u>特別点はミスが3字以内だったときのボーナス。0字で総字数の20%、1字で15%、2字で10%、3字で5%が加点される（小数点以下切り上げ）。</u></li>
+      <li>小学生～高校生を中心に全国の参加者が集う大規模なコンクール。<br>変換学習や辞書登録は認められていない。エラー数に応じた特別点が存在するため、正確な入力が重要。</li>
+      <li><b>誤字</b>：1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</li>
+      <li><b>脱字</b>：1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></li>
+      <li><b>余字</b>：1文字につき1エラー。</li>
+      <li><b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字） ＋ 特別点。<br><u>特別点はエラーが3字以内だったときのボーナス。0字で総字数の20%、1字で15%、2字で10%、3字で5%が加点される（小数点以下切り上げ）。</u></li>
     </ul>
     <div class="err-example">
-      <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6ミス。「さ」と入力した場合、誤字1＋脱字2の3ミス。
+      <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6エラー。「さ」と入力した場合、誤字1＋脱字2の3エラー。
     </div>
-  </div>
-  <div class="mcard">
-    <div class="mcard-title">採点ルール3：Intersteno Internet Contests</div>
+  </details>
+  <details class="mcard mcard-collapsible">
+    <summary class="mcard-title">採点ルール3：Intersteno Internet Contests</summary>
     <ul class="rule-list">
       <li>タイピングの世界大会。日本語も含めた十数言語のタイピング競技をオンラインで行う。<br>変換学習や辞書登録は可能だが、入力字数を超える辞書登録は認められていない。</li>
-      <li><b>誤字</b>：1文字につき1ミス。課題文側と入力側の文字数が異なる場合、少ない方を誤字とし、残りを脱字または余字としてカウント。</li>
-      <li><b>脱字</b>：1<u>箇所</u>につき1ミス。（連続する脱字はまとめて1エラー扱い。）</li>
-      <li><b>余字</b>：1文字につき1ミス。</li>
-      <li><b>得点</b>：総字数を2.95倍した換算字数から、ミス1つにつき50点減点。（小数点以下切り上げ）</li>
+      <li><b>誤字</b>：1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</li>
+      <li><b>脱字</b>：1<u>箇所</u>につき1エラー。（連続する脱字はまとめて1エラー扱い。）</li>
+      <li><b>余字</b>：1文字につき1エラー。</li>
+      <li><b>得点</b>：換算字数（総字数×2.95） − エラーカウント（誤字＋脱字＋余字）×50。小数点以下切り上げ。</li>
     </ul>
     <div class="err-example">
-      <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6ミス。「さ」と入力した場合、誤字1＋脱字1の2ミス。
+      <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6エラー。「さ」と入力した場合、誤字1＋脱字1の2エラー。
     </div>
-  </div>
+  </details>
 </div>
 </div>
 
@@ -262,6 +278,13 @@ input[type="file"]{display:none;}
       <button class="text-btn" data-rule="intersteno">Intersteno</button>
     </div>
     <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※結果画面ではタブで他方式も確認できます</div>
+  </div>
+  <div class="mcard">
+    <div class="mcard-title">プレイ時間</div>
+    <div class="text-select" id="solo-duration-select">
+      <button class="text-btn" data-duration="300">5分</button>
+      <button class="text-btn selected" data-duration="600">10分</button>
+    </div>
   </div>
   <div class="btn-row">
     <button class="btn-primary" id="solo-start-btn" disabled onclick="startSoloGame()">ゲームを開始する</button>
@@ -312,6 +335,13 @@ input[type="file"]{display:none;}
       <button class="text-btn" data-rule="intersteno">Intersteno</button>
     </div>
     <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※結果画面では各自タブで他方式も確認できます</div>
+  </div>
+  <div class="mcard">
+    <div class="mcard-title">プレイ時間</div>
+    <div class="text-select" id="host-duration-select">
+      <button class="text-btn" data-duration="300">5分</button>
+      <button class="text-btn selected" data-duration="600">10分</button>
+    </div>
   </div>
   <div id="host-err" class="err-msg">課題文を選択してください</div>
   <div class="btn-row">
@@ -497,6 +527,9 @@ let countdownInterval=null;
 let multiDefaultRule='warpro'; // マルチ時のデフォルト採点方式（ホストが指定）
 let hostSelectedRule='warpro'; // ホスト設定画面で選択中の方式
 let soloSelectedRule='warpro'; // ソロ時のデフォルト採点方式
+let soloSelectedDuration=600;  // ソロ時のプレイ時間（秒）
+let hostSelectedDuration=600;  // ホスト設定中のプレイ時間（秒）
+let multiDuration=600;         // マルチ時にサーバーから受信したプレイ時間
 
 // =====================================================================
 // 画面切り替え
@@ -524,6 +557,14 @@ document.querySelectorAll('#solo-rule-select .text-btn').forEach(btn=>{
     document.querySelectorAll('#solo-rule-select .text-btn').forEach(b=>b.classList.remove('selected'));
     btn.classList.add('selected');
     soloSelectedRule=btn.dataset.rule;
+  });
+});
+// ソロ：プレイ時間の選択
+document.querySelectorAll('#solo-duration-select .text-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#solo-duration-select .text-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    soloSelectedDuration=parseInt(btn.dataset.duration);
   });
 });
 document.getElementById('solo-file-input').addEventListener('change',e=>{
@@ -611,6 +652,14 @@ document.querySelectorAll('#host-rule-select .text-btn').forEach(btn=>{
     hostSelectedRule=btn.dataset.rule;
   });
 });
+// ホストのプレイ時間選択
+document.querySelectorAll('#host-duration-select .text-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#host-duration-select .text-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    hostSelectedDuration=parseInt(btn.dataset.duration);
+  });
+});
 
 function createRoom(){
   if(!hostText){ document.getElementById('host-err').classList.add('show'); return; }
@@ -622,7 +671,8 @@ function createRoom(){
     name:playerName,
     text:hostText.content,
     textName:hostText.name,
-    defaultRule:hostSelectedRule
+    defaultRule:hostSelectedRule,
+    duration:hostSelectedDuration
   }));
 }
 
@@ -666,6 +716,13 @@ function hostStartGame(force){
 
 function renderLobby(state){
   document.getElementById('lobby-room-id').textContent=state.roomId;
+  // 課題文名・プレイ時間・採点方式を案内
+  const infoParts=[];
+  if(state.textName) infoParts.push('課題文：'+state.textName);
+  if(state.duration) infoParts.push('プレイ時間：'+(state.duration/60)+'分');
+  const RULE_LABELS_J={warpro:'ワープロ大会', mainichi:'毎日パソコン入力', intersteno:'Intersteno'};
+  if(state.defaultRule) infoParts.push('デフォルト採点方式：'+(RULE_LABELS_J[state.defaultRule]||state.defaultRule));
+  document.getElementById('lobby-text-info').textContent=infoParts.join('　/　');
   const list=document.getElementById('lobby-player-list');
   list.innerHTML='';
   for(const p of state.players){
@@ -699,7 +756,7 @@ function handleServerMsg(msg){
 
     case 'JOIN_OK':
       currentRoomId=msg.roomId;
-      document.getElementById('lobby-text-info').textContent='課題文：'+msg.textName;
+      // 課題文名等の表示はこの直後に届くROOM_STATEで一括設定される
       document.getElementById('host-controls').style.display='none';
       document.getElementById('guest-controls').style.display='block';
       isReady=false;
@@ -739,6 +796,7 @@ function handleServerMsg(msg){
       gameStartAt=msg.startAt;
       isMulti=true;
       if(msg.defaultRule) multiDefaultRule=msg.defaultRule;
+      if(msg.duration) multiDuration=msg.duration;
       startCountdown();
       break;
 
@@ -941,7 +999,9 @@ function triggerFlash(){ stopFlash(); startFlash(); flashTimeout=setTimeout(stop
 function startGame(textObj, startAt){
   clearInterval(timerInterval); stopFlash();
   selectedText=textObj;
-  secondsLeft=600; warningShown=false; lastSecFlashShown=false; currentPage=0;
+  // プレイ時間：マルチはサーバー指定、ソロは選択値
+  const playDuration = isMulti ? (multiDuration||600) : (soloSelectedDuration||600);
+  secondsLeft=playDuration; warningShown=false; lastSecFlashShown=false; currentPage=0;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('play-screen').classList.add('active');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -974,13 +1034,16 @@ function startGame(textObj, startAt){
     // マルチの場合はサーバーのstartAtに合わせてタイマーをスタート
     if(isMulti && startAt){
       const drift=Math.max(0, Math.floor((Date.now()-startAt)/1000));
-      secondsLeft=Math.max(0, 600-drift);
+      secondsLeft=Math.max(0, playDuration-drift);
     }
     updateTimer();
+    // 2分前のアラートはプレイ時間が3分以上の場合のみ有効
+    // （5分以下では2分前=ゲーム中盤過ぎ、開始間もない通知になり不要）
+    const enable2minWarning = (playDuration > 300);
     timerInterval=setInterval(()=>{
       secondsLeft--; updateTimer();
-      if(secondsLeft===120&&!warningShown){warningShown=true;triggerFlash();}
-      if(secondsLeft===10&&!lastSecFlashShown){lastSecFlashShown=true;triggerFlash();}
+      if(enable2minWarning && secondsLeft===120 && !warningShown){warningShown=true;triggerFlash();}
+      if(secondsLeft===10 && !lastSecFlashShown){lastSecFlashShown=true;triggerFlash();}
       if(secondsLeft<=0) endGame();
     },1000);
   }));
@@ -1149,13 +1212,23 @@ function prepareScoredDiff(original, input){
   const origNorm=original.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   const inputNorm=input.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   const inputCharCount=inputNorm.replace(/\n/g,'').length;
-  const margin=Math.max(30,Math.floor(inputCharCount*0.1));
+  // 採点対象とする課題文の余白は最小限にする。
+  // 大きすぎると、入力末尾の変換途中の文字が課題文の遠方の同じ文字に
+  // 強引にマッチさせられ、間が大量誤字判定になる現象が起こる。
+  const margin=Math.max(10,Math.floor(inputCharCount*0.05));
   const capLen=Math.min(origNorm.length, inputNorm.length+margin);
   const cappedOrig=origNorm.slice(0,capLen);
   const rawDiff=computeDiff(cappedOrig,inputNorm);
   const diff=rawDiff.slice();
-  // 末尾が純削除（未到達）で終わるなら切り落とす
-  if(diff.length>0 && diff[diff.length-1][0]===-1){ diff.pop(); }
+
+  // 末尾の不確定部分を採点対象から除外する。
+  // diffの末尾が equal（一致）になるまで後ろからセグメントを取り除く。
+  // これにより、入力末尾の打ち切れなかった部分（変換途中の未確定文字列が
+  // 課題文の遠方とミスマッチさせられるケース）が誤判定に含まれなくなる。
+  while(diff.length>0 && diff[diff.length-1][0]!==0){
+    diff.pop();
+  }
+
   let totalChars=0;
   for(const [op,str] of diff){
     if(op===0||op===-1) totalChars+=lenNoNL(str);
