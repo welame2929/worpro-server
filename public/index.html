@@ -91,6 +91,7 @@ input[type="file"]{display:none;}
 .badge-host{background:#dde3f7;color:#3a4aa0;}
 .badge-ready{background:#d6f0dd;color:#1f7a3a;}
 .badge-notready{background:#eceef5;color:#7a82a0;}
+.ime-tag{font-size:11px;color:#3a4aa0;background:#dde3f7;padding:2px 8px;border-radius:4px;}
 .room-id-display{text-align:center;margin-bottom:12px;}
 .room-id-display .label{font-size:11px;color:var(--blue-mid);margin-bottom:4px;}
 .room-id-display .id{font-size:28px;font-weight:500;color:var(--white);letter-spacing:.15em;}
@@ -303,6 +304,15 @@ input[type="file"]{display:none;}
       <input type="text" id="player-name-input" class="text-input" placeholder="例：タイピング太郎" maxlength="20">
     </div>
   </div>
+  <div class="mcard">
+    <div class="mcard-title">IMEレギュレーション</div>
+    <div class="text-select" id="ime-rule-select">
+      <button class="text-btn" data-ime="mainichi">毎パソ式（変換学習も辞書登録も使わない場合に選択）</button>
+      <button class="text-btn selected" data-ime="normal">通常（変換学習または辞書登録を使う）</button>
+      <button class="text-btn" data-ime="warpro">ワープロ競技式（入力文字数を超える辞書登録を使う場合に選択）</button>
+    </div>
+    <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※申告は自己申告制で、リザルトの参考情報として全員に表示されます。</div>
+  </div>
   <div id="name-err" class="err-msg">ハンドルネームを入力してください</div>
   <div class="btn-pair">
     <button class="btn-primary" onclick="goToHostOrJoin('host')">ルームを作る</button>
@@ -471,7 +481,7 @@ input[type="file"]{display:none;}
   <div id="ranking-section" class="mcard" style="display:none;">
     <div class="mcard-title">順位表</div>
     <table class="ranking-table">
-      <thead><tr><th>順位</th><th>名前</th><th id="rank-point-head">得点</th><th id="rank-total-head">総字数</th><th>エラー</th></tr></thead>
+      <thead><tr><th>順位</th><th>名前</th><th>IMEルール</th><th id="rank-point-head">得点</th><th id="rank-total-head">総字数</th><th>エラー</th></tr></thead>
       <tbody id="ranking-body"></tbody>
     </table>
     <div id="ranking-waiting" style="font-size:12px;color:var(--muted);">他のプレイヤーの結果を待っています…</div>
@@ -530,6 +540,7 @@ let soloSelectedRule='warpro'; // ソロ時のデフォルト採点方式
 let soloSelectedDuration=600;  // ソロ時のプレイ時間（秒）
 let hostSelectedDuration=600;  // ホスト設定中のプレイ時間（秒）
 let multiDuration=600;         // マルチ時にサーバーから受信したプレイ時間
+let playerImeRule='normal';    // マルチ時の自己申告IMEレギュレーション
 
 // =====================================================================
 // 画面切り替え
@@ -596,6 +607,15 @@ function soloCountdownStart(){
 // =====================================================================
 // マルチプレイ：ハンドルネーム → ホスト/参加
 // =====================================================================
+// IMEレギュレーション選択
+document.querySelectorAll('#ime-rule-select .text-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#ime-rule-select .text-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    playerImeRule=btn.dataset.ime;
+  });
+});
+
 function goToHostOrJoin(mode){
   const name=document.getElementById('player-name-input').value.trim();
   if(!name){ document.getElementById('name-err').classList.add('show'); return; }
@@ -672,7 +692,8 @@ function createRoom(){
     text:hostText.content,
     textName:hostText.name,
     defaultRule:hostSelectedRule,
-    duration:hostSelectedDuration
+    duration:hostSelectedDuration,
+    imeRule:playerImeRule
   }));
 }
 
@@ -683,7 +704,7 @@ function joinRoom(){
   const rid=document.getElementById('room-id-input').value.trim().toUpperCase();
   if(!rid){ showJoinErr('ルームIDを入力してください'); return; }
   isHost=false;
-  ws.send(JSON.stringify({ type:'JOIN_ROOM', roomId:rid, name:playerName }));
+  ws.send(JSON.stringify({ type:'JOIN_ROOM', roomId:rid, name:playerName, imeRule:playerImeRule }));
 }
 function showJoinErr(msg){
   const el=document.getElementById('join-err');
@@ -728,14 +749,23 @@ function renderLobby(state){
   for(const p of state.players){
     const row=document.createElement('div');
     row.className='player-row';
+    const leftWrap=document.createElement('span');
+    leftWrap.style.display='flex'; leftWrap.style.alignItems='center'; leftWrap.style.gap='10px';
     const nameEl=document.createElement('span');
     nameEl.className='player-name';
     nameEl.textContent=p.name+(p.isHost?' （ホスト）':'');
+    leftWrap.appendChild(nameEl);
+    if(p.imeRule){
+      const imeTag=document.createElement('span');
+      imeTag.className='ime-tag';
+      imeTag.textContent='IME：'+(IME_LABELS[p.imeRule]||'—');
+      leftWrap.appendChild(imeTag);
+    }
     const badge=document.createElement('span');
     badge.className='player-badge '+(p.ready?'badge-ready':'badge-notready');
     badge.textContent=p.ready?'スタンバイ済':'未スタンバイ';
     if(p.isHost){ badge.className='player-badge badge-host'; badge.textContent='ホスト'; }
-    row.appendChild(nameEl); row.appendChild(badge);
+    row.appendChild(leftWrap); row.appendChild(badge);
     list.appendChild(row);
   }
 }
@@ -1064,6 +1094,7 @@ let rankingRule='warpro';
 let latestResults=null;
 
 const RULE_LABELS={warpro:'ワープロ大会', mainichi:'毎日パソコン入力', intersteno:'Intersteno'};
+const IME_LABELS={mainichi:'毎パソ式', normal:'通常', warpro:'ワープロ式'};
 
 function endGame(){
   clearInterval(timerInterval); stopFlash();
@@ -1164,12 +1195,13 @@ function renderRanking(results){
     if(i===0&&done) tr.className='rank-1';
     const tdRank=document.createElement('td'); tdRank.textContent=done?(i+1):'—';
     const tdName=document.createElement('td'); tdName.textContent=r.name;
+    const tdIme=document.createElement('td'); tdIme.textContent=IME_LABELS[r.imeRule]||'—';
     const tdPoint=document.createElement('td');
     if(done){ tdPoint.textContent=getPts(r); }
     else { const w=document.createElement('span'); w.className='waiting-result'; w.textContent='集計中'; tdPoint.appendChild(w); }
     const tdTotal=document.createElement('td'); tdTotal.textContent=done?getTotal(r):'';
     const tdErr=document.createElement('td'); tdErr.textContent=done?getMiss(r):'';
-    tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdPoint); tr.appendChild(tdTotal); tr.appendChild(tdErr);
+    tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdIme); tr.appendChild(tdPoint); tr.appendChild(tdTotal); tr.appendChild(tdErr);
     tbody.appendChild(tr);
   });
 }

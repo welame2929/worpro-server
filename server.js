@@ -38,7 +38,7 @@ function broadcast(room, msg) {
 function roomState(room, roomId) {
   const players = [];
   for (const [ws, p] of room.players) {
-    players.push({ name: p.name, ready: p.ready, isHost: ws === room.hostWs });
+    players.push({ name: p.name, imeRule: p.imeRule, ready: p.ready, isHost: ws === room.hostWs });
   }
   return { type: 'ROOM_STATE', roomId, players, gameState: room.gameState,
            textName: room.textName, duration: room.duration, defaultRule: room.defaultRule };
@@ -68,6 +68,8 @@ wss.on('connection', (ws) => {
         const roomId = genRoomId();
         // プレイ時間は300秒(5分)または600秒(10分)のみ許可
         const duration = (msg.duration === 300) ? 300 : 600;
+        // IMEレギュレーションは3種のみ許可、未指定はnormal
+        const imeRule = ['mainichi','normal','warpro'].includes(msg.imeRule) ? msg.imeRule : 'normal';
         const room = {
           hostWs: ws,
           text: msg.text || '',
@@ -78,12 +80,12 @@ wss.on('connection', (ws) => {
           gameState: 'waiting',
           timerInterval: null,
         };
-        room.players.set(ws, { name: msg.name, ready: false, result: null });
+        room.players.set(ws, { name: msg.name, imeRule, ready: false, result: null });
         rooms.set(roomId, room);
         currentRoomId = roomId;
         ws.send(JSON.stringify({ type: 'ROOM_CREATED', roomId }));
         broadcast(room, roomState(room, roomId));
-        console.log(`Room created: ${roomId} by ${msg.name} (duration ${duration}s)`);
+        console.log(`Room created: ${roomId} by ${msg.name} (duration ${duration}s, IME ${imeRule})`);
         break;
       }
 
@@ -98,11 +100,12 @@ wss.on('connection', (ws) => {
           ws.send(JSON.stringify({ type: 'ERROR', message: 'ゲームはすでに開始しています' }));
           return;
         }
-        room.players.set(ws, { name: msg.name, ready: false, result: null });
+        const imeRule = ['mainichi','normal','warpro'].includes(msg.imeRule) ? msg.imeRule : 'normal';
+        room.players.set(ws, { name: msg.name, imeRule, ready: false, result: null });
         currentRoomId = msg.roomId;
         ws.send(JSON.stringify({ type: 'JOIN_OK', roomId: msg.roomId, textName: room.textName }));
         broadcast(room, roomState(room, msg.roomId));
-        console.log(`${msg.name} joined room ${msg.roomId}`);
+        console.log(`${msg.name} joined room ${msg.roomId} (IME ${imeRule})`);
         break;
       }
 
@@ -174,6 +177,7 @@ wss.on('connection', (ws) => {
         for (const [, p] of room.players) {
           results.push({
             name: p.name,
+            imeRule: p.imeRule,
             totalChars: p.result ? p.result.totalChars : null,
             scores: p.result ? p.result.scores : null,
           });
