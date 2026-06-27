@@ -481,7 +481,7 @@ input[type="file"]{display:none;}
   <div id="ranking-section" class="mcard" style="display:none;">
     <div class="mcard-title">順位表</div>
     <table class="ranking-table">
-      <thead><tr><th>順位</th><th>名前</th><th>IMEルール</th><th id="rank-point-head">得点</th><th id="rank-total-head">総字数</th><th>エラー</th></tr></thead>
+      <thead><tr><th>順位</th><th>名前</th><th id="rank-point-head">得点</th><th id="rank-total-head">総字数</th><th>エラー</th></tr></thead>
       <tbody id="ranking-body"></tbody>
     </table>
     <div id="ranking-waiting" style="font-size:12px;color:var(--muted);">他のプレイヤーの結果を待っています…</div>
@@ -1194,14 +1194,24 @@ function renderRanking(results){
     const tr=document.createElement('tr');
     if(i===0&&done) tr.className='rank-1';
     const tdRank=document.createElement('td'); tdRank.textContent=done?(i+1):'—';
-    const tdName=document.createElement('td'); tdName.textContent=r.name;
-    const tdIme=document.createElement('td'); tdIme.textContent=IME_LABELS[r.imeRule]||'—';
+    // 名前セル内に IMEルールバッジを並べる
+    const tdName=document.createElement('td');
+    const nameWrap=document.createElement('span');
+    nameWrap.style.display='inline-flex'; nameWrap.style.alignItems='center'; nameWrap.style.gap='8px';
+    const nameText=document.createElement('span'); nameText.textContent=r.name;
+    nameWrap.appendChild(nameText);
+    if(r.imeRule){
+      const imeTag=document.createElement('span'); imeTag.className='ime-tag';
+      imeTag.textContent='IME：'+(IME_LABELS[r.imeRule]||'—');
+      nameWrap.appendChild(imeTag);
+    }
+    tdName.appendChild(nameWrap);
     const tdPoint=document.createElement('td');
     if(done){ tdPoint.textContent=getPts(r); }
     else { const w=document.createElement('span'); w.className='waiting-result'; w.textContent='集計中'; tdPoint.appendChild(w); }
     const tdTotal=document.createElement('td'); tdTotal.textContent=done?getTotal(r):'';
     const tdErr=document.createElement('td'); tdErr.textContent=done?getMiss(r):'';
-    tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdIme); tr.appendChild(tdPoint); tr.appendChild(tdTotal); tr.appendChild(tdErr);
+    tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdPoint); tr.appendChild(tdTotal); tr.appendChild(tdErr);
     tbody.appendChild(tr);
   });
 }
