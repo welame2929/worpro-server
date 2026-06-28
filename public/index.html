@@ -39,20 +39,33 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .mcard-collapsible[open] > *:last-child{margin-bottom:1rem;}
 .mcard-collapsible[open] > summary{padding-bottom:0.5rem;}
 .mcard-title{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;}
-.rule-list{list-style:none;font-size:13px;color:#2e3658;}
-.rule-list li{padding:4px 0;border-bottom:1.5px solid #8098D6;}
-.rule-list li:last-child{border-bottom:none;}
+.rule-list{list-style:none;font-size:13.5px;color:#2e3658;}
+.rule-list li{padding:6px 0 6px 18px;position:relative;line-height:1.7;}
+.rule-list li::before{
+  content:'';position:absolute;left:4px;top:13px;
+  width:5px;height:5px;border-radius:50%;background:#8098D6;
+}
 .rule-list li b{color:var(--navy);font-weight:500;}
-.err-table{width:100%;border-collapse:collapse;font-size:12px;}
-.err-table th{background:#8098D6;color:#ffffff;padding:5px 8px;text-align:left;font-weight:500;}
-.err-table td{padding:5px 8px;border-bottom:1.5px solid #8098D6;color:#2e3658;vertical-align:top;}
-.err-table tr:last-child td{border-bottom:none;}
+/* 重要項目のハイライトボックス */
+.rule-highlight{
+  background:#ffffff; border-left:4px solid #c0392b;
+  border-radius:6px; padding:10px 14px; margin-bottom:12px;
+  font-size:13.5px; color:var(--navy); line-height:1.75;
+}
+.rule-highlight b{color:var(--navy);font-weight:500;}
+.rule-highlight-sub{font-size:12px;color:#4658a8;}
+.err-table{width:100%;border-collapse:collapse;font-size:13px;}
+.err-table th{background:transparent;color:var(--navy);padding:6px 8px;text-align:left;font-weight:500;font-size:12px;letter-spacing:.04em;border-bottom:2px solid #8098D6;}
+.err-table td{padding:8px 8px;color:#2e3658;vertical-align:top;line-height:1.6;}
+.err-table td:first-child{color:var(--navy);font-weight:500;width:5em;}
 .warn-row td{color:var(--navy)!important;font-weight:500;}
 .warn-row td:last-child{text-decoration:underline;text-underline-offset:3px;text-decoration-color:#c4781a;}
 .err-example{margin-top:8px;background:#dfe7f5;border:1px solid #b3c3e2;border-radius:6px;padding:8px 10px;font-size:12px;color:#2e3658;line-height:1.8;}
 .err-example b{color:var(--navy);font-weight:500;}
-.notice-box{background:#fdf4e0;border:1px solid #f0cd84;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:15px;color:#5f4310;line-height:1.7;}
+.notice-box{background:#fdf4e0;border:1px solid #f0cd84;border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:14px;color:#5f4310;line-height:1.75;}
 .notice-box b{color:#42300a;font-weight:500;}
+/* 黄色カードが連続するとき、間隔を詰めてグループ感を出す */
+.notice-box + .notice-box{margin-top:-0.5rem;}
 .notice-title{font-size:15px;font-weight:500;color:#42300a;margin-bottom:6px;letter-spacing:.04em;}
 
 /* ボタン類 */
@@ -71,13 +84,35 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .input-label{font-size:12px;color:#3a4aa0;margin-bottom:6px;display:block;}
 .input-group{margin-bottom:12px;}
 input[type="file"]{display:none;}
-.upload-area{border:1.5px dashed #9fb1da;border-radius:8px;padding:12px;text-align:center;cursor:pointer;font-size:13px;color:#3a4aa0;transition:all .15s;}
+.upload-area{border:1.5px dashed #9fb1da;border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:12px;color:#3a4aa0;transition:all .15s;}
 .upload-area:hover{border-color:var(--navy);background:#dfe7f5;color:var(--navy);}
-.text-select{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
-.text-btn{background:#eaf0fa;border:1.5px solid #8098D6;border-radius:8px;padding:9px 12px;text-align:left;cursor:pointer;font-size:13px;color:#2e3658;transition:all .15s;font-family:inherit;}
-.text-btn:hover{background:#dfe7f5;border-color:var(--navy);color:var(--navy);}
-.text-btn.selected{background:#b7c6e6;border-color:var(--navy);color:var(--navy);font-weight:500;}
-#solo-selected-info,#host-selected-info{margin-top:6px;font-size:12px;color:#3a4aa0;min-height:16px;}
+.text-select{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
+/* 横並びバリアント（短いラベル、2-3択向け） */
+.text-select-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px;margin-bottom:8px;}
+.text-select-row .text-btn{text-align:center;padding-left:14px;}
+/* ボタン基本：カード背景(#CAD7EE)と明確に区別する白寄り＋濃い枠 */
+.text-btn{
+  background:#ffffff; border:1.5px solid #8098D6; border-radius:8px;
+  padding:10px 14px 10px 14px; text-align:left; cursor:pointer; font-size:13px;
+  color:#2e3658; transition:all .15s; font-family:inherit;
+}
+.text-btn:hover{background:#eef2fb;border-color:var(--navy);color:var(--navy);}
+/* 選択時：濃紺で塗りつぶし＋白文字＋軽いシャドウで明確にアクティブ表示 */
+.text-btn.selected{
+  background:var(--navy); border-color:var(--navy); color:#ffffff;
+  font-weight:500; box-shadow:0 2px 6px rgba(26,30,63,0.2);
+}
+.text-btn.selected:hover{
+  background:#2a3158; border-color:#2a3158; color:#ffffff;
+}
+#solo-selected-info,#host-selected-info{
+  margin-top:8px; font-size:12px; color:var(--navy);
+  padding:6px 10px; background:#ffffff; border:1px solid #aebfe0; border-radius:6px;
+  min-height:0;
+}
+#solo-selected-info:empty,#host-selected-info:empty{display:none;}
+/* 選択カード内の※注記 */
+.form-note{font-size:11px;color:#4658a8;margin-top:8px;line-height:1.6;}
 
 /* エラーメッセージ */
 .err-msg{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:8px 12px;font-size:13px;color:#fca5a5;margin-bottom:8px;display:none;}
@@ -138,24 +173,59 @@ input[type="file"]{display:none;}
 @keyframes flashB{0%,100%{box-shadow:inset 0 0 0 7px rgba(248,113,113,.8);}50%{box-shadow:inset 0 0 0 7px transparent;}}
 
 /* ===リザルト画面=== */
-.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
-.score-card{background:#CAD7EE;border:1px solid #aebfe0;border-radius:8px;padding:12px;}
-.sc-label{font-size:14px;color:#3a4aa0;margin-bottom:3px;}
-.sc-value{font-size:28px;font-weight:500;color:var(--navy);}
-.score-card.pure .sc-value{color:#2f5bd0;}
+/* 採点結果カード（得点・字数・エラー数・内訳を1枚に統合） */
+.result-card{
+  background:#CAD7EE; border:1px solid #aebfe0; border-radius:10px;
+  margin-bottom:1rem; overflow:hidden;
+}
+/* 上段：得点を主役として大きく表示 */
+.result-hero{
+  display:flex; align-items:baseline; justify-content:space-between;
+  padding:18px 24px;
+  background:linear-gradient(135deg,#3a4aa0 0%,#5a6fc4 100%);
+  color:#ffffff;
+}
+.result-hero .rh-label{
+  font-size:13px; color:#dde3f7;
+  text-transform:uppercase; letter-spacing:.1em;
+}
+.result-hero .rh-value{
+  font-size:48px; font-weight:500; line-height:1;
+  font-variant-numeric:tabular-nums; color:#ffffff;
+}
+/* 中段：総字数・エラー数 */
+.result-sub{
+  display:grid; grid-template-columns:1fr 1fr;
+  border-bottom:1px solid #aebfe0;
+}
+.rs-cell{padding:12px 18px;}
+.rs-cell + .rs-cell{border-left:1px solid #aebfe0;}
+.rs-label{font-size:12px;color:#3a4aa0;letter-spacing:.04em;margin-bottom:2px;}
+.rs-value{font-size:24px;font-weight:500;color:var(--navy);line-height:1.1;font-variant-numeric:tabular-nums;}
+/* 下段：エラー内訳（誤字＝赤系、余字＝緑系でdiff配色と対応） */
+.result-breakdown{
+  display:flex; padding:10px 4px;
+}
+.rb-cell{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+  border-right:1px solid #aebfe0; color:#3a4aa0; font-size:12px;
+}
+.rb-cell:last-child{border-right:none;}
+.rb-cell b{font-weight:500;font-size:22px;line-height:1;font-variant-numeric:tabular-nums;}
+.rb-cell.bd-goji b{color:#8b1c1c;}
+.rb-cell.bd-datsuji b{color:#8b1c1c;}
+.rb-cell.bd-yoji b{color:#14532d;}
 .diff-card{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
 .rule-tabs{display:flex;gap:6px;}
 .rule-tab{flex:1;padding:9px 6px;background:#aebfe0;border:1px solid #9fb1da;border-radius:8px;color:#2e3658;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;}
 .rule-tab:hover{background:#9fb1da;color:var(--navy);}
 .rule-tab.active{background:var(--navy);border-color:var(--navy);color:#ffffff;font-weight:500;}
-.err-breakdown{display:flex;gap:16px;justify-content:center;margin-bottom:12px;font-size:13px;color:#dde3f7;}
-.err-breakdown b{color:#ffffff;font-weight:500;font-size:15px;margin-left:3px;}
 .rank-tabs{display:flex;gap:6px;margin-bottom:10px;}
-.diff-card h2{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;}
-.legend{display:flex;gap:14px;margin-bottom:8px;}
-.ld{display:flex;align-items:center;gap:4px;font-size:12px;color:#3a4aa0;}
-.ld-dot{width:12px;height:12px;border-radius:2px;}
-.diff-content{font-size:13px;line-height:2;white-space:pre-wrap;font-family:'Noto Sans JP',sans-serif;color:#2e3658;}
+.diff-card h2{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;}
+.legend{display:flex;gap:18px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #aebfe0;}
+.ld{display:flex;align-items:center;gap:6px;font-size:12px;color:#3a4aa0;}
+.ld-dot{width:14px;height:14px;border-radius:3px;}
+.diff-content{font-size:14px;line-height:2.0;white-space:pre-wrap;font-family:'Noto Sans JP',sans-serif;color:#2e3658;padding:4px 2px;}
 .d-del{background:var(--del-bg);color:var(--del-text);text-decoration:line-through;border-radius:2px;}
 .d-ins{background:var(--ins-bg);color:var(--ins-text);border-radius:2px;}
 
@@ -192,9 +262,12 @@ input[type="file"]{display:none;}
   </div>
   <div class="mcard">
     <div class="mcard-title">競技ルール</div>
+    <div class="rule-highlight">
+      採点は下記の<b>3大会のルールに従ってそれぞれ行い、結果画面で3通りの得点が表示できる</b>。<br>
+      <span class="rule-highlight-sub">※採点処理は擬似的なものであり、各大会における実際の採点と異なる可能性があります。</span>
+    </div>
     <ul class="rule-list">
       <li>制限時間は<b>5分または10分</b>。画面左側に表示される課題文を正確に入力する。</li>
-      <li><b>採点は下記の3大会のルールに従ってそれぞれ行う。結果画面では3通りの得点表示が可能。</b><br>（採点処理は擬似的なものであり、各大会における実際の採点と異なる可能性があります。）</li>
       <li>残り <b>2分</b> および残り <b>10秒</b> になると、画面周囲が赤く点滅して通知される。</li>
       <li>課題文は <b>1行30文字の配置で30行ずつ表示</b>。次のページに達すると表示部分が自動で切り替わる。</li>
       <li>課題文中の <b style="color:#c0392b;">↵</b> は、その位置で <b>Enterキーによる改行</b>が必要なことを示す。</li>
@@ -269,7 +342,7 @@ input[type="file"]{display:none;}
     <div class="upload-area" onclick="document.getElementById('solo-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="solo-file-input" accept=".txt">
     <div id="solo-selected-info"></div>
-    <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
+    <div class="form-note">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
   </div>
   <div class="mcard">
     <div class="mcard-title">デフォルトの採点方式</div>
@@ -278,11 +351,11 @@ input[type="file"]{display:none;}
       <button class="text-btn" data-rule="mainichi">毎日パソコン入力コンクール</button>
       <button class="text-btn" data-rule="intersteno">Intersteno</button>
     </div>
-    <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※結果画面ではタブで他方式も確認できます</div>
+    <div class="form-note">※結果画面ではタブで他方式も確認できます</div>
   </div>
   <div class="mcard">
     <div class="mcard-title">プレイ時間</div>
-    <div class="text-select" id="solo-duration-select">
+    <div class="text-select text-select-row" id="solo-duration-select">
       <button class="text-btn" data-duration="300">5分</button>
       <button class="text-btn selected" data-duration="600">10分</button>
     </div>
@@ -311,7 +384,7 @@ input[type="file"]{display:none;}
       <button class="text-btn selected" data-ime="normal">通常（変換学習または辞書登録を使う）</button>
       <button class="text-btn" data-ime="warpro">ワープロ競技式（入力文字数を超える辞書登録を使う場合に選択）</button>
     </div>
-    <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※申告は自己申告制で、リザルトの参考情報として全員に表示されます。</div>
+    <div class="form-note">※申告は自己申告制で、リザルトの参考情報として全員に表示されます。</div>
   </div>
   <div id="name-err" class="err-msg">ハンドルネームを入力してください</div>
   <div class="btn-pair">
@@ -335,7 +408,7 @@ input[type="file"]{display:none;}
     <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="host-file-input" accept=".txt">
     <div id="host-selected-info"></div>
-    <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
+    <div class="form-note">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
   </div>
   <div class="mcard">
     <div class="mcard-title">順位表のデフォルト採点方式</div>
@@ -344,11 +417,11 @@ input[type="file"]{display:none;}
       <button class="text-btn" data-rule="mainichi">毎日パソコン入力</button>
       <button class="text-btn" data-rule="intersteno">Intersteno</button>
     </div>
-    <div style="font-size:11px;color:#3a4aa0;margin-top:6px;">※結果画面では各自タブで他方式も確認できます</div>
+    <div class="form-note">※結果画面では各自タブで他方式も確認できます</div>
   </div>
   <div class="mcard">
     <div class="mcard-title">プレイ時間</div>
-    <div class="text-select" id="host-duration-select">
+    <div class="text-select text-select-row" id="host-duration-select">
       <button class="text-btn" data-duration="300">5分</button>
       <button class="text-btn selected" data-duration="600">10分</button>
     </div>
@@ -464,17 +537,27 @@ input[type="file"]{display:none;}
     </div>
   </div>
 
-  <!-- 自分のスコア -->
-  <div class="score-grid">
-    <div class="score-card"><div class="sc-label" id="res-total-label">総字数</div><div class="sc-value" id="res-total">0</div></div>
-    <div class="score-card"><div class="sc-label">エラー数</div><div class="sc-value" id="res-errors">0</div></div>
-    <div class="score-card pure"><div class="sc-label" id="res-point-label">得点</div><div class="sc-value" id="res-point">0</div></div>
-  </div>
-  <!-- エラー内訳 -->
-  <div class="err-breakdown" id="err-breakdown">
-    <span>誤字 <b id="bd-goji">0</b></span>
-    <span>脱字 <b id="bd-datsuji">0</b></span>
-    <span>余字 <b id="bd-yoji">0</b></span>
+  <!-- 採点結果（得点・字数・エラー数・内訳を1枚に統合） -->
+  <div class="result-card">
+    <div class="result-hero">
+      <div class="rh-label" id="res-point-label">得点</div>
+      <div class="rh-value" id="res-point">0</div>
+    </div>
+    <div class="result-sub">
+      <div class="rs-cell">
+        <div class="rs-label" id="res-total-label">総字数</div>
+        <div class="rs-value" id="res-total">0</div>
+      </div>
+      <div class="rs-cell">
+        <div class="rs-label">エラー数</div>
+        <div class="rs-value" id="res-errors">0</div>
+      </div>
+    </div>
+    <div class="result-breakdown" id="err-breakdown">
+      <div class="rb-cell bd-goji"><b id="bd-goji">0</b><span>誤字</span></div>
+      <div class="rb-cell bd-datsuji"><b id="bd-datsuji">0</b><span>脱字</span></div>
+      <div class="rb-cell bd-yoji"><b id="bd-yoji">0</b><span>余字</span></div>
+    </div>
   </div>
 
   <!-- マルチ時：全員の順位表 -->
