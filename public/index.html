@@ -85,6 +85,25 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .input-group{margin-bottom:12px;}
 input[type="file"]{display:none;}
 .upload-area{border:1.5px dashed #9fb1da;border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:12px;color:#3a4aa0;transition:all .15s;}
+/* サーバー上課題文のプルダウン。テキストボタンと統一感のあるデザイン */
+.text-select-dropdown{
+  width:100%; padding:10px 14px; margin-bottom:6px;
+  background:#ffffff; border:1.5px solid #8098D6; border-radius:8px;
+  font-size:13px; color:#2e3658; font-family:inherit;
+  cursor:pointer; transition:all .15s;
+  appearance:none; -webkit-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%231A1E3F' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  padding-right:32px;
+}
+.text-select-dropdown:hover{border-color:var(--navy);background-color:#eef2fb;}
+.text-select-dropdown:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(26,30,63,0.12);}
+/* 何か選択されたら濃紺塗りで「選ばれている感」を出す */
+.text-select-dropdown.has-selection{
+  background-color:var(--navy); color:#ffffff; border-color:var(--navy);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
 .upload-area:hover{border-color:var(--navy);background:#dfe7f5;color:var(--navy);}
 .text-select{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
 /* 横並びバリアント（短いラベル、2-3択向け） */
@@ -339,6 +358,9 @@ input[type="file"]{display:none;}
       <button class="text-btn" data-idx="0">① 富士山（短文・動作確認用）</button>
       <button class="text-btn" data-idx="1">② 日本国憲法（長文・動作確認用）</button>
     </div>
+    <select id="solo-server-select" class="text-select-dropdown" style="display:none;">
+      <option value="">（一覧から課題文を選ぶ）</option>
+    </select>
     <div class="upload-area" onclick="document.getElementById('solo-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="solo-file-input" accept=".txt">
     <div id="solo-selected-info"></div>
@@ -405,6 +427,9 @@ input[type="file"]{display:none;}
       <button class="text-btn" data-idx="0">① 富士山（短文・動作確認用）</button>
       <button class="text-btn" data-idx="1">② 日本国憲法（長文・動作確認用）</button>
     </div>
+    <select id="host-server-select" class="text-select-dropdown" style="display:none;">
+      <option value="">（一覧から課題文を選ぶ）</option>
+    </select>
     <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="host-file-input" accept=".txt">
     <div id="host-selected-info"></div>
@@ -465,6 +490,7 @@ input[type="file"]{display:none;}
     <div class="mcard-title">参加者</div>
     <div class="player-list" id="lobby-player-list"></div>
     <div id="lobby-text-info" style="font-size:12px;color:#4658a8;margin-top:4px;"></div>
+    <a id="lobby-download-link" href="#" download style="display:none;font-size:12px;color:var(--navy);margin-top:6px;text-decoration:underline;">📄 課題文をダウンロード</a>
   </div>
   <div id="lobby-err" class="err-msg"></div>
   <!-- ホスト用 -->
@@ -636,14 +662,17 @@ function showScreen(id){
 // =====================================================================
 // ソロメニュー
 // =====================================================================
-document.querySelectorAll('#solo-text-select .text-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('#solo-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selectedText=SAMPLE_TEXTS[parseInt(btn.dataset.idx)];
-    document.getElementById('solo-selected-info').textContent='選択中：'+selectedText.name;
-    document.getElementById('solo-start-btn').disabled=false;
-  });
+// 課題文選択：サンプル文章ボタンのみを扱う（サーバー上はプルダウン側で処理）
+document.getElementById('solo-text-select').addEventListener('click',e=>{
+  const btn=e.target.closest('.text-btn'); if(!btn) return;
+  document.querySelectorAll('#solo-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  // サーバー上課題文のプルダウンを未選択に戻す
+  const sel=document.getElementById('solo-server-select');
+  sel.value=''; sel.classList.remove('has-selection');
+  selectedText=SAMPLE_TEXTS[parseInt(btn.dataset.idx)];
+  document.getElementById('solo-selected-info').textContent='選択中：'+selectedText.name;
+  document.getElementById('solo-start-btn').disabled=false;
 });
 // ソロ：デフォルト採点方式の選択
 document.querySelectorAll('#solo-rule-select .text-btn').forEach(btn=>{
@@ -668,6 +697,9 @@ document.getElementById('solo-file-input').addEventListener('change',e=>{
     selectedText={name:f.name,content:ev.target.result};
     document.getElementById('solo-selected-info').textContent='選択中：'+f.name;
     document.querySelectorAll('#solo-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
+    // サーバー上課題文のプルダウンも未選択に戻す
+    const sel=document.getElementById('solo-server-select');
+    sel.value=''; sel.classList.remove('has-selection');
     document.getElementById('solo-start-btn').disabled=false;
   };
   r.readAsText(f,'UTF-8');
@@ -725,15 +757,17 @@ function connectWS(callback){
 // マルチプレイ：ホスト設定
 // =====================================================================
 let hostText=null;
-// ホスト：サンプル文章の選択
-document.querySelectorAll('#host-text-select .text-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('#host-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    const t=SAMPLE_TEXTS[parseInt(btn.dataset.idx)];
-    hostText={name:t.name, content:t.content};
-    document.getElementById('host-selected-info').textContent='選択中：'+t.name;
-  });
+// ホスト：課題文選択（イベント委譲でサンプル＋サーバー上を統一処理）
+document.getElementById('host-text-select').addEventListener('click',e=>{
+  const btn=e.target.closest('.text-btn'); if(!btn) return;
+  document.querySelectorAll('#host-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  // サーバー上課題文のプルダウンを未選択に戻す
+  const sel=document.getElementById('host-server-select');
+  sel.value=''; sel.classList.remove('has-selection');
+  const t=SAMPLE_TEXTS[parseInt(btn.dataset.idx)];
+  hostText={name:t.name, content:t.content};
+  document.getElementById('host-selected-info').textContent='選択中：'+t.name;
 });
 document.getElementById('host-file-input').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f)return;
@@ -741,8 +775,10 @@ document.getElementById('host-file-input').addEventListener('change',e=>{
   r.onload=ev=>{
     hostText={name:f.name,content:ev.target.result};
     document.getElementById('host-selected-info').textContent='選択中：'+f.name;
-    // サンプルボタンの選択状態を解除
+    // サンプルボタン・サーバー上課題文の両方の選択状態を解除
     document.querySelectorAll('#host-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
+    const sel=document.getElementById('host-server-select');
+    sel.value=''; sel.classList.remove('has-selection');
   };
   r.readAsText(f,'UTF-8');
 });
@@ -774,6 +810,7 @@ function createRoom(){
     name:playerName,
     text:hostText.content,
     textName:hostText.name,
+    serverName:hostText.serverName||null,
     defaultRule:hostSelectedRule,
     duration:hostSelectedDuration,
     imeRule:playerImeRule
@@ -827,6 +864,15 @@ function renderLobby(state){
   const RULE_LABELS_J={warpro:'ワープロ大会', mainichi:'毎日パソコン入力', intersteno:'Intersteno'};
   if(state.defaultRule) infoParts.push('デフォルト採点方式：'+(RULE_LABELS_J[state.defaultRule]||state.defaultRule));
   document.getElementById('lobby-text-info').textContent=infoParts.join('　/　');
+  // サーバー上の課題文のときのみダウンロードリンクを表示
+  const dl=document.getElementById('lobby-download-link');
+  if(state.serverName){
+    dl.href='/texts/'+encodeURIComponent(state.serverName);
+    dl.style.display='inline-block';
+  } else {
+    dl.removeAttribute('href');
+    dl.style.display='none';
+  }
   const list=document.getElementById('lobby-player-list');
   list.innerHTML='';
   for(const p of state.players){
@@ -1488,6 +1534,81 @@ function backtrack(vs,a,b,MAX){
   }
   return merged;
 }
+
+// =====================================================================
+// 起動時：サーバー上の課題文一覧を取得してプルダウンに追加
+// =====================================================================
+fetch('/api/texts')
+  .then(r=>r.ok ? r.json() : {texts:[]})
+  .then(data=>{
+    const list=data.texts||[];
+    if(list.length===0) return; // サーバー側に課題文がなければ何もしない
+    const soloSel=document.getElementById('solo-server-select');
+    const hostSel=document.getElementById('host-server-select');
+    for(const t of list){
+      // 拡張子(.txt)を除いた表示名
+      const displayName=t.name.replace(/\.txt$/i,'');
+      const makeOpt=()=>{
+        const o=document.createElement('option');
+        o.value=t.name;
+        o.textContent=displayName;
+        return o;
+      };
+      if(soloSel) soloSel.appendChild(makeOpt());
+      if(hostSel) hostSel.appendChild(makeOpt());
+    }
+    // 課題文が存在する場合のみプルダウンを表示
+    if(soloSel) soloSel.style.display='block';
+    if(hostSel) hostSel.style.display='block';
+  })
+  .catch(()=>{ /* 取得失敗時は何もしない */ });
+
+// ソロ：サーバー上課題文プルダウンの変更ハンドラ
+document.getElementById('solo-server-select').addEventListener('change',e=>{
+  const name=e.target.value;
+  const sel=e.target;
+  if(!name){
+    sel.classList.remove('has-selection');
+    return;
+  }
+  sel.classList.add('has-selection');
+  // サンプル文章ボタンの選択状態を解除
+  document.querySelectorAll('#solo-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('solo-selected-info').textContent='読み込み中…';
+  document.getElementById('solo-start-btn').disabled=true;
+  fetch('/texts/'+encodeURIComponent(name))
+    .then(r=>{ if(!r.ok) throw new Error('Fetch failed'); return r.text(); })
+    .then(content=>{
+      selectedText={name, content, serverName:name};
+      document.getElementById('solo-selected-info').textContent='選択中：'+name;
+      document.getElementById('solo-start-btn').disabled=false;
+    })
+    .catch(()=>{
+      document.getElementById('solo-selected-info').textContent='読み込みに失敗しました';
+    });
+});
+
+// ホスト：サーバー上課題文プルダウンの変更ハンドラ
+document.getElementById('host-server-select').addEventListener('change',e=>{
+  const name=e.target.value;
+  const sel=e.target;
+  if(!name){
+    sel.classList.remove('has-selection');
+    return;
+  }
+  sel.classList.add('has-selection');
+  document.querySelectorAll('#host-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('host-selected-info').textContent='読み込み中…';
+  fetch('/texts/'+encodeURIComponent(name))
+    .then(r=>{ if(!r.ok) throw new Error('Fetch failed'); return r.text(); })
+    .then(content=>{
+      hostText={name, content, serverName:name};
+      document.getElementById('host-selected-info').textContent='選択中：'+name;
+    })
+    .catch(()=>{
+      document.getElementById('host-selected-info').textContent='読み込みに失敗しました';
+    });
+});
 </script>
 </body>
 </html>

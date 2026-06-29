@@ -5,8 +5,64 @@ const { WebSocketServer, WebSocket } = require('ws');
 
 const PORT = process.env.PORT || 3000;
 
-// ── HTTP サーバー（index.html を配信） ──────────────────────────
+// ── サーバー側課題文の読み込み ─────────────────────────────────
+// public/texts/ 配下の .txt をサーバー起動時に1回スキャンしてメモリに保持
+const TEXTS_DIR = path.join(__dirname, 'public', 'texts');
+const availableTexts = []; // [{name, content}]
+function loadAvailableTexts() {
+  availableTexts.length = 0;
+  try {
+    if (!fs.existsSync(TEXTS_DIR)) {
+      console.log(`No texts directory at ${TEXTS_DIR}`);
+      return;
+    }
+    const files = fs.readdirSync(TEXTS_DIR)
+      .filter(f => f.toLowerCase().endsWith('.txt'))
+      .sort();
+    for (const fname of files) {
+      try {
+        const content = fs.readFileSync(path.join(TEXTS_DIR, fname), 'utf8');
+        availableTexts.push({ name: fname, content });
+      } catch (e) {
+        console.error(`Failed to read ${fname}:`, e.message);
+      }
+    }
+    console.log(`Loaded ${availableTexts.length} server-side text(s): ${availableTexts.map(t => t.name).join(', ')}`);
+  } catch (e) {
+    console.error('Failed to scan texts directory:', e.message);
+  }
+}
+loadAvailableTexts();
+
+// ── HTTP サーバー ───────────────────────────────────────────────
 const httpServer = http.createServer((req, res) => {
+  const url = req.url || '/';
+
+  // 課題文一覧 API（ファイル名のみ返す軽量レスポンス）
+  if (url === '/api/texts') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ texts: availableTexts.map(t => ({ name: t.name })) }));
+    return;
+  }
+
+  // 個別課題文ダウンロード（/texts/<filename>）
+  if (url.startsWith('/texts/')) {
+    const name = decodeURIComponent(url.slice('/texts/'.length));
+    // パストラバーサル対策：ファイル名に / や .. を含むものは拒否
+    if (name.includes('/') || name.includes('\\') || name.includes('..') || !name.toLowerCase().endsWith('.txt')) {
+      res.writeHead(400); res.end('Bad request'); return;
+    }
+    const found = availableTexts.find(t => t.name === name);
+    if (!found) { res.writeHead(404); res.end('Not found'); return; }
+    res.writeHead(200, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(name)}`,
+    });
+    res.end(found.content);
+    return;
+  }
+
+  // ルートまたはその他のパスは index.html を返す
   const filePath = path.join(__dirname, 'public', 'index.html');
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404); res.end('Not found'); return; }
@@ -41,7 +97,8 @@ function roomState(room, roomId) {
     players.push({ name: p.name, imeRule: p.imeRule, ready: p.ready, isHost: ws === room.hostWs });
   }
   return { type: 'ROOM_STATE', roomId, players, gameState: room.gameState,
-           textName: room.textName, duration: room.duration, defaultRule: room.defaultRule };
+           textName: room.textName, serverName: room.serverName || null,
+           duration: room.duration, defaultRule: room.defaultRule };
 }
 
 wss.on('connection', (ws) => {
@@ -70,10 +127,14 @@ wss.on('connection', (ws) => {
         const duration = (msg.duration === 300) ? 300 : 600;
         // IMEレギュレーションは3種のみ許可、未指定はnormal
         const imeRule = ['mainichi','normal','warpro'].includes(msg.imeRule) ? msg.imeRule : 'normal';
+        // サーバー上の課題文ファイル名が指定されていれば、リストと照合してダウンロード可否を確定
+        const serverName = (typeof msg.serverName === 'string' && availableTexts.some(t => t.name === msg.serverName))
+          ? msg.serverName : null;
         const room = {
           hostWs: ws,
           text: msg.text || '',
           textName: msg.textName || '課題文',
+          serverName,                      // ダウンロード可能なサーバー側ファイル名（無ければnull）
           defaultRule: msg.defaultRule || 'warpro',
           duration,
           players: new Map(),
@@ -85,7 +146,7 @@ wss.on('connection', (ws) => {
         currentRoomId = roomId;
         ws.send(JSON.stringify({ type: 'ROOM_CREATED', roomId }));
         broadcast(room, roomState(room, roomId));
-        console.log(`Room created: ${roomId} by ${msg.name} (duration ${duration}s, IME ${imeRule})`);
+        console.log(`Room created: ${roomId} by ${msg.name} (duration ${duration}s, IME ${imeRule}, serverName ${serverName || '-'})`);
         break;
       }
 
