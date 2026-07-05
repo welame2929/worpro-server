@@ -125,8 +125,13 @@ wss.on('connection', (ws) => {
         const roomId = genRoomId();
         // プレイ時間は300秒(5分)または600秒(10分)のみ許可
         const duration = (msg.duration === 300) ? 300 : 600;
-        // IMEレギュレーションは3種のみ許可、未指定はnormal
-        const imeRule = ['mainichi','normal','warpro'].includes(msg.imeRule) ? msg.imeRule : 'normal';
+        // IMEレギュレーションは3種のみ許可、未指定・不正値は normal にフォールバック
+        const IME_ALLOWED = ['normal','mainichi','warpro'];
+        let imeRule = 'normal';
+        if (msg.imeRule != null) {
+          if (IME_ALLOWED.includes(msg.imeRule)) imeRule = msg.imeRule;
+          else console.warn(`[CREATE_ROOM] Invalid imeRule '${msg.imeRule}' from ${msg.name}, falling back to 'normal'`);
+        }
         // サーバー上の課題文ファイル名が指定されていれば、リストと照合してダウンロード可否を確定
         const serverName = (typeof msg.serverName === 'string' && availableTexts.some(t => t.name === msg.serverName))
           ? msg.serverName : null;
@@ -161,7 +166,11 @@ wss.on('connection', (ws) => {
           ws.send(JSON.stringify({ type: 'ERROR', message: 'ゲームはすでに開始しています' }));
           return;
         }
-        const imeRule = ['mainichi','normal','warpro'].includes(msg.imeRule) ? msg.imeRule : 'normal';
+        let imeRule = 'normal';
+        if (msg.imeRule != null) {
+          if (['normal','mainichi','warpro'].includes(msg.imeRule)) imeRule = msg.imeRule;
+          else console.warn(`[JOIN_ROOM] Invalid imeRule '${msg.imeRule}' from ${msg.name}, falling back to 'normal'`);
+        }
         room.players.set(ws, { name: msg.name, imeRule, ready: false, result: null });
         currentRoomId = msg.roomId;
         ws.send(JSON.stringify({ type: 'JOIN_OK', roomId: msg.roomId, textName: room.textName }));

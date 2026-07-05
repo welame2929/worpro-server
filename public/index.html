@@ -11,6 +11,8 @@
   --navy:#1A1E3F;--blue:#8098D6;--blue-mid:#b8c8ea;
   --white:#ffffff;--bg:#94ADE4;--text:#1a1e3f;--muted:#5a6490;--border:#d0d8ee;
   --del-bg:#fde8e8;--del-text:#8b1c1c;--ins-bg:#e6f4ea;--ins-text:#14532d;
+  /* アクセント（シアン）：選択状態・主要アクション・得点に限定して使用 */
+  --cyan:#0E9BBD;--cyan-bright:#35D6F4;--cyan-pale:#E3F6FB;--cyan-deep:#0B7E9A;
 }
 body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);}
 .screen{display:none;}.screen.active{display:block;}
@@ -38,9 +40,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .mcard-collapsible > *:not(summary){margin-left:1.25rem;margin-right:1.25rem;}
 .mcard-collapsible[open] > *:last-child{margin-bottom:1rem;}
 .mcard-collapsible[open] > summary{padding-bottom:0.5rem;}
-.mcard-title{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;}
-.rule-list{list-style:none;font-size:13.5px;color:#2e3658;}
-.rule-list li{padding:6px 0 6px 18px;position:relative;line-height:1.7;}
+.mcard-title{font-size:17px;font-weight:500;color:var(--navy);margin-bottom:12px;letter-spacing:.04em;}
+/* カード内のサブセクション見出し（カード統合用） */
+.mcard-subtitle{font-size:14px;font-weight:500;color:var(--navy);letter-spacing:.06em;margin:18px 0 10px;padding-top:14px;border-top:1px solid #aebfe0;}
+.rule-list{list-style:none;font-size:14px;color:#2e3658;}
+.rule-list li{padding:7px 0 7px 18px;position:relative;line-height:1.8;}
 .rule-list li::before{
   content:'';position:absolute;left:4px;top:13px;
   width:5px;height:5px;border-radius:50%;background:#8098D6;
@@ -49,7 +53,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 /* 重要項目のハイライトボックス */
 .rule-highlight{
   background:#ffffff; border-left:4px solid #c0392b;
-  border-radius:6px; padding:10px 14px; margin-bottom:12px;
+  border-radius:6px; padding:10px 14px; margin:12px 0;
   font-size:13.5px; color:var(--navy); line-height:1.75;
 }
 .rule-highlight b{color:var(--navy);font-weight:500;}
@@ -62,20 +66,57 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .warn-row td:last-child{text-decoration:underline;text-underline-offset:3px;text-decoration-color:#c4781a;}
 .err-example{margin-top:8px;background:#dfe7f5;border:1px solid #b3c3e2;border-radius:6px;padding:8px 10px;font-size:12px;color:#2e3658;line-height:1.8;}
 .err-example b{color:var(--navy);font-weight:500;}
-.notice-box{background:#fdf4e0;border:1px solid #f0cd84;border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:14px;color:#5f4310;line-height:1.75;}
+.notice-box{background:#fdf4e0;border:1px solid #f0cd84;border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:14px;color:#5f4310;line-height:1.8;}
 .notice-box b{color:#42300a;font-weight:500;}
-/* 黄色カードが連続するとき、間隔を詰めてグループ感を出す */
-.notice-box + .notice-box{margin-top:-0.5rem;}
-.notice-title{font-size:15px;font-weight:500;color:#42300a;margin-bottom:6px;letter-spacing:.04em;}
+.notice-title{font-size:16px;font-weight:500;color:#42300a;margin-bottom:8px;letter-spacing:.04em;}
+/* 黄色カード内でリスト形式を使う場合の配色調整（アンバー系に統一） */
+.notice-box .rule-list{color:#5f4310;}
+.notice-box .rule-list li b{color:#42300a;}
+.notice-box .rule-list li::before{background:#c9a95a;}
 
 /* ボタン類 */
-.btn-primary{width:100%;padding:13px;background:var(--blue);color:var(--navy);border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;}
-.btn-primary:hover{background:#a0b4e0;}
-.btn-primary:disabled{background:rgba(128,152,214,0.2);color:rgba(128,152,214,0.4);cursor:not-allowed;}
+.btn-primary{
+  width:100%;padding:13px;
+  background:linear-gradient(180deg,var(--cyan) 0%,var(--cyan-deep) 100%);
+  color:#ffffff;border:none;border-radius:8px;
+  font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;
+  transition:all .15s;
+  box-shadow:0 2px 8px rgba(14,155,189,0.35);
+}
+.btn-primary:hover{filter:brightness(1.08);box-shadow:0 4px 12px rgba(14,155,189,0.45);transform:translateY(-1px);}
+.btn-primary:active{transform:translateY(0);box-shadow:0 1px 4px rgba(14,155,189,0.3);}
+.btn-primary:disabled{background:rgba(128,152,214,0.2);color:rgba(128,152,214,0.4);cursor:not-allowed;box-shadow:none;transform:none;filter:none;}
+.btn-primary:focus-visible{outline:2px solid var(--cyan-bright);outline-offset:2px;}
 .btn-secondary{width:100%;padding:12px;background:transparent;color:var(--blue-mid);border:1px solid rgba(128,152,214,0.4);border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .15s;}
 .btn-secondary:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
 .btn-row{display:flex;flex-direction:column;gap:8px;}
 .btn-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+/* トップのモードカード（ソロ/マルチの主導線） */
+.mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+.mode-card{
+  padding:26px 16px;
+  background:linear-gradient(180deg,var(--cyan) 0%,var(--cyan-deep) 100%);
+  border:none;border-radius:12px;cursor:pointer;font-family:inherit;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  color:#ffffff;box-shadow:0 2px 10px rgba(14,155,189,0.35);
+  transition:all .15s;
+}
+.mode-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(14,155,189,0.45);filter:brightness(1.06);}
+.mode-card:active{transform:translateY(0);}
+.mode-card:focus-visible{outline:2px solid var(--cyan-bright);outline-offset:3px;}
+.mode-name{font-size:18px;font-weight:500;letter-spacing:.04em;}
+.mode-desc{font-size:12px;color:rgba(255,255,255,0.85);}
+/* ルール・採点方式の説明（デフォルト折りたたみ） */
+.rules-section > summary{
+  list-style:none;cursor:pointer;text-align:center;
+  padding:12px;border:1px solid rgba(128,152,214,0.5);border-radius:8px;
+  color:var(--blue-mid);font-size:14px;transition:all .15s;margin-bottom:1rem;
+  user-select:none;
+}
+.rules-section > summary::-webkit-details-marker{display:none;}
+.rules-section > summary::after{content:'　▼';font-size:10px;}
+.rules-section[open] > summary::after{content:'　▲';font-size:10px;}
+.rules-section > summary:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
 
 /* テキスト入力 */
 .text-input{width:100%;padding:10px 12px;background:#eaf0fa;border:1px solid #aebfe0;border-radius:8px;color:var(--navy);font-size:14px;font-family:inherit;outline:none;}
@@ -97,33 +138,53 @@ input[type="file"]{display:none;}
   background-position:right 12px center;
   padding-right:32px;
 }
-.text-select-dropdown:hover{border-color:var(--navy);background-color:#eef2fb;}
-.text-select-dropdown:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(26,30,63,0.12);}
-/* 何か選択されたら濃紺塗りで「選ばれている感」を出す */
+.text-select-dropdown:hover{border-color:var(--cyan);background-color:#f4fbfd;}
+.text-select-dropdown:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(14,155,189,0.18);}
+/* 何か選択されたら薄シアンで「選ばれている感」を出す */
 .text-select-dropdown.has-selection{
-  background-color:var(--navy); color:#ffffff; border-color:var(--navy);
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-color:var(--cyan-pale); color:var(--navy); border-color:var(--cyan); font-weight:500;
 }
 .upload-area:hover{border-color:var(--navy);background:#dfe7f5;color:var(--navy);}
-.text-select{display:flex;flex-direction:column;gap:6px;margin-bottom:6px;}
-/* 横並びバリアント（短いラベル、2-3択向け） */
-.text-select-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px;margin-bottom:8px;}
-.text-select-row .text-btn{text-align:center;padding-left:14px;}
-/* ボタン基本：カード背景(#CAD7EE)と明確に区別する白寄り＋濃い枠 */
-.text-btn{
-  background:#ffffff; border:1.5px solid #8098D6; border-radius:8px;
-  padding:10px 14px 10px 14px; text-align:left; cursor:pointer; font-size:13px;
+/* 選択肢：本物のラジオボタン（fieldset+input+label）。
+   inputは視覚的に隠し、labelにボタン状の見た目と○/●インジケータを持たせる。
+   矢印キーでの選択切替・Tabフォーカスはブラウザ標準機能として動作する。 */
+.radio-group{border:none;display:flex;flex-direction:column;gap:6px;margin-bottom:6px;min-width:0;}
+.radio-group input[type=radio]{
+  position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;
+}
+.radio-group label{
+  display:block;
+  background:#ffffff; border:1.5px solid #9fb1da; border-radius:8px;
+  padding:10px 14px 10px 40px; text-align:left; cursor:pointer; font-size:13px;
   color:#2e3658; transition:all .15s; font-family:inherit;
+  position:relative;
 }
-.text-btn:hover{background:#eef2fb;border-color:var(--navy);color:var(--navy);}
-/* 選択時：濃紺で塗りつぶし＋白文字＋軽いシャドウで明確にアクティブ表示 */
-.text-btn.selected{
-  background:var(--navy); border-color:var(--navy); color:#ffffff;
-  font-weight:500; box-shadow:0 2px 6px rgba(26,30,63,0.2);
+/* 外円（ラジオの枠） */
+.radio-group label::before{
+  content:''; position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  width:16px; height:16px; border-radius:50%;
+  border:2px solid #9fb1da; background:#ffffff;
+  transition:border-color .15s;
 }
-.text-btn.selected:hover{
-  background:#2a3158; border-color:#2a3158; color:#ffffff;
+/* 内ドット（選択時のみ表示） */
+.radio-group label::after{
+  content:''; position:absolute; left:19px; top:50%; transform:translateY(-50%) scale(0);
+  width:10px; height:10px; border-radius:50%;
+  background:var(--cyan);
+  transition:transform .12s ease-out;
 }
+.radio-group label:hover{border-color:var(--cyan);background:#f4fbfd;}
+.radio-group label:hover::before{border-color:var(--cyan);}
+.radio-group input:checked + label{
+  background:var(--cyan-pale); border-color:var(--cyan); color:var(--navy);
+  font-weight:500;
+}
+.radio-group input:checked + label::before{border-color:var(--cyan);}
+.radio-group input:checked + label::after{transform:translateY(-50%) scale(1);}
+.radio-group input:focus-visible + label{outline:2px solid var(--cyan);outline-offset:2px;}
+/* プレイ設定カード内の2列グリッド */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
+.setting-label{font-size:12px;font-weight:500;color:#3a4aa0;letter-spacing:.04em;margin-bottom:8px;}
 #solo-selected-info,#host-selected-info{
   margin-top:8px; font-size:12px; color:var(--navy);
   padding:6px 10px; background:#ffffff; border:1px solid #aebfe0; border-radius:6px;
@@ -132,6 +193,11 @@ input[type="file"]{display:none;}
 #solo-selected-info:empty,#host-selected-info:empty{display:none;}
 /* 選択カード内の※注記 */
 .form-note{font-size:11px;color:#4658a8;margin-top:8px;line-height:1.6;}
+/* IMEレギュレーションの区切り注記（「通常」と例外選択肢の間に挟む） */
+.ime-split-note{
+  font-size:12px; color:#3a4aa0; line-height:1.6;
+  margin:8px 4px 6px; padding:0;
+}
 
 /* エラーメッセージ */
 .err-msg{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:8px 12px;font-size:13px;color:#fca5a5;margin-bottom:8px;display:none;}
@@ -186,7 +252,7 @@ input[type="file"]{display:none;}
 .src-count{font-size:10px;color:#aab4cc;text-align:right;padding:0 5px 0 2px;white-space:nowrap;}
 #ta-frame{border:2px solid var(--navy);border-radius:4px;background:var(--white);flex-shrink:0;overflow:hidden;}
 #ta-wrapper{overflow:hidden;background:var(--white);}
-#typing-area{display:block;border:none;resize:none;padding:0;margin:0;font-family:'BIZ UDGothic',monospace;background:var(--white);color:var(--text);outline:none;overflow-y:scroll;overflow-x:hidden;
+#typing-area{display:block;border:none;resize:none;padding:0;margin:0;font-family:'BIZ UDGothic',monospace;background:var(--white);color:var(--text);outline:none;overflow-y:hidden;overflow-x:hidden;
   white-space:pre-wrap;line-break:anywhere;word-break:break-all;overflow-wrap:anywhere;}
 .flash-border{position:fixed;pointer-events:none;top:0;left:0;right:0;bottom:0;z-index:999;animation:flashB .5s step-end infinite;}
 @keyframes flashB{0%,100%{box-shadow:inset 0 0 0 7px rgba(248,113,113,.8);}50%{box-shadow:inset 0 0 0 7px transparent;}}
@@ -194,53 +260,83 @@ input[type="file"]{display:none;}
 /* ===リザルト画面=== */
 /* 採点結果カード（得点・字数・エラー数・内訳を1枚に統合） */
 .result-card{
-  background:#CAD7EE; border:1px solid #aebfe0; border-radius:10px;
+  background:#ffffff; border:1px solid #aebfe0; border-radius:10px;
   margin-bottom:1rem; overflow:hidden;
 }
-/* 上段：得点を主役として大きく表示 */
-.result-hero{
-  display:flex; align-items:baseline; justify-content:space-between;
-  padding:18px 24px;
-  background:linear-gradient(135deg,#3a4aa0 0%,#5a6fc4 100%);
-  color:#ffffff;
+/* タブ帯（上部）：ラベル＋タブ */
+.result-tab-strip{
+  padding:12px 16px 10px; background:#eaf0fa; border-bottom:1px solid #aebfe0;
 }
-.result-hero .rh-label{
-  font-size:13px; color:#dde3f7;
-  text-transform:uppercase; letter-spacing:.1em;
+.result-tab-label{
+  font-size:12px; color:#3a4aa0; letter-spacing:.06em; margin-bottom:8px;
 }
-.result-hero .rh-value{
-  font-size:48px; font-weight:500; line-height:1;
-  font-variant-numeric:tabular-nums; color:#ffffff;
+/* 結果本体：得点行＋統計リスト */
+.result-body{padding:18px 22px 22px;}
+/* 得点：見出しと数値の横並び。カード最上部の主役 */
+.score-hero{
+  display:flex; align-items:baseline; gap:20px;
+  padding-bottom:16px; margin-bottom:16px;
+  border-bottom:3px solid #b7c6e6;
 }
-/* 中段：総字数・エラー数 */
-.result-sub{
-  display:grid; grid-template-columns:1fr 1fr;
-  border-bottom:1px solid #aebfe0;
+.score-hero .rh-label{
+  font-size:24px; font-weight:500; color:var(--navy); letter-spacing:.08em;
 }
-.rs-cell{padding:12px 18px;}
-.rs-cell + .rs-cell{border-left:1px solid #aebfe0;}
-.rs-label{font-size:12px;color:#3a4aa0;letter-spacing:.04em;margin-bottom:2px;}
-.rs-value{font-size:24px;font-weight:500;color:var(--navy);line-height:1.1;font-variant-numeric:tabular-nums;}
-/* 下段：エラー内訳（誤字＝赤系、余字＝緑系でdiff配色と対応） */
-.result-breakdown{
-  display:flex; padding:10px 4px;
+.score-hero .rh-value{
+  font-size:44px; font-weight:500; color:var(--navy); line-height:1;
+  font-variant-numeric:tabular-nums;
 }
-.rb-cell{
-  flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
-  border-right:1px solid #aebfe0; color:#3a4aa0; font-size:12px;
+/* 統計リスト：項目名の直後に値を置き、視線移動を最小化する。
+   dtに最小幅を与えて数値の左端を揃え、行の右側は余白として空ける。 */
+.score-list{display:flex; flex-direction:column; gap:6px;}
+.score-line{
+  display:flex; align-items:baseline; gap:16px;
+  padding:4px 0;
 }
-.rb-cell:last-child{border-right:none;}
-.rb-cell b{font-weight:500;font-size:22px;line-height:1;font-variant-numeric:tabular-nums;}
-.rb-cell.bd-goji b{color:#8b1c1c;}
-.rb-cell.bd-datsuji b{color:#8b1c1c;}
-.rb-cell.bd-yoji b{color:#14532d;}
+.score-line dt{
+  font-size:15px; color:var(--navy);
+  min-width:5em;
+}
+.score-line dd{
+  font-size:20px; font-weight:500; color:var(--navy);
+  font-variant-numeric:tabular-nums;
+}
+.score-line dd b{font-weight:500;font-variant-numeric:tabular-nums;}
+/* エラー内訳（誤字・脱字・余字）：ツリー状にインデント表示 */
+.score-sub{
+  padding-left:32px; position:relative;
+}
+.score-sub dt, .score-sub dd{font-size:14px;}
+.score-sub dt{color:#4658a8; min-width:4em;}
+/* ツリーの縦線と枝分かれ */
+.score-sub::before{
+  content:''; position:absolute; left:12px; top:0; bottom:0;
+  border-left:1.5px solid #aebfe0;
+}
+.score-sub::after{
+  content:''; position:absolute; left:12px; top:50%;
+  width:14px; border-top:1.5px solid #aebfe0;
+}
+/* 最後の項目：縦線を「└」の形にするため下半分を消す */
+.score-sub:last-child::before{bottom:50%;}
+/* 意味色：誤字・脱字＝赤系、余字＝緑系 */
+.score-sub.bd-goji dd b, .score-sub.bd-goji dd{color:#8b1c1c;}
+.score-sub.bd-datsuji dd b, .score-sub.bd-datsuji dd{color:#8b1c1c;}
+.score-sub.bd-yoji dd b, .score-sub.bd-yoji dd{color:#14532d;}
 .diff-card{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
-.rule-tabs{display:flex;gap:6px;}
-.rule-tab{flex:1;padding:9px 6px;background:#aebfe0;border:1px solid #9fb1da;border-radius:8px;color:#2e3658;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;}
-.rule-tab:hover{background:#9fb1da;color:var(--navy);}
-.rule-tab.active{background:var(--navy);border-color:var(--navy);color:#ffffff;font-weight:500;}
-.rank-tabs{display:flex;gap:6px;margin-bottom:10px;}
-.diff-card h2{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;}
+/* diffカードの折りたたみ見出し */
+.diff-card > summary{list-style:none;cursor:pointer;user-select:none;}
+.diff-card > summary::-webkit-details-marker{display:none;}
+.diff-card > summary h2{display:inline;}
+.diff-card > summary::after{content:'▼';font-size:10px;color:var(--navy);margin-left:8px;}
+.diff-card[open] > summary::after{content:'▲';}
+.diff-card[open] > summary{margin-bottom:10px;}
+/* 採点結果カード内のタブ帯（方式の切替＝結果表示と一体） */
+.result-tabs{display:flex;gap:6px;}
+.rule-tab{flex:1;padding:9px 6px;background:#ffffff;border:1.5px solid #9fb1da;border-radius:8px;color:#2e3658;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;}
+.rule-tab:hover{border-color:var(--cyan);background:#f4fbfd;color:var(--navy);}
+.rule-tab.active{background:var(--cyan);border-color:var(--cyan);color:#ffffff;font-weight:500;box-shadow:0 2px 6px rgba(14,155,189,0.3);}
+.rule-tab:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+.diff-card h2{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:10px;letter-spacing:.06em;}
 .legend{display:flex;gap:18px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #aebfe0;}
 .ld{display:flex;align-items:center;gap:6px;font-size:12px;color:#3a4aa0;}
 .ld-dot{width:14px;height:14px;border-radius:3px;}
@@ -263,37 +359,42 @@ input[type="file"]{display:none;}
 <!-- ①トップメニュー -->
 <div id="menu-screen" class="screen active page-wrap">
 <div class="page-inner">
-  <div class="page-hero">
+  <header class="page-hero">
     <h1>実用タイピング採点用ツール</h1>
+    <p>実在する3大会のルールで採点できる、実用文タイピングの練習・競技ツール</p>
+  </header>
+  <div class="mode-cards">
+    <button class="mode-card" onclick="showScreen('solo-menu-screen')">
+      <span class="mode-name">ソロプレイ</span>
+      <span class="mode-desc">ひとりで練習して採点する</span>
+    </button>
+    <button class="mode-card" onclick="showScreen('multi-name-screen')">
+      <span class="mode-name">マルチプレイ</span>
+      <span class="mode-desc">ルームを作って同時に競う</span>
+    </button>
   </div>
-  <div class="notice-box">
-    <div class="notice-title">はじめにご確認ください</div>
-    文字サイズはウィンドウ幅をもとに自動設定されます。<b>まずサンプル文章でゲームを開始し</b>、表示を確認してください。
-  </div>
-  <div class="notice-box">
-    <div class="notice-title">課題文ファイルの注意事項</div>
-    このツールは、オリジナルの課題文をtxtファイルで読み込ませて使用することを想定しています（マルチプレイ時は部屋のホストがファイルを用意します）。<br>
-    課題文は<b>半角文字を含まず、すべて全角文字で記述されたもの</b>を使用してください。半角文字を含む場合、改行処理が正確に動作しない可能性があります。
-  </div>
-  <div class="btn-pair" style="margin-bottom:28px;">
-    <button class="btn-primary" onclick="showScreen('solo-menu-screen')">ソロプレイ</button>
-    <button class="btn-primary" onclick="showScreen('multi-name-screen')">マルチプレイ</button>
-  </div>
-  <div class="mcard">
-    <div class="mcard-title">競技ルール</div>
-    <div class="rule-highlight">
-      採点は下記の<b>3大会のルールに従ってそれぞれ行い、結果画面で3通りの得点が表示できる</b>。<br>
-      <span class="rule-highlight-sub">※採点処理は擬似的なものであり、各大会における実際の採点と異なる可能性があります。</span>
-    </div>
+  <aside class="notice-box">
+    <h2 class="notice-title">はじめにご確認ください</h2>
+    <ul class="rule-list">
+      <li>文字サイズはウィンドウ幅をもとに自動設定される。<b>まずサンプル文章でゲームを開始し</b>、表示を確認すること。</li>
+      <li>このツールは、オリジナルの課題文をtxtファイルで読み込ませることが可能。課題文は<b>半角文字を含まず、すべて全角文字で記述されたもの</b>を使用すること。半角文字を含む場合、改行処理が正確に動作しない可能性がある。</li>
+    </ul>
+  </aside>
+  <details class="rules-section">
+    <summary>競技ルール・採点方式の説明を見る</summary>
+    <section class="mcard">
+    <h2 class="mcard-title">競技ルール</h2>
     <ul class="rule-list">
       <li>制限時間は<b>5分または10分</b>。画面左側に表示される課題文を正確に入力する。</li>
-      <li>残り <b>2分</b> および残り <b>10秒</b> になると、画面周囲が赤く点滅して通知される。</li>
-      <li>課題文は <b>1行30文字の配置で30行ずつ表示</b>。次のページに達すると表示部分が自動で切り替わる。</li>
-      <li>課題文中の <b style="color:#c0392b;">↵</b> は、その位置で <b>Enterキーによる改行</b>が必要なことを示す。</li>
+      <li><b>残り2分と残り10秒</b>になると、画面周囲が赤く点滅して通知される。</li>
+      <li>課題文は<b>1行30文字の配置で30行ずつ表示</b>。次のページに達すると、表示部分が自動で切り替わる。</li>
+      <li>課題文中の <b style="color:#c0392b;">↵</b> は、その位置でEnterキーによる改行が必要なことを示す。</li>
     </ul>
-  </div>
-  <div class="mcard">
-    <div class="mcard-title">エラー種別</div>
+    <div class="rule-highlight">
+      採点は下記の3大会のルールに従ってそれぞれ行い、<b>結果画面で3通りの得点が表示できます</b>。<br>
+      <span class="rule-highlight-sub">※採点処理は擬似的なものであり、各大会における実際の採点と異なる可能性があります。</span>
+    </div>
+    <h3 class="mcard-subtitle">エラー種別</h3>
     <table class="err-table">
       <thead><tr><th>種別</th><th>内容</th></tr></thead>
       <tbody>
@@ -305,7 +406,7 @@ input[type="file"]{display:none;}
     <div class="err-example">
       この他に毎日パソコン入力コンクールでは「未変換」、Interstenoでは「反転」がありますが、このソフトでは扱いません。
     </div>
-  </div>
+    </section>
   <details class="mcard mcard-collapsible">
     <summary class="mcard-title">採点ルール1：全国高等学校ワープロ競技大会</summary>
     <ul class="rule-list">
@@ -345,43 +446,56 @@ input[type="file"]{display:none;}
       <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6エラー。「さ」と入力した場合、誤字1＋脱字1の2エラー。
     </div>
   </details>
+  </details><!-- /.rules-section -->
 </div>
 </div>
 
 <!-- ②ソロ：課題文選択 -->
 <div id="solo-menu-screen" class="screen page-wrap">
 <div class="page-inner">
-  <div class="page-hero"><h1>ソロプレイ</h1></div>
-  <div class="mcard">
-    <div class="mcard-title">課題文を選択</div>
-    <div class="text-select" id="solo-text-select">
-      <button class="text-btn" data-idx="0">① 富士山（短文・動作確認用）</button>
-      <button class="text-btn" data-idx="1">② 日本国憲法（長文・動作確認用）</button>
-    </div>
+  <header class="page-hero"><h1>ソロプレイ</h1></header>
+  <section class="mcard">
+    <h2 class="mcard-title">課題文を選択</h2>
+    <fieldset class="radio-group" id="solo-text-select">
+      <input type="radio" name="solo-text" id="solo-text-0" value="0">
+      <label for="solo-text-0">① 富士山（短文・動作確認用）</label>
+      <input type="radio" name="solo-text" id="solo-text-1" value="1">
+      <label for="solo-text-1">② 日本国憲法（長文・動作確認用）</label>
+    </fieldset>
     <select id="solo-server-select" class="text-select-dropdown" style="display:none;">
       <option value="">（一覧から課題文を選ぶ）</option>
     </select>
     <div class="upload-area" onclick="document.getElementById('solo-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="solo-file-input" accept=".txt">
     <div id="solo-selected-info"></div>
-    <div class="form-note">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
-  </div>
-  <div class="mcard">
-    <div class="mcard-title">デフォルトの採点方式</div>
-    <div class="text-select" id="solo-rule-select">
-      <button class="text-btn selected" data-rule="warpro">ワープロ大会</button>
-      <button class="text-btn" data-rule="mainichi">毎日パソコン入力コンクール</button>
-      <button class="text-btn" data-rule="intersteno">Intersteno</button>
+    <p class="form-note">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</p>
+  </section>
+  <section class="mcard">
+    <h2 class="mcard-title">プレイ設定</h2>
+    <div class="settings-grid">
+      <div>
+        <h3 class="setting-label">デフォルトの採点方式</h3>
+        <fieldset class="radio-group" id="solo-rule-select">
+          <input type="radio" name="solo-rule" id="solo-rule-warpro" value="warpro" checked>
+          <label for="solo-rule-warpro">ワープロ大会</label>
+          <input type="radio" name="solo-rule" id="solo-rule-mainichi" value="mainichi">
+          <label for="solo-rule-mainichi">毎日パソコン入力コンクール</label>
+          <input type="radio" name="solo-rule" id="solo-rule-intersteno" value="intersteno">
+          <label for="solo-rule-intersteno">Intersteno</label>
+        </fieldset>
+      </div>
+      <div>
+        <h3 class="setting-label">プレイ時間</h3>
+        <fieldset class="radio-group" id="solo-duration-select">
+          <input type="radio" name="solo-duration" id="solo-dur-300" value="300">
+          <label for="solo-dur-300">5分</label>
+          <input type="radio" name="solo-duration" id="solo-dur-600" value="600" checked>
+          <label for="solo-dur-600">10分</label>
+        </fieldset>
+      </div>
     </div>
-    <div class="form-note">※結果画面ではタブで他方式も確認できます</div>
-  </div>
-  <div class="mcard">
-    <div class="mcard-title">プレイ時間</div>
-    <div class="text-select text-select-row" id="solo-duration-select">
-      <button class="text-btn" data-duration="300">5分</button>
-      <button class="text-btn selected" data-duration="600">10分</button>
-    </div>
-  </div>
+    <p class="form-note">※結果画面ではタブで他方式も確認できます</p>
+  </section>
   <div class="btn-row">
     <button class="btn-primary" id="solo-start-btn" disabled onclick="startSoloGame()">ゲームを開始する</button>
     <button class="btn-secondary" onclick="showScreen('menu-screen')">戻る</button>
@@ -392,22 +506,26 @@ input[type="file"]{display:none;}
 <!-- ③マルチ：ハンドルネーム入力 -->
 <div id="multi-name-screen" class="screen page-wrap">
 <div class="page-inner">
-  <div class="page-hero"><h1>マルチプレイ</h1><p>ハンドルネームを入力してください</p></div>
-  <div class="mcard">
+  <header class="page-hero"><h1>マルチプレイ</h1><p>ハンドルネームを入力してください</p></header>
+  <section class="mcard">
     <div class="input-group">
-      <label class="input-label">ハンドルネーム</label>
+      <label class="input-label" for="player-name-input">ハンドルネーム</label>
       <input type="text" id="player-name-input" class="text-input" placeholder="例：タイピング太郎" maxlength="20">
     </div>
-  </div>
-  <div class="mcard">
-    <div class="mcard-title">IMEレギュレーション</div>
-    <div class="text-select" id="ime-rule-select">
-      <button class="text-btn" data-ime="mainichi">毎パソ式（変換学習も辞書登録も使わない場合に選択）</button>
-      <button class="text-btn selected" data-ime="normal">通常（変換学習または辞書登録を使う）</button>
-      <button class="text-btn" data-ime="warpro">ワープロ競技式（入力文字数を超える辞書登録を使う場合に選択）</button>
-    </div>
-    <div class="form-note">※申告は自己申告制で、リザルトの参考情報として全員に表示されます。</div>
-  </div>
+  </section>
+  <section class="mcard">
+    <h2 class="mcard-title">IMEレギュレーション</h2>
+    <fieldset class="radio-group" id="ime-rule-select">
+      <input type="radio" name="ime-rule" id="ime-normal" value="normal" checked>
+      <label for="ime-normal">通常（変換学習または辞書登録を使う）</label>
+      <p class="ime-split-note">以下の条件に当てはまる方は、下の2項目をかわりに選択してください。</p>
+      <input type="radio" name="ime-rule" id="ime-mainichi" value="mainichi">
+      <label for="ime-mainichi">変換学習・辞書登録なし（デフォルトのIMEのみを使う場合に選択。毎パソルール準拠）</label>
+      <input type="radio" name="ime-rule" id="ime-warpro" value="warpro">
+      <label for="ime-warpro">短縮辞書登録あり（「じか」→「時間」など、入力文字数を超える辞書登録を使う場合に選択）</label>
+    </fieldset>
+    <p class="form-note">※申告は自己申告制で、リザルトの参考情報として全員に表示されます。</p>
+  </section>
   <div id="name-err" class="err-msg">ハンドルネームを入力してください</div>
   <div class="btn-pair">
     <button class="btn-primary" onclick="goToHostOrJoin('host')">ルームを作る</button>
@@ -420,37 +538,49 @@ input[type="file"]{display:none;}
 <!-- ④ホスト：課題文指定 -->
 <div id="host-setup-screen" class="screen page-wrap">
 <div class="page-inner">
-  <div class="page-hero"><h1>ルームを作る</h1></div>
-  <div class="mcard">
-    <div class="mcard-title">課題文を指定</div>
-    <div class="text-select" id="host-text-select">
-      <button class="text-btn" data-idx="0">① 富士山（短文・動作確認用）</button>
-      <button class="text-btn" data-idx="1">② 日本国憲法（長文・動作確認用）</button>
-    </div>
+  <header class="page-hero"><h1>ルームを作る</h1></header>
+  <section class="mcard">
+    <h2 class="mcard-title">課題文を指定</h2>
+    <fieldset class="radio-group" id="host-text-select">
+      <input type="radio" name="host-text" id="host-text-0" value="0">
+      <label for="host-text-0">① 富士山（短文・動作確認用）</label>
+      <input type="radio" name="host-text" id="host-text-1" value="1">
+      <label for="host-text-1">② 日本国憲法（長文・動作確認用）</label>
+    </fieldset>
     <select id="host-server-select" class="text-select-dropdown" style="display:none;">
       <option value="">（一覧から課題文を選ぶ）</option>
     </select>
     <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
     <input type="file" id="host-file-input" accept=".txt">
     <div id="host-selected-info"></div>
-    <div class="form-note">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</div>
-  </div>
-  <div class="mcard">
-    <div class="mcard-title">順位表のデフォルト採点方式</div>
-    <div class="text-select" id="host-rule-select">
-      <button class="text-btn selected" data-rule="warpro">ワープロ大会</button>
-      <button class="text-btn" data-rule="mainichi">毎日パソコン入力</button>
-      <button class="text-btn" data-rule="intersteno">Intersteno</button>
+    <p class="form-note">※課題文は全角文字のみで作成してください（半角英数字・記号は不可）</p>
+  </section>
+  <section class="mcard">
+    <h2 class="mcard-title">プレイ設定</h2>
+    <div class="settings-grid">
+      <div>
+        <h3 class="setting-label">順位表のデフォルト採点方式</h3>
+        <fieldset class="radio-group" id="host-rule-select">
+          <input type="radio" name="host-rule" id="host-rule-warpro" value="warpro" checked>
+          <label for="host-rule-warpro">ワープロ大会</label>
+          <input type="radio" name="host-rule" id="host-rule-mainichi" value="mainichi">
+          <label for="host-rule-mainichi">毎日パソコン入力</label>
+          <input type="radio" name="host-rule" id="host-rule-intersteno" value="intersteno">
+          <label for="host-rule-intersteno">Intersteno</label>
+        </fieldset>
+      </div>
+      <div>
+        <h3 class="setting-label">プレイ時間</h3>
+        <fieldset class="radio-group" id="host-duration-select">
+          <input type="radio" name="host-duration" id="host-dur-300" value="300">
+          <label for="host-dur-300">5分</label>
+          <input type="radio" name="host-duration" id="host-dur-600" value="600" checked>
+          <label for="host-dur-600">10分</label>
+        </fieldset>
+      </div>
     </div>
-    <div class="form-note">※結果画面では各自タブで他方式も確認できます</div>
-  </div>
-  <div class="mcard">
-    <div class="mcard-title">プレイ時間</div>
-    <div class="text-select text-select-row" id="host-duration-select">
-      <button class="text-btn" data-duration="300">5分</button>
-      <button class="text-btn selected" data-duration="600">10分</button>
-    </div>
-  </div>
+    <p class="form-note">※結果画面では各自タブで他方式も確認できます</p>
+  </section>
   <div id="host-err" class="err-msg">課題文を選択してください</div>
   <div class="btn-row">
     <button class="btn-primary" id="create-room-btn" onclick="createRoom()">ルームを作成してスタンバイ</button>
@@ -551,59 +681,66 @@ input[type="file"]{display:none;}
 <!-- ⑨リザルト -->
 <div id="result-screen" class="screen page-wrap">
 <div class="page-inner">
-  <div class="page-hero"><h1>結果</h1></div>
+  <header class="page-hero"><h1>結果</h1></header>
 
-  <!-- 採点方式の選択カード -->
-  <div class="mcard">
-    <div class="mcard-title">採点方式を選択</div>
-    <div class="rule-tabs" id="rule-tabs">
-      <button class="rule-tab active" data-rule="warpro" onclick="switchRule('warpro')">ワープロ大会</button>
-      <button class="rule-tab" data-rule="mainichi" onclick="switchRule('mainichi')">毎日パソコン入力コンクール</button>
-      <button class="rule-tab" data-rule="intersteno" onclick="switchRule('intersteno')">Intersteno</button>
-    </div>
-  </div>
-
-  <!-- 採点結果（得点・字数・エラー数・内訳を1枚に統合） -->
-  <div class="result-card">
-    <div class="result-hero">
-      <div class="rh-label" id="res-point-label">得点</div>
-      <div class="rh-value" id="res-point">0</div>
-    </div>
-    <div class="result-sub">
-      <div class="rs-cell">
-        <div class="rs-label" id="res-total-label">総字数</div>
-        <div class="rs-value" id="res-total">0</div>
-      </div>
-      <div class="rs-cell">
-        <div class="rs-label">エラー数</div>
-        <div class="rs-value" id="res-errors">0</div>
+  <!-- 採点結果（方式タブ・得点・字数・エラー数・内訳を1枚に統合） -->
+  <section class="result-card">
+    <div class="result-tab-strip">
+      <div class="result-tab-label">採点方式を選択</div>
+      <div class="result-tabs" id="rule-tabs" role="tablist" aria-label="採点方式を選択">
+        <button class="rule-tab active" data-rule="warpro" onclick="switchRule('warpro')">ワープロ大会</button>
+        <button class="rule-tab" data-rule="mainichi" onclick="switchRule('mainichi')">毎日パソコン入力コンクール</button>
+        <button class="rule-tab" data-rule="intersteno" onclick="switchRule('intersteno')">Intersteno</button>
       </div>
     </div>
-    <div class="result-breakdown" id="err-breakdown">
-      <div class="rb-cell bd-goji"><b id="bd-goji">0</b><span>誤字</span></div>
-      <div class="rb-cell bd-datsuji"><b id="bd-datsuji">0</b><span>脱字</span></div>
-      <div class="rb-cell bd-yoji"><b id="bd-yoji">0</b><span>余字</span></div>
+    <div class="result-body">
+      <div class="score-hero">
+        <span class="rh-label" id="res-point-label">得点</span>
+        <span class="rh-value" id="res-point">0</span>
+      </div>
+      <dl class="score-list">
+        <div class="score-line">
+          <dt class="rs-label" id="res-total-label">総字数</dt>
+          <dd class="rs-value" id="res-total">0</dd>
+        </div>
+        <div class="score-line">
+          <dt class="rs-label">エラー数</dt>
+          <dd class="rs-value" id="res-errors">0</dd>
+        </div>
+        <div class="score-line score-sub bd-goji">
+          <dt>誤字</dt>
+          <dd><b id="bd-goji">0</b></dd>
+        </div>
+        <div class="score-line score-sub bd-datsuji">
+          <dt>脱字</dt>
+          <dd><b id="bd-datsuji">0</b></dd>
+        </div>
+        <div class="score-line score-sub bd-yoji">
+          <dt>余字</dt>
+          <dd><b id="bd-yoji">0</b></dd>
+        </div>
+      </dl>
     </div>
-  </div>
+  </section>
 
   <!-- マルチ時：全員の順位表 -->
-  <div id="ranking-section" class="mcard" style="display:none;">
-    <div class="mcard-title">順位表</div>
+  <section id="ranking-section" class="mcard" style="display:none;">
+    <h2 class="mcard-title">順位表</h2>
     <table class="ranking-table">
       <thead><tr><th>順位</th><th>名前</th><th id="rank-point-head">得点</th><th id="rank-total-head">総字数</th><th>エラー</th></tr></thead>
       <tbody id="ranking-body"></tbody>
     </table>
     <div id="ranking-waiting" style="font-size:12px;color:var(--muted);">他のプレイヤーの結果を待っています…</div>
-  </div>
-  <!-- diff表示 -->
-  <div class="diff-card">
-    <h2>入力内容の比較</h2>
+  </section>
+  <!-- diff表示（折りたたみ可能、デフォルト展開） -->
+  <details class="diff-card" open>
+    <summary><h2>入力内容の比較</h2></summary>
     <div class="legend">
       <div class="ld"><div class="ld-dot" style="background:var(--del-bg);border:1px solid #f87171;"></div>削除（脱字・誤字）</div>
       <div class="ld"><div class="ld-dot" style="background:var(--ins-bg);border:1px solid #4ade80;"></div>追加（余字）</div>
     </div>
     <div class="diff-content" id="diff-output"></div>
-  </div>
+  </details>
   <div class="btn-row">
     <button class="btn-secondary" id="retry-btn">同じ課題文でもう一度</button>
     <button class="btn-primary" onclick="goHome()">メニューに戻る</button>
@@ -662,33 +799,30 @@ function showScreen(id){
 // =====================================================================
 // ソロメニュー
 // =====================================================================
-// 課題文選択：サンプル文章ボタンのみを扱う（サーバー上はプルダウン側で処理）
-document.getElementById('solo-text-select').addEventListener('click',e=>{
-  const btn=e.target.closest('.text-btn'); if(!btn) return;
-  document.querySelectorAll('#solo-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  // サーバー上課題文のプルダウンを未選択に戻す
-  const sel=document.getElementById('solo-server-select');
-  sel.value=''; sel.classList.remove('has-selection');
-  selectedText=SAMPLE_TEXTS[parseInt(btn.dataset.idx)];
+// 選択の排他制御ヘルパー：ラジオ解除／プルダウン解除
+function uncheckRadios(name){
+  document.querySelectorAll('input[name="'+name+'"]').forEach(r=>r.checked=false);
+}
+function clearDropdown(id){
+  const sel=document.getElementById(id);
+  if(sel){ sel.value=''; sel.classList.remove('has-selection'); }
+}
+
+// 課題文選択（サンプル文章のラジオ）
+document.getElementById('solo-text-select').addEventListener('change',e=>{
+  if(e.target.name!=='solo-text') return;
+  clearDropdown('solo-server-select');
+  selectedText=SAMPLE_TEXTS[parseInt(e.target.value)];
   document.getElementById('solo-selected-info').textContent='選択中：'+selectedText.name;
   document.getElementById('solo-start-btn').disabled=false;
 });
 // ソロ：デフォルト採点方式の選択
-document.querySelectorAll('#solo-rule-select .text-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('#solo-rule-select .text-btn').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    soloSelectedRule=btn.dataset.rule;
-  });
+document.getElementById('solo-rule-select').addEventListener('change',e=>{
+  if(e.target.name==='solo-rule') soloSelectedRule=e.target.value;
 });
 // ソロ：プレイ時間の選択
-document.querySelectorAll('#solo-duration-select .text-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('#solo-duration-select .text-btn').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    soloSelectedDuration=parseInt(btn.dataset.duration);
-  });
+document.getElementById('solo-duration-select').addEventListener('change',e=>{
+  if(e.target.name==='solo-duration') soloSelectedDuration=parseInt(e.target.value);
 });
 document.getElementById('solo-file-input').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f)return;
@@ -696,10 +830,9 @@ document.getElementById('solo-file-input').addEventListener('change',e=>{
   r.onload=ev=>{
     selectedText={name:f.name,content:ev.target.result};
     document.getElementById('solo-selected-info').textContent='選択中：'+f.name;
-    document.querySelectorAll('#solo-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
-    // サーバー上課題文のプルダウンも未選択に戻す
-    const sel=document.getElementById('solo-server-select');
-    sel.value=''; sel.classList.remove('has-selection');
+    // サンプルラジオ・サーバー上課題文の両方の選択を解除
+    uncheckRadios('solo-text');
+    clearDropdown('solo-server-select');
     document.getElementById('solo-start-btn').disabled=false;
   };
   r.readAsText(f,'UTF-8');
@@ -723,12 +856,8 @@ function soloCountdownStart(){
 // マルチプレイ：ハンドルネーム → ホスト/参加
 // =====================================================================
 // IMEレギュレーション選択
-document.querySelectorAll('#ime-rule-select .text-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('#ime-rule-select .text-btn').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    playerImeRule=btn.dataset.ime;
-  });
+document.getElementById('ime-rule-select').addEventListener('change',e=>{
+  if(e.target.name==='ime-rule') playerImeRule=e.target.value;
 });
 
 function goToHostOrJoin(mode){
@@ -757,15 +886,11 @@ function connectWS(callback){
 // マルチプレイ：ホスト設定
 // =====================================================================
 let hostText=null;
-// ホスト：課題文選択（イベント委譲でサンプル＋サーバー上を統一処理）
-document.getElementById('host-text-select').addEventListener('click',e=>{
-  const btn=e.target.closest('.text-btn'); if(!btn) return;
-  document.querySelectorAll('#host-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  // サーバー上課題文のプルダウンを未選択に戻す
-  const sel=document.getElementById('host-server-select');
-  sel.value=''; sel.classList.remove('has-selection');
-  const t=SAMPLE_TEXTS[parseInt(btn.dataset.idx)];
+// ホスト：課題文選択（サンプル文章のラジオ）
+document.getElementById('host-text-select').addEventListener('change',e=>{
+  if(e.target.name!=='host-text') return;
+  clearDropdown('host-server-select');
+  const t=SAMPLE_TEXTS[parseInt(e.target.value)];
   hostText={name:t.name, content:t.content};
   document.getElementById('host-selected-info').textContent='選択中：'+t.name;
 });
@@ -775,29 +900,20 @@ document.getElementById('host-file-input').addEventListener('change',e=>{
   r.onload=ev=>{
     hostText={name:f.name,content:ev.target.result};
     document.getElementById('host-selected-info').textContent='選択中：'+f.name;
-    // サンプルボタン・サーバー上課題文の両方の選択状態を解除
-    document.querySelectorAll('#host-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
-    const sel=document.getElementById('host-server-select');
-    sel.value=''; sel.classList.remove('has-selection');
+    // サンプルラジオ・サーバー上課題文の両方の選択を解除
+    uncheckRadios('host-text');
+    clearDropdown('host-server-select');
   };
   r.readAsText(f,'UTF-8');
 });
 
 // ホストのデフォルト採点方式選択
-document.querySelectorAll('#host-rule-select .text-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('#host-rule-select .text-btn').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    hostSelectedRule=btn.dataset.rule;
-  });
+document.getElementById('host-rule-select').addEventListener('change',e=>{
+  if(e.target.name==='host-rule') hostSelectedRule=e.target.value;
 });
 // ホストのプレイ時間選択
-document.querySelectorAll('#host-duration-select .text-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('#host-duration-select .text-btn').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected');
-    hostSelectedDuration=parseInt(btn.dataset.duration);
-  });
+document.getElementById('host-duration-select').addEventListener('change',e=>{
+  if(e.target.name==='host-duration') hostSelectedDuration=parseInt(e.target.value);
 });
 
 function createRoom(){
@@ -1120,8 +1236,12 @@ function applyLayout(){
   const wrapper=document.getElementById('ta-wrapper');
   wrapper.style.paddingLeft=PAD_L+'px'; wrapper.style.width=taFrameW+'px'; wrapper.style.height=frameH+'px';
   ta.style.fontSize=fs+'px'; ta.style.lineHeight=lhPx+'px';
-  ta.style.width=(textAreaW+SCROLLBAR_W)+'px'; ta.style.height=frameH+'px';
-  ta.style.padding='0'; ta.style.boxSizing='content-box';
+  ta.style.width=(textAreaW+SCROLLBAR_W)+'px';
+  ta.style.padding='0';
+  ta.style.boxSizing='content-box';
+  // textareaは自前でスクロールせず、内容＋1ページ分の高さに自動拡張する。
+  // 表示窓はラッパー(#ta-wrapper, overflow:hidden)側のscrollTopで制御する。
+  syncInputView();
 }
 
 function calcSrcLineFromInput(ta){
@@ -1136,6 +1256,32 @@ function calcSrcLineFromInput(ta){
   return srcLine;
 }
 
+// 入力テキスト全体の折り返し行数（最終行を含む行カウント）
+function calcTotalInputRows(val){
+  const paragraphs=val.split('\n');
+  let rows=0;
+  for(let i=0;i<paragraphs.length;i++){
+    if(i<paragraphs.length-1) rows+=Math.max(1,Math.ceil(paragraphs[i].length/COLS));
+    else rows+=Math.floor(paragraphs[i].length/COLS)+1; // キャレットのいる最終行を含む
+  }
+  return rows;
+}
+
+// 入力欄の表示同期：
+// ・textareaの高さを「総行数＋1ページ分」に拡張（ページ境界までのスクロール余地を常に確保）
+// ・ラッパーのscrollTopを現在ページ位置に合わせる
+// これにより、いま打っている行は課題文の該当行と同じ高さに表示される。
+function syncInputView(){
+  const ta=document.getElementById('typing-area');
+  const wrapper=document.getElementById('ta-wrapper');
+  if(!ta||!wrapper||!currentLhPx)return;
+  const totalRows=calcTotalInputRows(ta.value);
+  const neededRows=Math.max(totalRows+PAGE_ROWS, PAGE_ROWS);
+  ta.style.height=(neededRows*currentLhPx)+'px';
+  ta.scrollTop=0; // textarea自身はスクロールさせない
+  wrapper.scrollTop=currentPage*PAGE_ROWS*currentLhPx;
+}
+
 function updateSourcePage(){
   const ta=document.getElementById('typing-area'); if(!ta)return;
   const srcLine=calcSrcLineFromInput(ta);
@@ -1145,9 +1291,10 @@ function updateSourcePage(){
     renderSourcePage(currentPage,currentFontSize);
     const frameH=currentLhPx*PAGE_ROWS;
     document.getElementById('ta-frame').style.height=frameH+'px';
-    document.getElementById('typing-area').style.height=frameH+'px';
     document.getElementById('ta-wrapper').style.height=frameH+'px';
   }
+  // 入力欄の表示位置を課題文ページに同期
+  syncInputView();
   document.getElementById('cur-line').textContent=srcLine+1;
 }
 
@@ -1223,7 +1370,7 @@ let rankingRule='warpro';
 let latestResults=null;
 
 const RULE_LABELS={warpro:'ワープロ大会', mainichi:'毎日パソコン入力', intersteno:'Intersteno'};
-const IME_LABELS={mainichi:'毎パソ式', normal:'通常', warpro:'ワープロ式'};
+const IME_LABELS={normal:'通常', mainichi:'変換学習・辞書なし', warpro:'短縮辞書登録あり'};
 
 function endGame(){
   clearInterval(timerInterval); stopFlash();
@@ -1573,7 +1720,7 @@ document.getElementById('solo-server-select').addEventListener('change',e=>{
   }
   sel.classList.add('has-selection');
   // サンプル文章ボタンの選択状態を解除
-  document.querySelectorAll('#solo-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
+  uncheckRadios('solo-text');
   document.getElementById('solo-selected-info').textContent='読み込み中…';
   document.getElementById('solo-start-btn').disabled=true;
   fetch('/texts/'+encodeURIComponent(name))
@@ -1597,7 +1744,7 @@ document.getElementById('host-server-select').addEventListener('change',e=>{
     return;
   }
   sel.classList.add('has-selection');
-  document.querySelectorAll('#host-text-select .text-btn').forEach(b=>b.classList.remove('selected'));
+  uncheckRadios('host-text');
   document.getElementById('host-selected-info').textContent='読み込み中…';
   fetch('/texts/'+encodeURIComponent(name))
     .then(r=>{ if(!r.ok) throw new Error('Fetch failed'); return r.text(); })
