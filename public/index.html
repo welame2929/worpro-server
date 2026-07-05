@@ -755,7 +755,7 @@ input[type="file"]{display:none;}
 // 定数・状態変数
 // =====================================================================
 const COLS=30, PAGE_ROWS=30;
-const PAD_L=14, PAD_R=14, COUNT_W=48, SCROLLBAR_W=17;
+const PAD_L=14, PAD_R=14, COUNT_W=48;
 
 const SAMPLE_TEXTS=[
   {name:"① 富士山（短文・動作確認用）",content:`　富士山の高さは３７７６メートル。子どものころに学校で習ったこの数字は、大正時代の測量により決定されたもので、長い間この数字が使われてきた。\n　ところが、最新の技術を利用して正確に測り直したところ、従来の高さより６５センチ程度低いことがわかった。`},
@@ -1228,7 +1228,7 @@ function applyLayout(){
   srcFrame.style.width=srcFrameW+'px'; srcFrame.style.height=frameH+'px';
   document.getElementById('src-head-row').style.width=srcFrameW+'px';
   renderSourcePage(currentPage,fs);
-  const taFrameW=PAD_L+textAreaW+SCROLLBAR_W+PAD_R;
+  const taFrameW=PAD_L+textAreaW+PAD_R;
   const taFrame=document.getElementById('ta-frame');
   taFrame.style.width=taFrameW+'px'; taFrame.style.height=frameH+'px';
   document.getElementById('ta-head-row').style.width=taFrameW+'px';
@@ -1236,7 +1236,7 @@ function applyLayout(){
   const wrapper=document.getElementById('ta-wrapper');
   wrapper.style.paddingLeft=PAD_L+'px'; wrapper.style.width=taFrameW+'px'; wrapper.style.height=frameH+'px';
   ta.style.fontSize=fs+'px'; ta.style.lineHeight=lhPx+'px';
-  ta.style.width=(textAreaW+SCROLLBAR_W)+'px';
+  ta.style.width=textAreaW+'px';
   ta.style.padding='0';
   ta.style.boxSizing='content-box';
   // textareaは自前でスクロールせず、内容＋1ページ分の高さに自動拡張する。
