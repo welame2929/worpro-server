@@ -1389,10 +1389,11 @@ function endGame(){
 
   const rankSection=document.getElementById('ranking-section');
   if(isMulti){
-    rankSection.style.display='block';
-    document.getElementById('ranking-waiting').style.display='block';
-    rankingRule=multiDefaultRule||'warpro';
-    // 3ルール分すべての結果をサーバーへ送信
+  rankSection.style.display='block';
+  document.getElementById('ranking-waiting').style.display='block';
+  rankingRule=multiDefaultRule||'warpro';
+  // 3ルール分すべての結果をサーバーへ送信（切断済みの場合は送らず、画面遷移だけ行う）
+  if(ws && ws.readyState===WebSocket.OPEN){
     ws.send(JSON.stringify({
       type:'SUBMIT_RESULT',
       totalChars:result.totalChars,
@@ -1402,7 +1403,8 @@ function endGame(){
         intersteno:{points:result.intersteno.points, miss:result.intersteno.miss},
       }
     }));
-    document.getElementById('retry-btn').onclick=returnToLobby;
+  }
+  document.getElementById('retry-btn').onclick=returnToLobby;
   } else {
     rankSection.style.display='none';
     document.getElementById('retry-btn').onclick=()=>{ isMulti=false; soloCountdownStart(); };

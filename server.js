@@ -4,6 +4,7 @@ const path = require('path');
 const { WebSocketServer, WebSocket } = require('ws');
 
 const PORT = process.env.PORT || 3000;
+const HEARTBEAT_INTERVAL_MS = 30000;
 
 // ── サーバー側課題文の読み込み ─────────────────────────────────
 // public/texts/ 配下の .txt をサーバー起動時に1回スキャンしてメモリに保持
@@ -101,7 +102,23 @@ function roomState(room, roomId) {
            duration: room.duration, defaultRule: room.defaultRule };
 }
 
+function buildResults(room) {
+  const results = [];
+  for (const [, p] of room.players) {
+    results.push({
+      name: p.name,
+      imeRule: p.imeRule,
+      totalChars: p.result ? p.result.totalChars : null,
+      scores: p.result ? p.result.scores : null,
+    });
+  }
+  return results;
+}
+
 wss.on('connection', (ws) => {
+  ws.isAlive = true;
+  ws.on('pong', () => { ws.isAlive = true; });
+
   let currentRoomId = null;
 
   ws.on('message', (raw) => {
@@ -240,19 +257,9 @@ wss.on('connection', (ws) => {
         if (!player) return;
         player.result = {
           totalChars: msg.totalChars,
-          scores: msg.scores, // {warpro:{points,miss}, mainichi:{...}, intersteno:{...}}
+          scores: msg.scores,
         };
-        // 全員の結果を集計して配信
-        const results = [];
-        for (const [, p] of room.players) {
-          results.push({
-            name: p.name,
-            imeRule: p.imeRule,
-            totalChars: p.result ? p.result.totalChars : null,
-            scores: p.result ? p.result.scores : null,
-          });
-        }
-        broadcast(room, { type: 'RESULTS_UPDATE', results });
+        broadcast(room, { type: 'RESULTS_UPDATE', results: buildResults(room) });
         break;
       }
 
@@ -286,14 +293,27 @@ wss.on('connection', (ws) => {
       rooms.delete(currentRoomId);
       console.log(`Room ${currentRoomId} deleted (empty)`);
     } else {
-      // ホストが抜けた場合は次のプレイヤーをホストにする
       if (ws === room.hostWs) {
         room.hostWs = room.players.keys().next().value;
       }
       broadcast(room, roomState(room, currentRoomId));
+      // ゲーム開始後の切断なら、結果集計中のランキング表示も更新させる
+      if (room.gameState !== 'waiting') {
+        broadcast(room, { type: 'RESULTS_UPDATE', results: buildResults(room) });
+      }
     }
   });
 });
+
+const heartbeatTimer = setInterval(() => {
+  for (const ws of wss.clients) {
+    if (ws.isAlive === false) { ws.terminate(); continue; } // 応答なし→強制切断（closeイベントが発火する）
+    ws.isAlive = false;
+    ws.ping();
+  }
+}, HEARTBEAT_INTERVAL_MS);
+
+wss.on('close', () => clearInterval(heartbeatTimer));
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
