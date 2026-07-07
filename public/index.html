@@ -771,6 +771,7 @@ let flashEl=null, flashTimeout=null;
 let currentFontSize=14, currentLhPx=22;
 let allSourceLines=[], currentPage=0;
 let isMulti=false;        // マルチプレイ中か
+let isComposing=false;    // IME composition中か（スペース入力妨害防止用）
 
 // マルチプレイ状態
 let ws=null;
@@ -778,7 +779,7 @@ let playerName='';
 let currentRoomId='';
 let isHost=false;
 let isReady=false;
-let gameStartAt=null;     // サーバーから受け取るゲーム開始Unix時刻(ms)
+let gameStartAt=null;     // カウントダウン終了時刻（ローカル時刻、Unix ms）
 let countdownInterval=null;
 let multiDefaultRule='warpro'; // マルチ時のデフォルト採点方式（ホストが指定）
 let hostSelectedRule='warpro'; // ホスト設定画面で選択中の方式
@@ -1068,7 +1069,10 @@ function handleServerMsg(msg){
 
     case 'GAME_START':
       selectedText={name:msg.textName, content:msg.text};
-      gameStartAt=msg.startAt;
+      // 受信時のローカル時刻を起点にカウントダウン終了時刻を決める。
+      // サーバー時刻ではなく各クライアントのローカル時刻を使うことで、
+      // クライアント間の時計ずれ（数秒〜数十秒）による開始タイマーのずれを防ぐ。
+      gameStartAt=Date.now()+(msg.countdownMs||3000);
       isMulti=true;
       if(msg.defaultRule) multiDefaultRule=msg.defaultRule;
       if(msg.duration) multiDuration=msg.duration;
@@ -1275,11 +1279,16 @@ function syncInputView(){
   const ta=document.getElementById('typing-area');
   const wrapper=document.getElementById('ta-wrapper');
   if(!ta||!wrapper||!currentLhPx)return;
-  const totalRows=calcTotalInputRows(ta.value);
-  const neededRows=Math.max(totalRows+PAGE_ROWS, PAGE_ROWS);
-  ta.style.height=(neededRows*currentLhPx)+'px';
-  ta.scrollTop=0; // textarea自身はスクロールさせない
-  wrapper.scrollTop=currentPage*PAGE_ROWS*currentLhPx;
+  // IME composition中はheight書き換えをスキップ（compositionを妨げないため）
+  if(!isComposing){
+    const totalRows=calcTotalInputRows(ta.value);
+    const neededRows=Math.max(totalRows+PAGE_ROWS, PAGE_ROWS);
+    const newH=(neededRows*currentLhPx)+'px';
+    if(ta.style.height!==newH) ta.style.height=newH; // 変化した場合のみ代入
+  }
+  if(ta.scrollTop!==0) ta.scrollTop=0; // 変化した場合のみ代入
+  const targetScrollTop=currentPage*PAGE_ROWS*currentLhPx;
+  if(wrapper.scrollTop!==targetScrollTop) wrapper.scrollTop=targetScrollTop;
 }
 
 function updateSourcePage(){
@@ -1321,13 +1330,26 @@ function startGame(textObj, startAt){
     document.getElementById('timer').classList.remove('warning');
     updateTimer();
     ta.focus();
+    isComposing=false;
+    ta.oncompositionstart=()=>{ isComposing=true; };
+    // compositionend後に1回updateSourcePageを呼ぶ（確定後のページ同期）
+    ta.oncompositionend=()=>{ isComposing=false; onUpdate(); };
     const onUpdate=()=>{
       const v=ta.value, ch=v.replace(/\n/g,'').length;
       document.getElementById('cur-chars').textContent=ch;
       document.getElementById('total-chars').textContent=ch;
       updateSourcePage();
     };
-    ta.oninput=onUpdate; ta.onkeyup=onUpdate; ta.onclick=onUpdate;
+    ta.oninput=onUpdate; ta.onkeyup=onUpdate;
+    // onclick は除去し selectionchange で代替。
+    // onclick内のDOM操作（scrollTop / height 書き換え）がIME compositionを妨げていたため。
+    // selectionchange はdocumentレベルで発火し、対象がtextareaの場合のみ処理する。
+    const onSelectionChange=()=>{
+      if(document.activeElement===ta) updateSourcePage();
+    };
+    document.addEventListener('selectionchange', onSelectionChange);
+    // ゲーム終了時にリスナーを除去するため参照を保持
+    window._selectionChangeHandler=onSelectionChange;
     // 課題文・自分の入力内容のコピー＆ペーストを禁止する
     ta.onpaste=e=>e.preventDefault();
     ta.oncopy=e=>e.preventDefault();
@@ -1337,7 +1359,8 @@ function startGame(textObj, startAt){
     const srcDisp=document.getElementById('source-display');
     if(srcDisp) srcDisp.oncontextmenu=e=>e.preventDefault();
 
-    // マルチの場合はサーバーのstartAtに合わせてタイマーをスタート
+    // マルチの場合はカウントダウン終了時刻(gameStartAt, ローカル時刻)に合わせて
+    // タイマーのドリフト補正を行う。rAF待機・レイアウト計算に時間がかかった場合の埋め合わせ。
     if(isMulti && startAt){
       const drift=Math.max(0, Math.floor((Date.now()-startAt)/1000));
       secondsLeft=Math.max(0, playDuration-drift);
@@ -1374,6 +1397,11 @@ const IME_LABELS={normal:'通常', mainichi:'変換学習・辞書なし', warpr
 
 function endGame(){
   clearInterval(timerInterval); stopFlash();
+  // selectionchange リスナーを除去（ゲーム終了後も残り続けるのを防ぐ）
+  if(window._selectionChangeHandler){
+    document.removeEventListener('selectionchange', window._selectionChangeHandler);
+    window._selectionChangeHandler=null;
+  }
   const input=document.getElementById('typing-area').value;
   const result=scoreAll(selectedText.content, input);
   lastScore=result;
@@ -1542,10 +1570,19 @@ function prepareScoredDiff(original, input){
   const diff=rawDiff.slice();
 
   // 末尾の不確定部分を採点対象から除外する。
-  // diffの末尾が equal（一致）になるまで後ろからセグメントを取り除く。
-  // これにより、入力末尾の打ち切れなかった部分（変換途中の未確定文字列が
-  // 課題文の遠方とミスマッチさせられるケース）が誤判定に含まれなくなる。
-  while(diff.length>0 && diff[diff.length-1][0]!==0){
+  // (1) diffの末尾が equal（一致）になるまで後ろからセグメントを取り除く。
+  // (2) 末尾の連続equalが短い（3文字未満）場合、それを「入力末尾の未確定文字列が
+  //     偶然遠方の1〜2文字と一致した」誤マッチとみなし、そのequalも切り落とす。
+  //     切り落とし後さらに末尾が非equalなら (1) の処理を再帰的に繰り返す。
+  const MIN_TAIL_EQUAL=3;
+  while(diff.length>0){
+    // (1) 末尾の非equalを除去
+    while(diff.length>0 && diff[diff.length-1][0]!==0) diff.pop();
+    if(diff.length===0) break;
+    // (2) 末尾equalが十分長ければ本物の一致とみなし終了
+    const tailEqualLen=lenNoNL(diff[diff.length-1][1]);
+    if(tailEqualLen>=MIN_TAIL_EQUAL) break;
+    // 短い末尾equalは偶発マッチとして除去し、ループ継続
     diff.pop();
   }
 

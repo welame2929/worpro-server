@@ -228,10 +228,10 @@ wss.on('connection', (ws) => {
         }
 
         room.gameState = 'playing';
-        const startAt = Date.now() + 3000; // 3秒カウントダウン後開始
+        const countdownMs = 3000; // 各クライアントの受信からNミリ秒後に開始
         broadcast(room, {
           type: 'GAME_START',
-          startAt,
+          countdownMs,
           text: room.text,
           textName: room.textName,
           defaultRule: room.defaultRule,
@@ -239,13 +239,13 @@ wss.on('connection', (ws) => {
         });
         console.log(`Game started in room ${currentRoomId} (duration ${room.duration}s)`);
 
-        // サーバー側タイマー（指定時間後に強制終了）
+        // サーバー側タイマー（指定時間後に強制終了、余裕として+5秒）
         room.timerInterval = setTimeout(() => {
           if (rooms.has(currentRoomId)) {
             room.gameState = 'finished';
             broadcast(room, { type: 'TIME_UP' });
           }
-        }, room.duration * 1000 + 3000);
+        }, room.duration * 1000 + countdownMs + 5000);
         break;
       }
 
