@@ -1338,14 +1338,19 @@ function startGame(textObj, startAt){
       const v=ta.value, ch=v.replace(/\n/g,'').length;
       document.getElementById('cur-chars').textContent=ch;
       document.getElementById('total-chars').textContent=ch;
-      updateSourcePage();
+      // IME composition中はupdateSourcePage全体をスキップする。
+      // updateSourcePage内のDOM操作（scrollTop/height変更、cur-line表示更新、
+      // ページ切り替え時のsource-display再描画）がIMEの内部状態を不安定にし、
+      // 特に全角スペース（1キー押下=即1文字確定型の入力）の反映を妨げるため。
+      // compositionend時に1度呼び直すのでページ同期は失われない。
+      if(!isComposing) updateSourcePage();
     };
     ta.oninput=onUpdate; ta.onkeyup=onUpdate;
     // onclick は除去し selectionchange で代替。
     // onclick内のDOM操作（scrollTop / height 書き換え）がIME compositionを妨げていたため。
     // selectionchange はdocumentレベルで発火し、対象がtextareaの場合のみ処理する。
     const onSelectionChange=()=>{
-      if(document.activeElement===ta) updateSourcePage();
+      if(document.activeElement===ta && !isComposing) updateSourcePage();
     };
     document.addEventListener('selectionchange', onSelectionChange);
     // ゲーム終了時にリスナーを除去するため参照を保持
