@@ -63,6 +63,17 @@ const httpServer = http.createServer((req, res) => {
     return;
   }
 
+  // アップデート内容ページ
+  if (url === '/updates.html' || url === '/updates') {
+    const filePath = path.join(__dirname, 'public', 'updates.html');
+    fs.readFile(filePath, (err, data) => {
+      if (err) { res.writeHead(404); res.end('Not found'); return; }
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(data);
+    });
+    return;
+  }
+
   // ルートまたはその他のパスは index.html を返す
   const filePath = path.join(__dirname, 'public', 'index.html');
   fs.readFile(filePath, (err, data) => {
@@ -163,7 +174,7 @@ wss.on('connection', (ws) => {
           gameState: 'waiting',
           timerInterval: null,
         };
-        room.players.set(ws, { name: msg.name, imeRule, ready: false, result: null });
+        room.players.set(ws, { name: msg.name, imeRule, ready: false, result: null, connected: true });
         rooms.set(roomId, room);
         currentRoomId = roomId;
         ws.send(JSON.stringify({ type: 'ROOM_CREATED', roomId }));
@@ -188,7 +199,7 @@ wss.on('connection', (ws) => {
           if (['normal','mainichi','warpro'].includes(msg.imeRule)) imeRule = msg.imeRule;
           else console.warn(`[JOIN_ROOM] Invalid imeRule '${msg.imeRule}' from ${msg.name}, falling back to 'normal'`);
         }
-        room.players.set(ws, { name: msg.name, imeRule, ready: false, result: null });
+        room.players.set(ws, { name: msg.name, imeRule, ready: false, result: null, connected: true });
         currentRoomId = msg.roomId;
         ws.send(JSON.stringify({ type: 'JOIN_OK', roomId: msg.roomId, textName: room.textName }));
         broadcast(room, roomState(room, msg.roomId));
@@ -262,23 +273,6 @@ wss.on('connection', (ws) => {
         broadcast(room, { type: 'RESULTS_UPDATE', results: buildResults(room) });
         break;
       }
-
-      // ── ルームに戻る（再戦） ─────────────────────────────────
-      case 'RETURN_TO_LOBBY': {
-        const room = rooms.get(currentRoomId);
-        if (!room) return;
-        // ゲーム状態リセット
-        if (ws === room.hostWs) {
-          clearTimeout(room.timerInterval);
-          room.gameState = 'waiting';
-          for (const [, p] of room.players) {
-            p.ready = false;
-            p.result = null;
-          }
-          broadcast(room, roomState(room, currentRoomId));
-        }
-        break;
-      }
     }
   });
 
@@ -287,20 +281,37 @@ wss.on('connection', (ws) => {
     if (!currentRoomId) return;
     const room = rooms.get(currentRoomId);
     if (!room) return;
-    room.players.delete(ws);
-    if (room.players.size === 0) {
+    const player = room.players.get(ws);
+    if (!player) return;
+
+    if (room.gameState === 'waiting') {
+      // ロビー段階の離脱はこれまで通り即座に一覧から削除
+      room.players.delete(ws);
+    } else {
+      // プレイ中／終了後の離脱は結果を順位表に残すため、Mapからは削除せず
+      // 接続フラグだけを落とす（ルームは1ゲームごとの使い切りなので、
+      // 全員が切断した時点でルームごと破棄される＝下のanyConnectedチェック）
+      player.connected = false;
+    }
+
+    if (ws === room.hostWs) {
+      // ホストが抜けた場合は、まだ接続中の別プレイヤーに委譲する
+      const nextHost = [...room.players.entries()].find(([w, p]) => w !== ws && p.connected !== false);
+      room.hostWs = nextHost ? nextHost[0] : null;
+    }
+
+    const anyConnected = [...room.players.values()].some(p => p.connected !== false);
+    if (!anyConnected) {
       clearTimeout(room.timerInterval);
       rooms.delete(currentRoomId);
-      console.log(`Room ${currentRoomId} deleted (empty)`);
-    } else {
-      if (ws === room.hostWs) {
-        room.hostWs = room.players.keys().next().value;
-      }
-      broadcast(room, roomState(room, currentRoomId));
-      // ゲーム開始後の切断なら、結果集計中のランキング表示も更新させる
-      if (room.gameState !== 'waiting') {
-        broadcast(room, { type: 'RESULTS_UPDATE', results: buildResults(room) });
-      }
+      console.log(`Room ${currentRoomId} deleted (all players disconnected)`);
+      return;
+    }
+
+    broadcast(room, roomState(room, currentRoomId));
+    // ゲーム開始後の切断なら、結果集計中のランキング表示も更新させる
+    if (room.gameState !== 'waiting') {
+      broadcast(room, { type: 'RESULTS_UPDATE', results: buildResults(room) });
     }
   });
 });

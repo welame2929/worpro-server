@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>アップデート内容｜JIKAGAMI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&family=BIZ+UDGothic:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#1A1E3F;--blue:#8098D6;--blue-mid:#b8c8ea;
+  --white:#ffffff;--bg:#94ADE4;--text:#1a1e3f;--border:#d0d8ee;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--navy);color:var(--text);}
+.page-wrap{min-height:100vh;background:var(--navy);}
+.page-inner{max-width:680px;margin:0 auto;padding:1.5rem 1.25rem;}
+.page-hero{text-align:center;padding:1.5rem 0 1.25rem;}
+.page-hero h1.app-title{
+  font-size:40px; font-weight:700; color:var(--white);
+  font-family:'BIZ UDGothic',sans-serif; letter-spacing:.08em;
+}
+.page-hero p.app-subtitle{font-size:15px;color:var(--blue-mid);margin-top:10px;}
+.mcard{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
+.mcard-title{font-size:19px;font-weight:500;color:var(--navy);margin-bottom:4px;letter-spacing:.04em;}
+.mcard-date{font-size:13px;color:#4658a8;margin-bottom:14px;}
+.rule-list{list-style:none;font-size:15px;color:#2e3658;}
+.rule-list li{padding:7px 0 7px 18px;position:relative;line-height:1.8;}
+.rule-list li::before{
+  content:'';position:absolute;left:4px;top:13px;
+  width:5px;height:5px;border-radius:50%;background:#8098D6;
+}
+.btn-secondary{
+  display:block; width:100%;padding:12px;background:transparent;color:var(--blue-mid);
+  border:1px solid rgba(128,152,214,0.4);border-radius:8px;font-size:15px;cursor:pointer;
+  font-family:inherit;transition:all .15s;text-align:center;text-decoration:none;margin-top:8px;
+}
+.btn-secondary:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<div class="page-inner">
+  <header class="page-hero">
+    <h1 class="app-title">JIKAGAMI</h1>
+    <p class="app-subtitle">アップデート内容</p>
+  </header>
+
+  <section class="mcard">
+    <div class="mcard-title">v1.0.0</div>
+    <ul class="rule-list">
+      <li>ツール名『JIKAGAMI』として正式に公開</li>
+      <li>各採点における失格ルールを実装</li>
+      <li>レイアウト調整</li>
+      <li>改ページ時の表示仕様を変更</li>
+      <li>スタンバイ時の練習用入力欄を作成</li>
+      <li>その他不具合の修正</li>
+    </ul>
+  </section>
+
+  <a class="btn-secondary" href="/">トップに戻る</a>
+</div>
+</div>
+</body>
+</html>

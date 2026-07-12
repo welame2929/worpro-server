@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>実用タイピング採点用ツール</title>
+<title>JIKAGAMI（字鏡）｜実用タイピング競技・採点用ツール</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&family=BIZ+UDGothic:wght@400;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -21,8 +21,19 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .page-wrap{min-height:100vh;background:var(--navy);}
 .page-inner{max-width:680px;margin:0 auto;padding:1.5rem 1.25rem;}
 .page-hero{text-align:center;padding:1.5rem 0 1.25rem;}
-.page-hero h1{font-size:20px;font-weight:500;color:var(--white);}
-.page-hero p{font-size:13px;color:var(--blue-mid);margin-top:4px;}
+.page-hero h1{font-size:22px;font-weight:500;color:var(--white);}
+.page-hero p{font-size:15px;color:var(--blue-mid);margin-top:4px;}
+/* トップページのブランド表示：ツール名（大）＋副題＋バージョン */
+.page-hero h1.app-title{
+  font-size:48px; font-weight:700; color:var(--white);
+  font-family:'BIZ UDGothic',sans-serif; letter-spacing:.08em;
+}
+.page-hero p.app-subtitle{font-size:15px;color:var(--blue-mid);margin-top:10px;}
+.app-version{
+  display:inline-block; margin-top:10px; padding:3px 12px;
+  border:1px solid rgba(128,152,214,0.5); border-radius:12px;
+  font-size:12px; color:var(--blue-mid); letter-spacing:.05em;
+}
 .mcard{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
 /* 折りたたみ可能な説明カード（details要素ベース） */
 .mcard-collapsible{padding:0;}
@@ -40,10 +51,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .mcard-collapsible > *:not(summary){margin-left:1.25rem;margin-right:1.25rem;}
 .mcard-collapsible[open] > *:last-child{margin-bottom:1rem;}
 .mcard-collapsible[open] > summary{padding-bottom:0.5rem;}
-.mcard-title{font-size:17px;font-weight:500;color:var(--navy);margin-bottom:12px;letter-spacing:.04em;}
+.mcard-title{font-size:18px;font-weight:500;color:var(--navy);margin-bottom:12px;letter-spacing:.04em;}
 /* カード内のサブセクション見出し（カード統合用） */
-.mcard-subtitle{font-size:14px;font-weight:500;color:var(--navy);letter-spacing:.06em;margin:18px 0 10px;padding-top:14px;border-top:1px solid #aebfe0;}
-.rule-list{list-style:none;font-size:14px;color:#2e3658;}
+.mcard-subtitle{font-size:15px;font-weight:500;color:var(--navy);letter-spacing:.06em;margin:18px 0 10px;padding-top:14px;border-top:1px solid #aebfe0;}
+.rule-list{list-style:none;font-size:15px;color:#2e3658;}
 .rule-list li{padding:7px 0 7px 18px;position:relative;line-height:1.8;}
 .rule-list li::before{
   content:'';position:absolute;left:4px;top:13px;
@@ -54,21 +65,25 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .rule-highlight{
   background:#ffffff; border-left:4px solid #c0392b;
   border-radius:6px; padding:10px 14px; margin:12px 0;
-  font-size:13.5px; color:var(--navy); line-height:1.75;
+  font-size:14.5px; color:var(--navy); line-height:1.75;
 }
 .rule-highlight b{color:var(--navy);font-weight:500;}
-.rule-highlight-sub{font-size:12px;color:#4658a8;}
-.err-table{width:100%;border-collapse:collapse;font-size:13px;}
-.err-table th{background:transparent;color:var(--navy);padding:6px 8px;text-align:left;font-weight:500;font-size:12px;letter-spacing:.04em;border-bottom:2px solid #8098D6;}
-.err-table td{padding:8px 8px;color:#2e3658;vertical-align:top;line-height:1.6;}
+.rule-highlight-sub{font-size:13px;color:#4658a8;}
+.err-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px;margin:10px 0;}
+/* mcard-collapsible内の子要素はmargin-left/rightで左右余白を確保する方式のため、
+   width:100%のtableはその分だけ幅がはみ出す。他の子要素と同じ実効幅になるよう補正する。 */
+.mcard-collapsible .err-table{width:calc(100% - 2.5rem);}
+.err-table th{background:transparent;color:var(--navy);padding:6px 8px;text-align:left;font-weight:500;font-size:13px;letter-spacing:.04em;border-bottom:2px solid #8098D6;}
+.err-table th:first-child{width:5em;}
+.err-table td{padding:8px 8px;color:#2e3658;vertical-align:top;line-height:1.6;word-break:break-word;overflow-wrap:anywhere;}
 .err-table td:first-child{color:var(--navy);font-weight:500;width:5em;}
 .warn-row td{color:var(--navy)!important;font-weight:500;}
 .warn-row td:last-child{text-decoration:underline;text-underline-offset:3px;text-decoration-color:#c4781a;}
-.err-example{margin-top:8px;background:#dfe7f5;border:1px solid #b3c3e2;border-radius:6px;padding:8px 10px;font-size:12px;color:#2e3658;line-height:1.8;}
+.err-example{margin-top:8px;background:#dfe7f5;border:1px solid #b3c3e2;border-radius:6px;padding:8px 10px;font-size:13px;color:#2e3658;line-height:1.8;}
 .err-example b{color:var(--navy);font-weight:500;}
-.notice-box{background:#fdf4e0;border:1px solid #f0cd84;border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:14px;color:#5f4310;line-height:1.8;}
+.notice-box{background:#fdf4e0;border:1px solid #f0cd84;border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:15px;color:#5f4310;line-height:1.8;}
 .notice-box b{color:#42300a;font-weight:500;}
-.notice-title{font-size:16px;font-weight:500;color:#42300a;margin-bottom:8px;letter-spacing:.04em;}
+.notice-title{font-size:17px;font-weight:500;color:#42300a;margin-bottom:8px;letter-spacing:.04em;}
 /* 黄色カード内でリスト形式を使う場合の配色調整（アンバー系に統一） */
 .notice-box .rule-list{color:#5f4310;}
 .notice-box .rule-list li b{color:#42300a;}
@@ -79,7 +94,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   width:100%;padding:13px;
   background:linear-gradient(180deg,var(--cyan) 0%,var(--cyan-deep) 100%);
   color:#ffffff;border:none;border-radius:8px;
-  font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;
+  font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;
   transition:all .15s;
   box-shadow:0 2px 8px rgba(14,155,189,0.35);
 }
@@ -87,7 +102,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .btn-primary:active{transform:translateY(0);box-shadow:0 1px 4px rgba(14,155,189,0.3);}
 .btn-primary:disabled{background:rgba(128,152,214,0.2);color:rgba(128,152,214,0.4);cursor:not-allowed;box-shadow:none;transform:none;filter:none;}
 .btn-primary:focus-visible{outline:2px solid var(--cyan-bright);outline-offset:2px;}
-.btn-secondary{width:100%;padding:12px;background:transparent;color:var(--blue-mid);border:1px solid rgba(128,152,214,0.4);border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-secondary{width:100%;padding:12px;background:transparent;color:var(--blue-mid);border:1px solid rgba(128,152,214,0.4);border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit;transition:all .15s;}
 .btn-secondary:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
 .btn-row{display:flex;flex-direction:column;gap:8px;}
 .btn-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
@@ -104,13 +119,13 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .mode-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(14,155,189,0.45);filter:brightness(1.06);}
 .mode-card:active{transform:translateY(0);}
 .mode-card:focus-visible{outline:2px solid var(--cyan-bright);outline-offset:3px;}
-.mode-name{font-size:18px;font-weight:500;letter-spacing:.04em;}
-.mode-desc{font-size:12px;color:rgba(255,255,255,0.85);}
+.mode-name{font-size:19px;font-weight:500;letter-spacing:.04em;}
+.mode-desc{font-size:13px;color:rgba(255,255,255,0.85);}
 /* ルール・採点方式の説明（デフォルト折りたたみ） */
 .rules-section > summary{
   list-style:none;cursor:pointer;text-align:center;
   padding:12px;border:1px solid rgba(128,152,214,0.5);border-radius:8px;
-  color:var(--blue-mid);font-size:14px;transition:all .15s;margin-bottom:1rem;
+  color:var(--blue-mid);font-size:15px;transition:all .15s;margin-bottom:1rem;
   user-select:none;
 }
 .rules-section > summary::-webkit-details-marker{display:none;}
@@ -119,18 +134,22 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .rules-section > summary:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
 
 /* テキスト入力 */
-.text-input{width:100%;padding:10px 12px;background:#eaf0fa;border:1px solid #aebfe0;border-radius:8px;color:var(--navy);font-size:14px;font-family:inherit;outline:none;}
+.text-input{width:100%;padding:10px 12px;background:#eaf0fa;border:1px solid #aebfe0;border-radius:8px;color:var(--navy);font-size:15px;font-family:inherit;outline:none;}
 .text-input:focus{border-color:var(--navy);background:#ffffff;}
 .text-input::placeholder{color:#8794ba;}
-.input-label{font-size:12px;color:#3a4aa0;margin-bottom:6px;display:block;}
+/* ロビーの練習入力欄：IME調整・指慣らし用。採点用textareaとは無関係の素朴な入力欄 */
+.practice-textarea{width:100%;padding:10px 12px;background:#eaf0fa;border:1px solid #aebfe0;border-radius:8px;color:var(--navy);font-size:15px;font-family:'BIZ UDGothic',monospace;line-height:1.6;outline:none;resize:vertical;}
+.practice-textarea:focus{border-color:var(--navy);background:#ffffff;}
+.practice-textarea::placeholder{color:#8794ba;}
+.input-label{font-size:13px;color:#3a4aa0;margin-bottom:6px;display:block;}
 .input-group{margin-bottom:12px;}
 input[type="file"]{display:none;}
-.upload-area{border:1.5px dashed #9fb1da;border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:12px;color:#3a4aa0;transition:all .15s;}
+.upload-area{border:1.5px dashed #9fb1da;border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:13px;color:#3a4aa0;transition:all .15s;}
 /* サーバー上課題文のプルダウン。テキストボタンと統一感のあるデザイン */
 .text-select-dropdown{
   width:100%; padding:10px 14px; margin-bottom:6px;
   background:#ffffff; border:1.5px solid #8098D6; border-radius:8px;
-  font-size:13px; color:#2e3658; font-family:inherit;
+  font-size:14px; color:#2e3658; font-family:inherit;
   cursor:pointer; transition:all .15s;
   appearance:none; -webkit-appearance:none;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%231A1E3F' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
@@ -155,7 +174,7 @@ input[type="file"]{display:none;}
 .radio-group label{
   display:block;
   background:#ffffff; border:1.5px solid #9fb1da; border-radius:8px;
-  padding:10px 14px 10px 40px; text-align:left; cursor:pointer; font-size:13px;
+  padding:10px 14px 10px 40px; text-align:left; cursor:pointer; font-size:14px;
   color:#2e3658; transition:all .15s; font-family:inherit;
   position:relative;
 }
@@ -184,37 +203,48 @@ input[type="file"]{display:none;}
 .radio-group input:focus-visible + label{outline:2px solid var(--cyan);outline-offset:2px;}
 /* プレイ設定カード内の2列グリッド */
 .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
-.setting-label{font-size:12px;font-weight:500;color:#3a4aa0;letter-spacing:.04em;margin-bottom:8px;}
+.setting-label{font-size:13px;font-weight:500;color:#3a4aa0;letter-spacing:.04em;margin-bottom:8px;}
 #solo-selected-info,#host-selected-info{
-  margin-top:8px; font-size:12px; color:var(--navy);
+  margin-top:8px; font-size:13px; color:var(--navy);
   padding:6px 10px; background:#ffffff; border:1px solid #aebfe0; border-radius:6px;
   min-height:0;
 }
 #solo-selected-info:empty,#host-selected-info:empty{display:none;}
 /* 選択カード内の※注記 */
-.form-note{font-size:11px;color:#4658a8;margin-top:8px;line-height:1.6;}
+.form-note{font-size:12px;color:#4658a8;margin-top:8px;line-height:1.6;}
 /* IMEレギュレーションの区切り注記（「通常」と例外選択肢の間に挟む） */
 .ime-split-note{
-  font-size:12px; color:#3a4aa0; line-height:1.6;
+  font-size:13px; color:#3a4aa0; line-height:1.6;
   margin:8px 4px 6px; padding:0;
 }
 
 /* エラーメッセージ */
-.err-msg{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:8px 12px;font-size:13px;color:#fca5a5;margin-bottom:8px;display:none;}
+.err-msg{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:8px 12px;font-size:14px;color:#fca5a5;margin-bottom:8px;display:none;}
 .err-msg.show{display:block;}
+
+/* ===トップページ最下部：リンク集=== */
+.site-footer{
+  margin-top:2rem; padding-top:1.25rem;
+  border-top:1px solid rgba(128,152,214,0.3);
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;}
+.footer-links a{font-size:13px;color:var(--blue-mid);text-decoration:underline;text-underline-offset:3px;transition:color .15s;}
+.footer-links a:hover{color:var(--white);}
+.footer-version{font-size:11px;color:rgba(184,200,234,0.6);letter-spacing:.04em;}
 
 /* ===ロビー画面=== */
 .player-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
 .player-row{display:flex;align-items:center;justify-content:space-between;background:#eaf0fa;border:1px solid #b3c3e2;border-radius:6px;padding:8px 12px;}
-.player-name{font-size:14px;color:var(--navy);}
-.player-badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500;}
+.player-name{font-size:15px;color:var(--navy);}
+.player-badge{font-size:12px;padding:2px 8px;border-radius:4px;font-weight:500;}
 .badge-host{background:#dde3f7;color:#3a4aa0;}
 .badge-ready{background:#d6f0dd;color:#1f7a3a;}
 .badge-notready{background:#eceef5;color:#7a82a0;}
-.ime-tag{font-size:11px;color:#3a4aa0;background:#dde3f7;padding:2px 8px;border-radius:4px;}
+.ime-tag{font-size:12px;color:#3a4aa0;background:#dde3f7;padding:2px 8px;border-radius:4px;}
 .room-id-display{text-align:center;margin-bottom:12px;}
-.room-id-display .label{font-size:11px;color:var(--blue-mid);margin-bottom:4px;}
-.room-id-display .id{font-size:28px;font-weight:500;color:var(--white);letter-spacing:.15em;}
+.room-id-display .label{font-size:12px;color:var(--blue-mid);margin-bottom:4px;}
+.room-id-display .id{font-size:30px;font-weight:500;color:var(--white);letter-spacing:.15em;}
 
 /* ===カウントダウン=== */
 #countdown-screen .page-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;}
@@ -246,6 +276,8 @@ input[type="file"]{display:none;}
 #source-frame{border:2px solid var(--navy);border-radius:4px;background:var(--white);flex-shrink:0;overflow:hidden;}
 #source-display{overflow:hidden;}
 .src-row{display:flex;align-items:stretch;}
+/* ピーク行：前ページ最終行の続き表示（改ページ境界の単語を見失わないための文脈行） */
+.src-row-peek{opacity:0.45;}
 .src-text{font-family:'BIZ UDGothic',monospace;white-space:pre;color:var(--text);flex:1;}
 .enter-mark{color:#c0392b;opacity:0.8;font-family:'Noto Sans JP',sans-serif;pointer-events:none;margin-left:1px;}
 .src-count-wrap{display:flex;align-items:center;flex-shrink:0;border-left:1px solid var(--border);}
@@ -284,6 +316,20 @@ input[type="file"]{display:none;}
 .score-hero .rh-value{
   font-size:44px; font-weight:500; color:var(--navy); line-height:1;
   font-variant-numeric:tabular-nums;
+}
+.score-hero .rh-value.dq{color:#8b1c1c;}
+/* 失格バッジ・注記：得点は通常どおり表示しつつ、失格ラインに達したことを明示する */
+.dq-badge{
+  display:inline-block; padding:4px 10px; margin-left:2px;
+  background:#fde8e8; color:#8b1c1c; border:1px solid #f0b4b4;
+  border-radius:6px; font-size:13px; font-weight:500; letter-spacing:.04em;
+}
+.dq-note{font-size:12px; color:#8b1c1c; margin:-8px 0 16px;}
+/* 順位表内の失格バッジ（小さめ） */
+.dq-badge-sm{
+  display:inline-block; padding:1px 6px; margin-left:6px;
+  background:#fde8e8; color:#8b1c1c; border:1px solid #f0b4b4;
+  border-radius:4px; font-size:10px; font-weight:500;
 }
 /* 統計リスト：項目名の直後に値を置き、視線移動を最小化する。
    dtに最小幅を与えて数値の左端を揃え、行の右側は余白として空ける。 */
@@ -360,8 +406,9 @@ input[type="file"]{display:none;}
 <div id="menu-screen" class="screen active page-wrap">
 <div class="page-inner">
   <header class="page-hero">
-    <h1>実用タイピング採点用ツール</h1>
-    <p>実在する3大会のルールで採点できる、実用文タイピングの練習・競技ツール</p>
+    <h1 class="app-title">JIKAGAMI</h1>
+    <p class="app-subtitle">実用タイピング競技・採点用ツール『字鏡』</p>
+    <span class="app-version">v1.0.0</span>
   </header>
   <div class="mode-cards">
     <button class="mode-card" onclick="showScreen('solo-menu-screen')">
@@ -411,42 +458,82 @@ input[type="file"]{display:none;}
     <summary class="mcard-title">採点ルール1：全国高等学校ワープロ競技大会</summary>
     <ul class="rule-list">
       <li>全国の商業高校生が参加するワープロ大会。<br>変換学習の使用や、入力字数を超えるものも含めた辞書登録が認められている。</li>
-      <li><b>誤字</b>：対象箇所の<u>課題文側の文字数</u>をカウント。</li>
-      <li><b>脱字</b>：1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></li>
-      <li><b>余字</b>：1<u>箇所</u>につき1エラー。（連続する余字はまとめて1エラー扱い。）</li>
-      <li><b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字）×10。</li>
     </ul>
+    <table class="err-table">
+      <thead><tr><th>種別</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>誤字</td><td>対象箇所の<u>課題文側の文字数</u>をカウント。</td></tr>
+        <tr><td>脱字</td><td>1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></td></tr>
+        <tr><td>余字</td><td>1<u>箇所</u>につき1エラー。（連続する余字はまとめて1エラー扱い。）</td></tr>
+      </tbody>
+    </table>
+    <div class="rule-highlight">
+      <b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字）×10。
+    </div>
     <div class="err-example">
       <b>誤字の例</b>：「最新版」を「さいしんばん」「saisinban」「再審判」と入力した場合、「最新版」が3文字なのですべて3エラー。
+    </div>
+    <div class="err-example">
+      <b>失格ルール</b>：エラーカウント（誤字＋脱字＋余字）が30以上になると失格（得点自体は通常どおり計算され、結果画面には参考値として表示されます）。
     </div>
   </details>
   <details class="mcard mcard-collapsible">
     <summary class="mcard-title">採点ルール2:毎日パソコン入力コンクール</summary>
     <ul class="rule-list">
       <li>小学生～高校生を中心に全国の参加者が集う大規模なコンクール。<br>変換学習や辞書登録は認められていない。エラー数に応じた特別点が存在するため、正確な入力が重要。</li>
-      <li><b>誤字</b>：1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</li>
-      <li><b>脱字</b>：1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></li>
-      <li><b>余字</b>：1文字につき1エラー。</li>
-      <li><b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字） ＋ 特別点。<br><u>特別点はエラーが3字以内だったときのボーナス。0字で総字数の20%、1字で15%、2字で10%、3字で5%が加点される（小数点以下切り上げ）。</u></li>
     </ul>
+    <table class="err-table">
+      <thead><tr><th>種別</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>誤字</td><td>1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</td></tr>
+        <tr><td>脱字</td><td>1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></td></tr>
+        <tr><td>余字</td><td>1文字につき1エラー。</td></tr>
+      </tbody>
+    </table>
+    <div class="rule-highlight">
+      <b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字） ＋ 特別点。<br><u>特別点はエラーが3字以内だったときのボーナス。0字で総字数の20%、1字で15%、2字で10%、3字で5%が加点される（小数点以下切り上げ）。</u>
+    </div>
     <div class="err-example">
       <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6エラー。「さ」と入力した場合、誤字1＋脱字2の3エラー。
+    </div>
+    <div class="err-example">
+      <b>失格ルール</b>：エラーカウント（誤字＋脱字＋余字）が9以上になると失格（得点自体は通常どおり計算され、結果画面には参考値として表示されます）。
     </div>
   </details>
   <details class="mcard mcard-collapsible">
     <summary class="mcard-title">採点ルール3：Intersteno Internet Contests</summary>
     <ul class="rule-list">
       <li>タイピングの世界大会。日本語も含めた十数言語のタイピング競技をオンラインで行う。<br>変換学習や辞書登録は可能だが、入力字数を超える辞書登録は認められていない。</li>
-      <li><b>誤字</b>：1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</li>
-      <li><b>脱字</b>：1<u>箇所</u>につき1エラー。（連続する脱字はまとめて1エラー扱い。）</li>
-      <li><b>余字</b>：1文字につき1エラー。</li>
-      <li><b>得点</b>：換算字数（総字数×2.95） − エラーカウント（誤字＋脱字＋余字）×50。小数点以下切り上げ。</li>
     </ul>
+    <table class="err-table">
+      <thead><tr><th>種別</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>誤字</td><td>1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</td></tr>
+        <tr><td>脱字</td><td>1<u>箇所</u>につき1エラー。（連続する脱字はまとめて1エラー扱い。）</td></tr>
+        <tr><td>余字</td><td>1文字につき1エラー。</td></tr>
+      </tbody>
+    </table>
+    <div class="rule-highlight">
+      <b>得点</b>：換算字数（総字数×2.95） − エラーカウント（誤字＋脱字＋余字）×50。小数点以下切り上げ。
+    </div>
     <div class="err-example">
       <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6エラー。「さ」と入力した場合、誤字1＋脱字1の2エラー。
     </div>
+    <div class="err-example">
+      <b>失格ルール</b>：エラーカウント（誤字＋脱字＋余字）が換算字数の0.5%（小数点切り上げ）以上になると失格（得点自体は通常どおり計算され、結果画面には参考値として表示されます）。
+    </div>
   </details>
   </details><!-- /.rules-section -->
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="/updates.html">アップデート内容</a>
+      <a href="https://x.com/welch2929" target="_blank" rel="noopener noreferrer">管理人のX</a>
+      <a href="https://github.com/welame2929/worpro-server" target="_blank" rel="noopener noreferrer">GitHubリポジトリ</a>
+      <a href="https://github.com/welame2929/worpro-server/tree/main/public/texts" target="_blank" rel="noopener noreferrer">課題文txt一覧</a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfb3YxhlhfkzLhUAV1nGt9VM6058ParbCyKL8y9hM7Exgaj3A/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">不具合報告フォーム</a>
+    </div>
+    <div class="footer-version">JIKAGAMI v1.0.0</div>
+  </footer>
 </div>
 </div>
 
@@ -619,10 +706,17 @@ input[type="file"]{display:none;}
   <div class="mcard">
     <div class="mcard-title">参加者</div>
     <div class="player-list" id="lobby-player-list"></div>
-    <div id="lobby-text-info" style="font-size:12px;color:#4658a8;margin-top:4px;"></div>
-    <a id="lobby-download-link" href="#" download style="display:none;font-size:12px;color:var(--navy);margin-top:6px;text-decoration:underline;">📄 課題文をダウンロード</a>
+    <div id="lobby-text-info" style="font-size:13px;color:#4658a8;margin-top:4px;"></div>
+    <a id="lobby-download-link" href="#" download style="display:none;font-size:13px;color:var(--navy);margin-top:6px;text-decoration:underline;">📄 課題文をダウンロード</a>
   </div>
   <div id="lobby-err" class="err-msg"></div>
+  <!-- 練習入力：IMEモードの調整や指慣らし用。採点対象外・他プレイヤーには共有されない -->
+  <div class="mcard">
+    <div class="mcard-title">練習入力</div>
+    <textarea id="practice-input" class="practice-textarea" rows="3"
+      placeholder="ここでIMEの切り替えや指慣らしができます（採点対象外・他のプレイヤーには表示されません）"
+      spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+  </div>
   <!-- ホスト用 -->
   <div id="host-controls" style="display:none;">
     <button class="btn-primary" id="lobby-start-btn" onclick="hostStartGame()">ゲームを開始する</button>
@@ -697,7 +791,9 @@ input[type="file"]{display:none;}
       <div class="score-hero">
         <span class="rh-label" id="res-point-label">得点</span>
         <span class="rh-value" id="res-point">0</span>
+        <span class="dq-badge" id="res-dq-badge" style="display:none;">失格</span>
       </div>
+      <div class="dq-note" id="res-dq-note" style="display:none;"></div>
       <dl class="score-list">
         <div class="score-line">
           <dt class="rs-label" id="res-total-label">総字数</dt>
@@ -755,6 +851,9 @@ input[type="file"]{display:none;}
 // 定数・状態変数
 // =====================================================================
 const COLS=30, PAGE_ROWS=30;
+// ページ上端に「前ページ最終行」を1行分だけ薄く表示するためのピーク行数。
+// 表示は PAGE_ROWS + PEEK_ROWS 行だが、ページの区切り自体は PAGE_ROWS のまま。
+const PEEK_ROWS=1;
 const PAD_L=14, PAD_R=14, COUNT_W=48;
 
 const SAMPLE_TEXTS=[
@@ -1154,7 +1253,7 @@ function calcFontSize(){
   const cw=measureCharWidth(fsA);
   const fsFromW=Math.floor(fsA*(availW/(cw*COLS)));
   const availH=paneH-headH-4-4-16;
-  const fsFromH=availH/(PAGE_ROWS*lineHRatio(fsFromW));
+  const fsFromH=availH/((PAGE_ROWS+PEEK_ROWS)*lineHRatio(fsFromW));
   return Math.min(22,Math.max(10,Math.floor(Math.min(fsFromW,fsFromH))));
 }
 
@@ -1189,14 +1288,17 @@ function renderSourcePage(page,fs){
   const totalPages=Math.ceil(allSourceLines.length/PAGE_ROWS);
   const display=document.getElementById('source-display');
   display.innerHTML='';
-  for(let i=startRow;i<endRow;i++){
-    const row=allSourceLines[i];
-    const div=document.createElement('div'); div.className='src-row'; div.style.height=lhPx+'px';
+  // 1行分の課題文行を <div class="src-row"> に描画する共通処理。
+  // peek=true のとき src-row-peek クラスを付与し薄色表示にする。
+  // row が null（page 0 のピーク行など「実データなし」の場合）は空行を作る。
+  const appendRow=(row, peek)=>{
+    const div=document.createElement('div');
+    div.className='src-row'+(peek?' src-row-peek':'');
+    div.style.height=lhPx+'px';
     const txt=document.createElement('span'); txt.className='src-text';
     txt.style.fontSize=fs+'px'; txt.style.lineHeight=lhPx+'px'; txt.style.paddingLeft=PAD_L+'px';
-    fillTextWithFixedWidthSpaces(txt, row.text, fs);
-    // 段落末（元テキストで改行があった位置）に改行マークを表示する
-    if(row.paraEnd){
+    if(row) fillTextWithFixedWidthSpaces(txt, row.text, fs);
+    if(row && row.paraEnd){
       const mark=document.createElement('span');
       mark.className='enter-mark';
       mark.textContent='↵';
@@ -1207,12 +1309,26 @@ function renderSourcePage(page,fs){
     div.appendChild(txt);
     const cntWrap=document.createElement('span'); cntWrap.className='src-count-wrap';
     cntWrap.style.width=COUNT_W+'px'; cntWrap.style.height=lhPx+'px';
-    if(row.text.length>0){
+    if(row && row.text.length>0){
       const cnt=document.createElement('span'); cnt.className='src-count';
       cnt.style.fontSize=countFs+'px'; cnt.style.width='100%';
       cnt.textContent=row.cumul; cntWrap.appendChild(cnt);
     }
-    div.appendChild(cntWrap); display.appendChild(div);
+    div.appendChild(cntWrap);
+    display.appendChild(div);
+  };
+  if(page===0){
+    // ページ0（1ページ目）は前ページが存在せず、上端のピーク行が空白のスペーサになって
+    // 見づらいため、頭の行から本文を表示し、代わりに31行目（次ページの先頭行）を
+    // 下端に薄色で表示する。改ページのタイミング自体やページ1以降の表示方法は変更しない。
+    for(let i=startRow;i<endRow;i++) appendRow(allSourceLines[i], false);
+    const nextPageFirstIdx=endRow; // = PAGE_ROWS（次ページの先頭行のインデックス）
+    if(nextPageFirstIdx<allSourceLines.length) appendRow(allSourceLines[nextPageFirstIdx], true);
+  } else {
+    // ページ1以降：前ページ最終行を上端に薄色で表示する（改ページ境界の単語追跡を助ける）。
+    const peekIdx=startRow-1;
+    appendRow(allSourceLines[peekIdx], true);
+    for(let i=startRow;i<endRow;i++) appendRow(allSourceLines[i], false);
   }
   document.getElementById('page-indicator').textContent=totalPages>1?(page+1)+' / '+totalPages+' ページ':'';
 }
@@ -1245,7 +1361,8 @@ function applyLayout(){
   const fs=calcFontSize(); currentFontSize=fs;
   const cw=measureCharWidth(fs);
   const lhPx=Math.round(fs*lineHRatio(fs)); currentLhPx=lhPx;
-  const frameH=lhPx*PAGE_ROWS;
+  // フレームは「本ページ PAGE_ROWS 行 ＋ ピーク行 PEEK_ROWS 行」を丸ごと収める高さにする。
+  const frameH=lhPx*(PAGE_ROWS+PEEK_ROWS);
   const textAreaW=Math.floor(cw*COLS);
   const srcFrameW=PAD_L+textAreaW+COUNT_W+PAD_R;
   const srcFrame=document.getElementById('source-frame');
@@ -1261,7 +1378,7 @@ function applyLayout(){
   wrapper.style.paddingLeft=PAD_L+'px'; wrapper.style.width=taFrameW+'px'; wrapper.style.height=frameH+'px';
   ta.style.fontSize=fs+'px'; ta.style.lineHeight=lhPx+'px';
   ta.style.width=textAreaW+'px';
-  ta.style.padding='0';
+  // 上端パディング（ピーク行分の確保）はページごとに異なるため、syncInputView内で設定する。
   ta.style.boxSizing='content-box';
   // textareaは自前でスクロールせず、内容＋1ページ分の高さに自動拡張する。
   // 表示窓はラッパー(#ta-wrapper, overflow:hidden)側のscrollTopで制御する。
@@ -1299,6 +1416,10 @@ function syncInputView(){
   const ta=document.getElementById('typing-area');
   const wrapper=document.getElementById('ta-wrapper');
   if(!ta||!wrapper||!currentLhPx)return;
+  // ページ0は上端にピーク行を置かない仕様なのでパディングなし、ページ1以降は
+  // ピーク行分（PEEK_ROWS）だけ上端にパディングを入れる。
+  const newPad=(currentPage===0?0:PEEK_ROWS*currentLhPx)+'px 0 0 0';
+  if(ta.style.padding!==newPad) ta.style.padding=newPad;
   // IME composition中はheight書き換えをスキップ（compositionを妨げないため）
   if(!isComposing){
     const totalRows=calcTotalInputRows(ta.value);
@@ -1318,7 +1439,7 @@ function updateSourcePage(){
   if(page!==currentPage){
     currentPage=page;
     renderSourcePage(currentPage,currentFontSize);
-    const frameH=currentLhPx*PAGE_ROWS;
+    const frameH=currentLhPx*(PAGE_ROWS+PEEK_ROWS);
     document.getElementById('ta-frame').style.height=frameH+'px';
     document.getElementById('ta-wrapper').style.height=frameH+'px';
   }
@@ -1451,18 +1572,28 @@ function endGame(){
       type:'SUBMIT_RESULT',
       totalChars:result.totalChars,
       scores:{
-        warpro:{points:result.warpro.points, miss:result.warpro.miss},
-        mainichi:{points:result.mainichi.points, miss:result.mainichi.miss},
-        intersteno:{points:result.intersteno.points, miss:result.intersteno.miss},
+        warpro:{points:result.warpro.points, miss:result.warpro.miss, disqualified:result.warpro.disqualified},
+        mainichi:{points:result.mainichi.points, miss:result.mainichi.miss, disqualified:result.mainichi.disqualified},
+        intersteno:{points:result.intersteno.points, miss:result.intersteno.miss, disqualified:result.intersteno.disqualified},
       }
     }));
   }
-  document.getElementById('retry-btn').onclick=returnToLobby;
+  // マルチプレイでは同じ部屋での再戦を行わないため、再挑戦ボタンは表示しない
+  document.getElementById('retry-btn').style.display='none';
   } else {
     rankSection.style.display='none';
+    document.getElementById('retry-btn').style.display='';
     document.getElementById('retry-btn').onclick=()=>{ isMulti=false; soloCountdownStart(); };
   }
   showScreen('result-screen');
+}
+
+// 失格ラインの説明文（結果カードの注記用）
+function dqNoteText(rule, s){
+  if(rule==='warpro') return `※ミス${DQ_WARPRO_MISS}以上のため、ワープロ大会ルールでは失格ラインです（得点は参考値）。`;
+  if(rule==='mainichi') return `※ミス${DQ_MAINICHI_MISS}以上のため、毎日パソコン入力コンクールルールでは失格ラインです（得点は参考値）。`;
+  if(rule==='intersteno') return `※ミス数が換算字数の0.5%（${s.dqThreshold}）以上のため、Interstenoルールでは失格ラインです（得点は参考値）。`;
+  return '';
 }
 
 // 自分のスコアカードを現在の採点方式で表示
@@ -1482,6 +1613,12 @@ function renderMyScore(){
   document.getElementById('bd-goji').textContent=s.goji;
   document.getElementById('bd-datsuji').textContent=s.datsuji;
   document.getElementById('bd-yoji').textContent=s.yoji;
+  // 失格ラインの表示：得点自体は変更せず、バッジと注記で明示するのみ
+  document.getElementById('res-point').classList.toggle('dq', !!s.disqualified);
+  document.getElementById('res-dq-badge').style.display=s.disqualified?'inline-block':'none';
+  const noteEl=document.getElementById('res-dq-note');
+  if(s.disqualified){ noteEl.textContent=dqNoteText(currentRule,s); noteEl.style.display='block'; }
+  else { noteEl.style.display='none'; }
 }
 
 // 採点方式タブの切り替え（自分のスコア＋順位表の両方に反映）
@@ -1510,6 +1647,7 @@ function renderRanking(results){
   // 現在の採点方式(rankingRule)の得点でソート
   const getPts=(r)=> r.scores ? r.scores[rankingRule].points : null;
   const getMiss=(r)=> r.scores ? r.scores[rankingRule].miss : null;
+  const getDisq=(r)=> r.scores ? !!r.scores[rankingRule].disqualified : false;
   const getTotal=(r)=> r.totalChars==null ? '' : (isInter ? Math.ceil(r.totalChars*2.95) : r.totalChars);
   const sorted=[...results].sort((a,b)=>{
     const pa=getPts(a), pb=getPts(b);
@@ -1538,23 +1676,20 @@ function renderRanking(results){
     }
     tdName.appendChild(nameWrap);
     const tdPoint=document.createElement('td');
-    if(done){ tdPoint.textContent=getPts(r); }
+    if(done){
+      const ptsText=document.createElement('span'); ptsText.textContent=getPts(r);
+      tdPoint.appendChild(ptsText);
+      if(getDisq(r)){
+        const dqBadge=document.createElement('span'); dqBadge.className='dq-badge-sm'; dqBadge.textContent='失格';
+        tdPoint.appendChild(dqBadge);
+      }
+    }
     else { const w=document.createElement('span'); w.className='waiting-result'; w.textContent='集計中'; tdPoint.appendChild(w); }
     const tdTotal=document.createElement('td'); tdTotal.textContent=done?getTotal(r):'';
     const tdErr=document.createElement('td'); tdErr.textContent=done?getMiss(r):'';
     tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdPoint); tr.appendChild(tdTotal); tr.appendChild(tdErr);
     tbody.appendChild(tr);
   });
-}
-
-function returnToLobby(){
-  if(ws&&ws.readyState===WebSocket.OPEN && isHost){
-    ws.send(JSON.stringify({ type:'RETURN_TO_LOBBY' }));
-  }
-  isReady=false;
-  document.getElementById('ready-btn').textContent='スタンバイする';
-  document.getElementById('ready-btn').style.cssText='';
-  showScreen('lobby-screen');
 }
 
 function leaveRoom(){
@@ -1690,6 +1825,12 @@ function pointsMainichi(total,miss){
 }
 function pointsIntersteno(total,miss){ return Math.max(0,Math.ceil(total*2.95)-miss*50); }
 
+// 失格ライン（各大会の実際の基準に準拠。得点自体は通常どおり計算し、
+// 表示側で「失格」であることが分かるようにするためのフラグとして用いる）
+const DQ_WARPRO_MISS=30;      // ワープロ大会：ミス30以上で失格
+const DQ_MAINICHI_MISS=9;     // 毎日パソコン入力コンクール：ミス9以上で失格
+const DQ_INTERSTENO_RATE=0.005; // Intersteno：換算字数の0.5%（小数点切り上げ）以上のミスで失格
+
 // diff表示HTML（3ルール共通の見た目。削除=赤、挿入=緑）
 function buildDiffHtml(diff){
   let html='',i=0;
@@ -1712,12 +1853,16 @@ function scoreAll(original, input){
   const {diff, totalChars}=prepareScoredDiff(original, input);
   const segs=buildSegments(diff);
   const w=countWarpro(segs), m=countMainichi(segs), it=countIntersteno(segs);
+  // Interstenoの失格ライン：換算字数（総字数×2.95切り上げ）の0.5%（小数点切り上げ）以上のミスで失格
+  const convChars=Math.ceil(totalChars*2.95);
+  const intersDqThreshold=Math.ceil(convChars*DQ_INTERSTENO_RATE);
   return {
     totalChars,
     diffHtml: buildDiffHtml(diff),
-    warpro:{...w, points:pointsWarpro(totalChars,w.miss)},
-    mainichi:{...m, points:pointsMainichi(totalChars,m.miss)},
-    intersteno:{...it, points:pointsIntersteno(totalChars,it.miss), convChars:Math.ceil(totalChars*2.95)},
+    warpro:{...w, points:pointsWarpro(totalChars,w.miss), disqualified: w.miss>=DQ_WARPRO_MISS},
+    mainichi:{...m, points:pointsMainichi(totalChars,m.miss), disqualified: m.miss>=DQ_MAINICHI_MISS},
+    intersteno:{...it, points:pointsIntersteno(totalChars,it.miss), convChars,
+      disqualified: it.miss>=intersDqThreshold, dqThreshold:intersDqThreshold},
   };
 }
 
