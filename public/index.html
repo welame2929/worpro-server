@@ -788,6 +788,11 @@ let soloSelectedDuration=600;  // ソロ時のプレイ時間（秒）
 let hostSelectedDuration=600;  // ホスト設定中のプレイ時間（秒）
 let multiDuration=600;         // マルチ時にサーバーから受信したプレイ時間
 let playerImeRule='normal';    // マルチ時の自己申告IMEレギュレーション
+// 課題文選択の世代番号。async選択（FileReader / fetch）の完了時に自分が最新の
+// 選択かどうかを判定するために使う。ラジオ切替や別方式の選択で++され、
+// 古いasync完了は捨てられる。これがないと「読み込み中に別のを選んだ」「読み込み中に
+// 開始した」際、以前プレイしていた課題文にすりかわる。
+let soloSelectionSeq=0, hostSelectionSeq=0;
 
 // =====================================================================
 // 画面切り替え
@@ -812,6 +817,7 @@ function clearDropdown(id){
 // 課題文選択（サンプル文章のラジオ）
 document.getElementById('solo-text-select').addEventListener('change',e=>{
   if(e.target.name!=='solo-text') return;
+  ++soloSelectionSeq; // 進行中のasync選択（アップロード・fetch）を無効化
   clearDropdown('solo-server-select');
   selectedText=SAMPLE_TEXTS[parseInt(e.target.value)];
   document.getElementById('solo-selected-info').textContent='選択中：'+selectedText.name;
@@ -827,13 +833,20 @@ document.getElementById('solo-duration-select').addEventListener('change',e=>{
 });
 document.getElementById('solo-file-input').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f)return;
+  const seq=++soloSelectionSeq;
+  // 読み込み完了までは「選択されていない」状態にする。前回プレイした課題文が
+  // selectedTextに残っていて、そのままゲームを開始しないよう保護する。
+  selectedText=null;
+  document.getElementById('solo-selected-info').textContent='読み込み中…';
+  document.getElementById('solo-start-btn').disabled=true;
+  // サンプルラジオ・サーバー上課題文の両方の選択を解除
+  uncheckRadios('solo-text');
+  clearDropdown('solo-server-select');
   const r=new FileReader();
   r.onload=ev=>{
+    if(seq!==soloSelectionSeq) return; // 読み込み中に別の選択に切り替わっていたら破棄
     selectedText={name:f.name,content:ev.target.result};
     document.getElementById('solo-selected-info').textContent='選択中：'+f.name;
-    // サンプルラジオ・サーバー上課題文の両方の選択を解除
-    uncheckRadios('solo-text');
-    clearDropdown('solo-server-select');
     document.getElementById('solo-start-btn').disabled=false;
   };
   r.readAsText(f,'UTF-8');
@@ -890,6 +903,7 @@ let hostText=null;
 // ホスト：課題文選択（サンプル文章のラジオ）
 document.getElementById('host-text-select').addEventListener('change',e=>{
   if(e.target.name!=='host-text') return;
+  ++hostSelectionSeq; // 進行中のasync選択を無効化
   clearDropdown('host-server-select');
   const t=SAMPLE_TEXTS[parseInt(e.target.value)];
   hostText={name:t.name, content:t.content};
@@ -897,13 +911,19 @@ document.getElementById('host-text-select').addEventListener('change',e=>{
 });
 document.getElementById('host-file-input').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f)return;
+  const seq=++hostSelectionSeq;
+  // 読み込み中は「未選択」扱い。createRoom側の !hostText チェックで
+  // 「読み込み前の状態で作成」を弾く（前回プレイの残存が使われないように）。
+  hostText=null;
+  document.getElementById('host-selected-info').textContent='読み込み中…';
+  // サンプルラジオ・サーバー上課題文の両方の選択を解除
+  uncheckRadios('host-text');
+  clearDropdown('host-server-select');
   const r=new FileReader();
   r.onload=ev=>{
+    if(seq!==hostSelectionSeq) return; // 別の選択に切り替わっていたら破棄
     hostText={name:f.name,content:ev.target.result};
     document.getElementById('host-selected-info').textContent='選択中：'+f.name;
-    // サンプルラジオ・サーバー上課題文の両方の選択を解除
-    uncheckRadios('host-text');
-    clearDropdown('host-server-select');
   };
   r.readAsText(f,'UTF-8');
 });
@@ -1551,7 +1571,18 @@ function leaveRoom(){
 }
 
 function goHome(){
+  // マルチプレイ後は、サーバー側のルーム所属を確実に外すため接続を切る。
+  // 切らないと古いルームのメンバーとして残り、次のルーム作成/参加後に
+  // 古いルームからの ROOM_STATE ブロードキャストで lobby-room-id が
+  // 古いIDに上書きされ、前のルームに飛ばされたように見える。
+  if(ws && ws.readyState===WebSocket.OPEN){
+    ws.close();
+  }
+  ws=null;
+  currentRoomId=''; isReady=false;
   isMulti=false; isHost=false;
+  document.getElementById('ready-btn').textContent='スタンバイする';
+  document.getElementById('ready-btn').style.cssText='';
   showScreen('menu-screen');
 }
 
@@ -1762,6 +1793,8 @@ document.getElementById('solo-server-select').addEventListener('change',e=>{
     sel.classList.remove('has-selection');
     return;
   }
+  const seq=++soloSelectionSeq;
+  selectedText=null; // fetch完了までは「選択されていない」扱い（前回プレイの残存対策）
   sel.classList.add('has-selection');
   // サンプル文章ボタンの選択状態を解除
   uncheckRadios('solo-text');
@@ -1770,11 +1803,13 @@ document.getElementById('solo-server-select').addEventListener('change',e=>{
   fetch('/texts/'+encodeURIComponent(name))
     .then(r=>{ if(!r.ok) throw new Error('Fetch failed'); return r.text(); })
     .then(content=>{
+      if(seq!==soloSelectionSeq) return; // 別の選択に切り替わっていたら破棄
       selectedText={name, content, serverName:name};
       document.getElementById('solo-selected-info').textContent='選択中：'+name;
       document.getElementById('solo-start-btn').disabled=false;
     })
     .catch(()=>{
+      if(seq!==soloSelectionSeq) return;
       document.getElementById('solo-selected-info').textContent='読み込みに失敗しました';
     });
 });
@@ -1787,16 +1822,20 @@ document.getElementById('host-server-select').addEventListener('change',e=>{
     sel.classList.remove('has-selection');
     return;
   }
+  const seq=++hostSelectionSeq;
+  hostText=null; // fetch完了までは「未選択」扱い（前回プレイの残存対策）
   sel.classList.add('has-selection');
   uncheckRadios('host-text');
   document.getElementById('host-selected-info').textContent='読み込み中…';
   fetch('/texts/'+encodeURIComponent(name))
     .then(r=>{ if(!r.ok) throw new Error('Fetch failed'); return r.text(); })
     .then(content=>{
+      if(seq!==hostSelectionSeq) return; // 別の選択に切り替わっていたら破棄
       hostText={name, content, serverName:name};
       document.getElementById('host-selected-info').textContent='選択中：'+name;
     })
     .catch(()=>{
+      if(seq!==hostSelectionSeq) return;
       document.getElementById('host-selected-info').textContent='読み込みに失敗しました';
     });
 });
