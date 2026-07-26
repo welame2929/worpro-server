@@ -34,6 +34,12 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   border:1px solid rgba(128,152,214,0.5); border-radius:12px;
   font-size:12px; color:var(--blue-mid); letter-spacing:.05em;
 }
+/* トップページのイメージ画像（タイトルとモード選択の間） */
+.hero-image{
+  display:block; width:100%; max-width:100%; height:auto;
+  border-radius:10px; margin-bottom:24px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.25);
+}
 .mcard{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
 /* 折りたたみ可能な説明カード（details要素ベース） */
 .mcard-collapsible{padding:0;}
@@ -408,8 +414,9 @@ input[type="file"]{display:none;}
   <header class="page-hero">
     <h1 class="app-title">JIKAGAMI</h1>
     <p class="app-subtitle">実用タイピング競技・採点用ツール『字鏡』</p>
-    <span class="app-version">v1.0.0</span>
+    <span class="app-version">v1.0.1</span>
   </header>
+  <img class="hero-image" src="/hero-image.png" alt="実際のプレイ画面のイメージ">
   <div class="mode-cards">
     <button class="mode-card" onclick="showScreen('solo-menu-screen')">
       <span class="mode-name">ソロプレイ</span>
@@ -535,7 +542,7 @@ input[type="file"]{display:none;}
       <a href="https://github.com/welame2929/worpro-server/tree/main/public/texts" target="_blank" rel="noopener noreferrer">課題文txt一覧</a>
       <a href="https://docs.google.com/forms/d/e/1FAIpQLSfb3YxhlhfkzLhUAV1nGt9VM6058ParbCyKL8y9hM7Exgaj3A/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">不具合報告フォーム</a>
     </div>
-    <div class="footer-version">JIKAGAMI v1.0.0</div>
+    <div class="footer-version">JIKAGAMI v1.0.1</div>
   </footer>
 </div>
 </div>
@@ -1730,9 +1737,20 @@ function goHome(){
 function lenNoNL(s){ return s.replace(/\n/g,'').length; }
 
 // diffを採点対象範囲に整える。末尾の未到達削除を除外し、総字数を求める。
+// 見た目上ほぼ区別できず、環境やIMEの違いで入力側に出やすい文字の揺れを
+// 採点上は同一視するための正規化。ルール説明での告知は行わない（ノイズになるため）。
+// U+301C（波ダッシュ）とU+FF5E（全角チルダ）：Shift_JIS時代からの解釈違いにより、
+// 課題文の記述と実際の入力（IME・OS依存）で字体が食い違うことがある。
+// あわせて、濁点・半濁点の合成済み文字（例：「が」=U+304C）と分解形
+// （「か」U+304B＋結合濁点U+3099）のような、見た目が同一でもコードポイント列が
+// 異なるUnicode正規化の揺れも吸収するため、normalize('NFC')もかけている。
+function normalizeConfusables(s){
+  return s.normalize('NFC').replace(/～/g,'〜');
+}
+
 function prepareScoredDiff(original, input){
-  const origNorm=original.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-  const inputNorm=input.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const origNorm=normalizeConfusables(original.replace(/\r\n/g,'\n').replace(/\r/g,'\n'));
+  const inputNorm=normalizeConfusables(input.replace(/\r\n/g,'\n').replace(/\r/g,'\n'));
   const inputCharCount=inputNorm.replace(/\n/g,'').length;
   // 採点対象とする課題文の余白は最小限にする。
   // 大きすぎると、入力末尾の変換途中の文字が課題文の遠方の同じ文字に
@@ -1768,15 +1786,58 @@ function prepareScoredDiff(original, input){
 }
 
 // diffを置換/削除/挿入のセグメント列に変換
+// 一致部分を挟んで隣り合う削除・挿入を、可能な範囲で隣接させる正規化処理。
+// 例：課題文の「かか」を「掛か」と誤入力した場合、Myers diffは
+//   [挿入:掛][一致:か][削除:か]
+// のように、一致部分を間に挟んだ対応付けを返すことがある。同じ文字（または
+// 同じ並び）が連続する箇所では、入力側の文字を課題文側のどちらの文字に
+// 対応させても最短編集距離は変わらないため、diffアルゴリズムのタイブレーク
+// 次第で「本来1箇所の置換のはずが、削除と挿入に分断される」結果になりうる。
+//
+// 削除テキスト（またはヒント：挿入テキスト）と一致テキストを入れ替えても
+// 復元結果が変わらない場合（＝連結が可換になる場合。同じ文字の繰り返しなど
+// で成立する）に限り、一致部分を編集の外側へずらして削除・挿入を隣接させる。
+// 隣接させた後は buildSegments が1つの置換としてまとめる。
+function normalizeDiffBoundaries(diff){
+  const d=diff.map(e=>[e[0],e[1]]);
+  let changed=true, guard=0;
+  while(changed && guard++<d.length*2+10){
+    changed=false;
+    for(let i=0;i+2<d.length;i++){
+      const [op1,s1]=d[i], [op2,s2]=d[i+1], [op3,s3]=d[i+2];
+      if(op2!==0) continue; // 中央が一致部分のときのみ対象
+      if(op1===-1 && op3===1){
+        // [削除, 一致, 挿入] → 挿入テキストと一致テキストが可換なら
+        // [削除, 挿入, 一致] へ並べ替え、削除と挿入を隣接させる
+        if((s3+s2)===(s2+s3)){ d.splice(i,3,[-1,s1],[1,s3],[0,s2]); changed=true; }
+      } else if(op1===1 && op3===-1){
+        // [挿入, 一致, 削除] → 削除テキストと一致テキストが可換なら
+        // [削除, 挿入, 一致] へ並べ替え、削除と挿入を隣接させる
+        if((s3+s2)===(s2+s3)){ d.splice(i,3,[-1,s3],[1,s1],[0,s2]); changed=true; }
+      }
+    }
+  }
+  return d;
+}
+
 function buildSegments(diff){
   const segs=[]; let i=0;
   while(i<diff.length){
     const [op,str]=diff[i];
-    if(op===0){ segs.push({type:'equal', text:str}); i++; }
-    else if(op===-1){
-      if(i+1<diff.length && diff[i+1][0]===1){ segs.push({type:'sub', del:str, ins:diff[i+1][1]}); i+=2; }
-      else { segs.push({type:'del', del:str}); i++; }
-    } else { segs.push({type:'ins', ins:str}); i++; }
+    if(op===0){ segs.push({type:'equal', text:str}); i++; continue; }
+    // 同一区間内の削除・挿入をまとめて1つの置換とみなす。
+    // Myers diffのバックトラックでは、1点の置換が「削除→挿入」の順で
+    // 出力される場合と「挿入→削除」の順で出力される場合があり（最短経路が
+    // 複数ある場合のタイブレークの結果に依存し、どちらが出るかは不定）、
+    // 順序を問わず隣接するdel/insはすべて同じ置換区間としてまとめる。
+    let delBuf='', insBuf='';
+    while(i<diff.length && diff[i][0]!==0){
+      if(diff[i][0]===-1) delBuf+=diff[i][1]; else insBuf+=diff[i][1];
+      i++;
+    }
+    if(delBuf && insBuf) segs.push({type:'sub', del:delBuf, ins:insBuf});
+    else if(delBuf) segs.push({type:'del', del:delBuf});
+    else segs.push({type:'ins', ins:insBuf});
   }
   return segs;
 }
@@ -1853,7 +1914,8 @@ function buildDiffHtml(diff){
 
 // 統合採点：3ルールすべての結果を返す
 function scoreAll(original, input){
-  const {diff, totalChars}=prepareScoredDiff(original, input);
+  const {diff: rawDiff, totalChars}=prepareScoredDiff(original, input);
+  const diff=normalizeDiffBoundaries(rawDiff);
   const segs=buildSegments(diff);
   const w=countWarpro(segs), m=countMainichi(segs), it=countIntersteno(segs);
   // Interstenoの失格ライン：換算字数（総字数×2.95切り上げ）の0.5%（小数点切り上げ）以上のミスで失格

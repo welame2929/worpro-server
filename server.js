@@ -63,6 +63,22 @@ const httpServer = http.createServer((req, res) => {
     return;
   }
 
+  // 静的な画像ファイル（public/ 直下）の配信
+  const IMAGE_EXT_TYPES = {
+    '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif', '.svg': 'image/svg+xml', '.webp': 'image/webp',
+  };
+  const imageExt = Object.keys(IMAGE_EXT_TYPES).find(ext => url.toLowerCase().endsWith(ext));
+  if (imageExt && !url.includes('..') && url.indexOf('/', 1) === -1) {
+    const filePath = path.join(__dirname, 'public', decodeURIComponent(url.slice(1)));
+    fs.readFile(filePath, (err, data) => {
+      if (err) { res.writeHead(404); res.end('Not found'); return; }
+      res.writeHead(200, { 'Content-Type': IMAGE_EXT_TYPES[imageExt] });
+      res.end(data);
+    });
+    return;
+  }
+
   // アップデート内容ページ
   if (url === '/updates.html' || url === '/updates') {
     const filePath = path.join(__dirname, 'public', 'updates.html');
