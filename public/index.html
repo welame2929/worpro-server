@@ -13,9 +13,65 @@
   --del-bg:#fde8e8;--del-text:#8b1c1c;--ins-bg:#e6f4ea;--ins-text:#14532d;
   /* アクセント（シアン）：選択状態・主要アクション・得点に限定して使用 */
   --cyan:#0E9BBD;--cyan-bright:#35D6F4;--cyan-pale:#E3F6FB;--cyan-deep:#0B7E9A;
+  /* 分割レイアウトの右側パネル（ブランドのnavyとカードの明色をつなぐ中間色） */
+  --panel:#6B74B8;
 }
 body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);}
 .screen{display:none;}.screen.active{display:block;}
+
+/* ===左右分割レイアウト（タイトル・各設定画面）===
+   左＝ブランドパネル（固定・常に表示）、右＝画面ごとの操作領域。
+   右側だけがスクロールし、左のブランド表示は常に視界に残る。 */
+/* display は「アクティブな画面」だけに与える。
+   .split 側で display:flex を指定してしまうと .screen{display:none} を
+   上書きし、全画面が同時に表示されてしまうため、ここでは指定しない。 */
+.split{min-height:100vh;align-items:stretch;}
+.screen.split.active{display:flex;}
+.split-brand{
+  flex:0 0 36%; max-width:520px;
+  background:var(--navy); color:var(--white);
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  padding:2.5rem 1.75rem; text-align:center; position:relative;
+}
+.split-brand .brand-title{
+  font-size:56px; font-weight:700; color:var(--white);
+  font-family:'BIZ UDGothic',sans-serif; letter-spacing:.08em; line-height:1.1;
+}
+.split-brand .brand-sub{
+  font-size:15px; font-weight:500; color:var(--white);
+  margin-top:12px; letter-spacing:.02em;
+}
+/* 画面名（ソロプレイ設定・ロビーなど）。タイトルの下に控えめに置く */
+.split-brand .brand-screen{
+  margin-top:24px; padding-top:20px;
+  border-top:1px solid rgba(128,152,214,0.35);
+  font-size:17px; color:var(--blue-mid); letter-spacing:.08em;
+  width:100%; max-width:320px;
+}
+/* リンク集はパネル下部に寄せ、主役のタイトルと干渉させない */
+.split-brand .brand-foot{
+  position:absolute; left:0; right:0; bottom:1.25rem;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  padding:0 1rem;
+}
+.split-main{
+  flex:1; min-width:0;
+  background:var(--panel);
+  display:flex; flex-direction:column; justify-content:center;
+  padding:2.5rem 2rem; overflow-y:auto; max-height:100vh;
+}
+.split-main-inner{width:100%; max-width:640px; margin:0 auto;}
+/* 縦長・狭い画面では上下に積む（左パネルは高さを詰める） */
+@media (max-width:820px){
+  .split{flex-direction:column;}
+  .split-brand{
+    flex:0 0 auto; max-width:none; padding:1.75rem 1.25rem;
+  }
+  .split-brand .brand-title{font-size:38px;}
+  .split-brand .brand-screen{margin-top:16px;padding-top:14px;}
+  .split-brand .brand-foot{position:static;margin-top:1.25rem;}
+  .split-main{max-height:none; padding:1.5rem 1.25rem;}
+}
 
 /* ===共通カードUI=== */
 .page-wrap{min-height:100vh;background:var(--navy);}
@@ -33,12 +89,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   display:inline-block; margin-top:10px; padding:3px 12px;
   border:1px solid rgba(128,152,214,0.5); border-radius:12px;
   font-size:12px; color:var(--blue-mid); letter-spacing:.05em;
-}
-/* トップページのイメージ画像（タイトルとモード選択の間） */
-.hero-image{
-  display:block; width:100%; max-width:100%; height:auto;
-  border-radius:10px; margin-bottom:24px;
-  box-shadow:0 4px 16px rgba(0,0,0,0.25);
 }
 .mcard{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
 /* 折りたたみ可能な説明カード（details要素ベース） */
@@ -112,21 +162,38 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .btn-secondary:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
 .btn-row{display:flex;flex-direction:column;gap:8px;}
 .btn-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-/* トップのモードカード（ソロ/マルチの主導線） */
-.mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+/* 分割レイアウトの画面下部の操作列：左に「戻る」、右に主アクションを幅広で置く */
+.action-row{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-top:4px;}
+.btn-back{
+  width:100%;padding:13px;background:#2E3566;color:var(--blue-mid);
+  border:none;border-radius:8px;font-size:16px;cursor:pointer;
+  font-family:inherit;transition:all .15s;
+}
+.btn-back:hover{background:#3a4278;color:var(--white);}
+.btn-back:focus-visible{outline:2px solid var(--cyan-bright);outline-offset:2px;}
+@media (max-width:520px){
+  .action-row{grid-template-columns:1fr;}
+}
+/* トップのモードカード（ソロ/マルチ/ルール説明の主導線）。
+   画面を大きく使うため、縦積みの大きなボタンにする。 */
+.mode-cards{display:flex;flex-direction:column;gap:16px;}
 .mode-card{
-  padding:26px 16px;
-  background:linear-gradient(180deg,var(--cyan) 0%,var(--cyan-deep) 100%);
-  border:none;border-radius:12px;cursor:pointer;font-family:inherit;
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  color:#ffffff;box-shadow:0 2px 10px rgba(14,155,189,0.35);
+  width:100%; padding:26px 20px;
+  background:#CAD7EE; border:1px solid #aebfe0; border-radius:12px;
+  cursor:pointer; font-family:inherit;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  color:var(--navy);
   transition:all .15s;
 }
-.mode-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(14,155,189,0.45);filter:brightness(1.06);}
+.mode-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(26,30,63,0.25);background:#d8e2f4;}
 .mode-card:active{transform:translateY(0);}
 .mode-card:focus-visible{outline:2px solid var(--cyan-bright);outline-offset:3px;}
-.mode-name{font-size:19px;font-weight:500;letter-spacing:.04em;}
-.mode-desc{font-size:13px;color:rgba(255,255,255,0.85);}
+.mode-name{font-size:28px;font-weight:500;letter-spacing:.14em;color:var(--navy);}
+.mode-desc{font-size:14px;color:#4658a8;}
+/* 副次的な導線（ルール説明）。主導線と区別するため濃色にする */
+.mode-card-alt{background:var(--navy);border-color:var(--navy);}
+.mode-card-alt .mode-name{color:var(--white);}
+.mode-card-alt:hover{background:#252a56;}
 /* ルール・採点方式の説明（デフォルト折りたたみ） */
 .rules-section > summary{
   list-style:none;cursor:pointer;text-align:center;
@@ -165,9 +232,10 @@ input[type="file"]{display:none;}
 }
 .text-select-dropdown:hover{border-color:var(--cyan);background-color:#f4fbfd;}
 .text-select-dropdown:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(14,155,189,0.18);}
-/* 何か選択されたら薄シアンで「選ばれている感」を出す */
+/* 何か選択されたら塗りつぶしで「選ばれている感」を出す（薄色だと周囲と判別しづらいため） */
 .text-select-dropdown.has-selection{
-  background-color:var(--cyan-pale); color:var(--navy); border-color:var(--cyan); font-weight:500;
+  background-color:var(--cyan); color:#ffffff; border-color:var(--cyan); font-weight:500;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
 }
 .upload-area:hover{border-color:var(--navy);background:#dfe7f5;color:var(--navy);}
 /* 選択肢：本物のラジオボタン（fieldset+input+label）。
@@ -200,13 +268,47 @@ input[type="file"]{display:none;}
 }
 .radio-group label:hover{border-color:var(--cyan);background:#f4fbfd;}
 .radio-group label:hover::before{border-color:var(--cyan);}
+/* 選択中の項目：薄い塗りつぶしだと周囲との差が分かりづらいため、
+   リザルト画面の採点方式タブ(.rule-tab.active)と同じ「地色を塗る」配色に揃える。 */
 .radio-group input:checked + label{
-  background:var(--cyan-pale); border-color:var(--cyan); color:var(--navy);
+  background:var(--cyan); border-color:var(--cyan); color:#ffffff;
   font-weight:500;
 }
-.radio-group input:checked + label::before{border-color:var(--cyan);}
-.radio-group input:checked + label::after{transform:translateY(-50%) scale(1);}
+.radio-group input:checked + label::before{border-color:#ffffff;}
+.radio-group input:checked + label::after{background:var(--cyan);transform:translateY(-50%) scale(1);}
+.radio-group input:checked + label:hover{background:var(--cyan-deep);border-color:var(--cyan-deep);}
 .radio-group input:focus-visible + label{outline:2px solid var(--cyan);outline-offset:2px;}
+/* プレイ時間スライダー（1〜10分・1分刻み） */
+.duration-slider-wrap{
+  background:#ffffff; border:1.5px solid #9fb1da; border-radius:8px;
+  padding:12px 14px 10px;
+}
+.duration-value{
+  display:block; text-align:center;
+  font-size:22px; font-weight:500; color:var(--navy); letter-spacing:.04em;
+  margin-bottom:8px;
+}
+.duration-slider{
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:6px; border-radius:3px; margin:0;
+  background:#dfe7f5; outline:none; cursor:pointer;
+}
+.duration-slider::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:20px; height:20px; border-radius:50%;
+  background:var(--cyan); border:2px solid #ffffff; cursor:pointer;
+  box-shadow:0 1px 4px rgba(14,155,189,0.5);
+}
+.duration-slider::-moz-range-thumb{
+  width:20px; height:20px; border-radius:50%;
+  background:var(--cyan); border:2px solid #ffffff; cursor:pointer;
+  box-shadow:0 1px 4px rgba(14,155,189,0.5);
+}
+.duration-slider:focus-visible{outline:2px solid var(--cyan);outline-offset:4px;}
+.duration-scale{
+  display:flex; justify-content:space-between;
+  font-size:11px; color:#7a82a0; margin-top:6px;
+}
 /* プレイ設定カード内の2列グリッド */
 .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
 .setting-label{font-size:13px;font-weight:500;color:#3a4aa0;letter-spacing:.04em;margin-bottom:8px;}
@@ -228,14 +330,9 @@ input[type="file"]{display:none;}
 .err-msg{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.4);border-radius:6px;padding:8px 12px;font-size:14px;color:#fca5a5;margin-bottom:8px;display:none;}
 .err-msg.show{display:block;}
 
-/* ===トップページ最下部：リンク集=== */
-.site-footer{
-  margin-top:2rem; padding-top:1.25rem;
-  border-top:1px solid rgba(128,152,214,0.3);
-  display:flex; flex-direction:column; align-items:center; gap:10px;
-}
-.footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;}
-.footer-links a{font-size:13px;color:var(--blue-mid);text-decoration:underline;text-underline-offset:3px;transition:color .15s;}
+/* ===ブランドパネル下部：リンク集=== */
+.footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;}
+.footer-links a{font-size:12px;color:var(--blue-mid);text-decoration:underline;text-underline-offset:3px;transition:color .15s;}
 .footer-links a:hover{color:var(--white);}
 .footer-version{font-size:11px;color:rgba(184,200,234,0.6);letter-spacing:.04em;}
 
@@ -248,9 +345,10 @@ input[type="file"]{display:none;}
 .badge-ready{background:#d6f0dd;color:#1f7a3a;}
 .badge-notready{background:#eceef5;color:#7a82a0;}
 .ime-tag{font-size:12px;color:#3a4aa0;background:#dde3f7;padding:2px 8px;border-radius:4px;}
-.room-id-display{text-align:center;margin-bottom:12px;}
-.room-id-display .label{font-size:12px;color:var(--blue-mid);margin-bottom:4px;}
-.room-id-display .id{font-size:30px;font-weight:500;color:var(--white);letter-spacing:.15em;}
+/* ロビーのルームID表示。ブランドパネル内に置き、参加者へ伝えやすいよう大きく見せる */
+.room-id-display{text-align:center;margin-top:20px;}
+.room-id-display .label{font-size:12px;color:var(--blue-mid);margin-bottom:4px;letter-spacing:.08em;}
+.room-id-display .id{font-size:38px;font-weight:500;color:var(--white);letter-spacing:.18em;font-family:'BIZ UDGothic',monospace;}
 
 /* ===カウントダウン=== */
 #countdown-screen .page-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;}
@@ -368,8 +466,10 @@ input[type="file"]{display:none;}
   content:''; position:absolute; left:12px; top:50%;
   width:14px; border-top:1.5px solid #aebfe0;
 }
-/* 最後の項目：縦線を「└」の形にするため下半分を消す */
-.score-sub:last-child::before{bottom:50%;}
+/* エラー内訳の最終項目（余字）：縦線を「└」の形にするため下半分を消す。
+   内訳の後ろに別の項目が並んでも終端が崩れないよう、:last-childではなく
+   最終項目のクラスを直接指定している。 */
+.score-sub.bd-yoji::before{bottom:50%;}
 /* 意味色：誤字・脱字＝赤系、余字＝緑系 */
 .score-sub.bd-goji dd b, .score-sub.bd-goji dd{color:#8b1c1c;}
 .score-sub.bd-datsuji dd b, .score-sub.bd-datsuji dd{color:#8b1c1c;}
@@ -389,6 +489,12 @@ input[type="file"]{display:none;}
 .rule-tab.active{background:var(--cyan);border-color:var(--cyan);color:#ffffff;font-weight:500;box-shadow:0 2px 6px rgba(14,155,189,0.3);}
 .rule-tab:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
 .diff-card h2{font-size:15px;font-weight:500;color:var(--navy);margin-bottom:10px;letter-spacing:.06em;}
+/* マルチ時：正誤判定を表示するプレイヤーの切り替え */
+.diff-player-row{margin-bottom:12px;}
+.diff-player-label{display:block;font-size:12px;color:#3a4aa0;margin-bottom:6px;}
+.diff-player-row .text-select-dropdown{margin-bottom:0;}
+/* 未提出のプレイヤーを選んだときの案内 */
+.diff-empty{font-size:13px;color:#7a82a0;font-style:italic;padding:4px 2px;}
 .legend{display:flex;gap:18px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #aebfe0;}
 .ld{display:flex;align-items:center;gap:6px;font-size:12px;color:#3a4aa0;}
 .ld-dot{width:14px;height:14px;border-radius:3px;}
@@ -409,334 +515,249 @@ input[type="file"]{display:none;}
 <div id="app">
 
 <!-- ①トップメニュー -->
-<div id="menu-screen" class="screen active page-wrap">
-<div class="page-inner">
-  <header class="page-hero">
-    <h1 class="app-title">JIKAGAMI</h1>
-    <p class="app-subtitle">実用タイピング競技・採点用ツール『字鏡』</p>
-    <span class="app-version">v1.0.1</span>
-  </header>
-  <img class="hero-image" src="/hero-image.png" alt="実際のプレイ画面のイメージ">
-  <div class="mode-cards">
-    <button class="mode-card" onclick="showScreen('solo-menu-screen')">
-      <span class="mode-name">ソロプレイ</span>
-      <span class="mode-desc">ひとりで練習して採点する</span>
-    </button>
-    <button class="mode-card" onclick="showScreen('multi-name-screen')">
-      <span class="mode-name">マルチプレイ</span>
-      <span class="mode-desc">ルームを作って同時に競う</span>
-    </button>
+<div id="menu-screen" class="screen active split">
+  <div class="split-brand">
+    <h1 class="brand-title">JIKAGAMI</h1>
+    <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
+    <div class="brand-foot">
+      <div class="footer-links">
+        <a href="/updates.html">アップデート内容</a>
+        <a href="https://x.com/welch2929" target="_blank" rel="noopener noreferrer">管理人のX</a>
+        <a href="https://github.com/welame2929/worpro-server" target="_blank" rel="noopener noreferrer">GitHubリポジトリ</a>
+        <a href="https://github.com/welame2929/worpro-server/tree/main/public/texts" target="_blank" rel="noopener noreferrer">課題文txt一覧</a>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfb3YxhlhfkzLhUAV1nGt9VM6058ParbCyKL8y9hM7Exgaj3A/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">不具合報告フォーム</a>
+      </div>
+      <div class="footer-version">v1.1.0</div>
+    </div>
   </div>
-  <aside class="notice-box">
-    <h2 class="notice-title">はじめにご確認ください</h2>
-    <ul class="rule-list">
-      <li>文字サイズはウィンドウ幅をもとに自動設定されます。<b>まずサンプル文章でゲームを開始し</b>、表示を確認してください。</li>
-      <li>このツールは、オリジナルの課題文をtxtファイルで読み込ませることができます。課題文は<b>すべて全角文字で記述されたもの</b>を使用してください。（半角文字を含むと、改ページが正確に動作しない可能性があります。）</li>
-    </ul>
-  </aside>
-  <details class="rules-section">
-    <summary>競技ルール・採点方式の説明を見る</summary>
-    <section class="mcard">
-    <h2 class="mcard-title">競技ルール</h2>
-    <ul class="rule-list">
-      <li>制限時間は<b>5分または10分</b>。画面左側に表示される課題文を正確に入力する。</li>
-      <li>課題文は<b>1行30文字の配置で30行ずつ表示</b>。次のページに達すると、表示部分が自動で切り替わる。</li>
-      <li><b>残り2分と残り10秒</b>（5分設定の場合は残り10秒のみ）になると、画面周囲が赤く点滅して通知される。</li>
-      <li>課題文中の <b style="color:#c0392b;">↵</b> は、その位置でEnterキーによる改行が必要なことを示す。</li>
-    </ul>
-    <div class="rule-highlight">
-      採点は下記の3大会のルールに従ってそれぞれ行い、<b>結果画面で3通りの得点が表示できます</b>。<br>
-      <span class="rule-highlight-sub">※採点処理は擬似的なものであり、各大会における実際の採点と異なる可能性があります。</span>
+  <div class="split-main">
+   <div class="split-main-inner">
+    <div class="mode-cards">
+      <button class="mode-card" onclick="showScreen('solo-menu-screen')">
+        <span class="mode-name">ソロプレイ</span>
+        <span class="mode-desc">ひとりで練習して採点する</span>
+      </button>
+      <button class="mode-card" onclick="showScreen('multi-name-screen')">
+        <span class="mode-name">マルチプレイ</span>
+        <span class="mode-desc">ルームを作って同時に競う</span>
+      </button>
+      <a class="mode-card mode-card-alt" href="/rules.html">
+        <span class="mode-name">ルール説明</span>
+      </a>
     </div>
-    <h3 class="mcard-subtitle">エラー種別</h3>
-    <table class="err-table">
-      <thead><tr><th>種別</th><th>内容</th></tr></thead>
-      <tbody>
-        <tr><td>誤字</td><td>課題文の文字を別の文字と打ち間違えるエラー。（例：最新の→細心の）</td></tr>
-        <tr><td>脱字</td><td>課題文の文字を入力せずに飛ばすエラー。（例：最新の→最の）</td></tr>
-        <tr><td>余字</td><td>課題文にない文字を余分に入力するエラー。（例：最新の→最新版の）</td></tr>
-      </tbody>
-    </table>
-    <div class="err-example">
-      この他に毎日パソコン入力コンクールでは「未変換」、Interstenoでは「反転」がありますが、このソフトでは扱いません。
-    </div>
-    <div class="err-example">
-      プレイ終了時に入力末尾に未変換の文字などのエラーが残ってしまった場合、<u>原則的にそのミスは採点に含めないようにします</u>。<br>エラーの一部が直後の文字列に一致していた場合も、その一致部分が2文字以内であれば切り捨てされます。
-    </div>
-    </section>
-  <details class="mcard mcard-collapsible">
-    <summary class="mcard-title">採点ルール1：全国高等学校ワープロ競技大会</summary>
-    <ul class="rule-list">
-      <li>全国の商業高校生が参加するワープロ大会。<br>変換学習の使用や、入力字数を超えるものも含めた辞書登録が認められている。</li>
-    </ul>
-    <table class="err-table">
-      <thead><tr><th>種別</th><th>内容</th></tr></thead>
-      <tbody>
-        <tr><td>誤字</td><td>対象箇所の<u>課題文側の文字数</u>をカウント。</td></tr>
-        <tr><td>脱字</td><td>1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></td></tr>
-        <tr><td>余字</td><td>1<u>箇所</u>につき1エラー。（連続する余字はまとめて1エラー扱い。）</td></tr>
-      </tbody>
-    </table>
-    <div class="rule-highlight">
-      <b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字）×10。
-    </div>
-    <div class="err-example">
-      <b>誤字の例</b>：「最新版」を「さいしんばん」「saisinban」「再審判」と入力した場合、「最新版」が3文字なのですべて3エラー。
-    </div>
-    <div class="err-example">
-      <b>失格ルール</b>：エラーカウントが30以上になると失格。
-    </div>
-  </details>
-  <details class="mcard mcard-collapsible">
-    <summary class="mcard-title">採点ルール2：毎日パソコン入力コンクール</summary>
-    <ul class="rule-list">
-      <li>小学生～高校生を中心に全国の参加者が集う大規模なコンクール。<br>変換学習や辞書登録は認められていない。エラー数に応じた特別点が存在するため、正確な入力が重要。</li>
-    </ul>
-    <table class="err-table">
-      <thead><tr><th>種別</th><th>内容</th></tr></thead>
-      <tbody>
-        <tr><td>誤字</td><td>1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</td></tr>
-        <tr><td>脱字</td><td>1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></td></tr>
-        <tr><td>余字</td><td>1文字につき1エラー。</td></tr>
-      </tbody>
-    </table>
-    <div class="rule-highlight">
-      <b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字） ＋ 特別点。<br><u>特別点はエラーが3字以内だったときのボーナス。0字で総字数の20%、1字で15%、2字で10%、3字で5%が加点される（小数点以下切り上げ）。</u>
-    </div>
-    <div class="err-example">
-      <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6エラー。「さ」と入力した場合、誤字1＋脱字2の3エラー。
-    </div>
-    <div class="err-example">
-      <b>失格ルール</b>：エラーカウントが9以上になると失格。
-    </div>
-  </details>
-  <details class="mcard mcard-collapsible">
-    <summary class="mcard-title">採点ルール3：Intersteno Internet Contests</summary>
-    <ul class="rule-list">
-      <li>タイピングの世界大会。日本語も含めた十数言語のタイピング競技をオンラインで行う。<br>変換学習や辞書登録は可能だが、入力字数を超える辞書登録は認められていない。</li>
-    </ul>
-    <table class="err-table">
-      <thead><tr><th>種別</th><th>内容</th></tr></thead>
-      <tbody>
-        <tr><td>誤字</td><td>1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</td></tr>
-        <tr><td>脱字</td><td>1<u>箇所</u>につき1エラー。（連続する脱字はまとめて1エラー扱い。）</td></tr>
-        <tr><td>余字</td><td>1文字につき1エラー。</td></tr>
-      </tbody>
-    </table>
-    <div class="rule-highlight">
-      <b>得点</b>：換算字数（総字数×2.95） − エラーカウント（誤字＋脱字＋余字）×50。小数点以下切り上げ。
-    </div>
-    <div class="err-example">
-      <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6エラー。「さ」と入力した場合、誤字1＋脱字1の2エラー。
-    </div>
-    <div class="err-example">
-      <b>失格ルール</b>：エラーカウントが換算字数の0.5%（小数点切り上げ）以上になると失格。
-    </div>
-  </details>
-  </details><!-- /.rules-section -->
-  <footer class="site-footer">
-    <div class="footer-links">
-      <a href="/updates.html">アップデート内容</a>
-      <a href="https://x.com/welch2929" target="_blank" rel="noopener noreferrer">管理人のX</a>
-      <a href="https://github.com/welame2929/worpro-server" target="_blank" rel="noopener noreferrer">GitHubリポジトリ</a>
-      <a href="https://github.com/welame2929/worpro-server/tree/main/public/texts" target="_blank" rel="noopener noreferrer">課題文txt一覧</a>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfb3YxhlhfkzLhUAV1nGt9VM6058ParbCyKL8y9hM7Exgaj3A/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">不具合報告フォーム</a>
-    </div>
-    <div class="footer-version">JIKAGAMI v1.0.1</div>
-  </footer>
-</div>
+   </div>
+  </div>
 </div>
 
 <!-- ②ソロ：課題文選択 -->
-<div id="solo-menu-screen" class="screen page-wrap">
-<div class="page-inner">
-  <header class="page-hero"><h1>ソロプレイ</h1></header>
-  <section class="mcard">
-    <h2 class="mcard-title">課題文を選択</h2>
-    <fieldset class="radio-group" id="solo-text-select">
-      <input type="radio" name="solo-text" id="solo-text-0" value="0">
-      <label for="solo-text-0">① 富士山（短文・動作確認用）</label>
-      <input type="radio" name="solo-text" id="solo-text-1" value="1">
-      <label for="solo-text-1">② 日本国憲法（長文・動作確認用）</label>
-    </fieldset>
-    <select id="solo-server-select" class="text-select-dropdown" style="display:none;">
-      <option value="">（一覧から課題文を選ぶ）</option>
-    </select>
-    <div class="upload-area" onclick="document.getElementById('solo-file-input').click()">txtファイルをアップロード</div>
-    <input type="file" id="solo-file-input" accept=".txt">
-    <div id="solo-selected-info"></div>
-    <p class="form-note">※課題文は全角文字のみで作成してください（半角英数字は不可）</p>
-  </section>
-  <section class="mcard">
-    <h2 class="mcard-title">プレイ設定</h2>
-    <div class="settings-grid">
-      <div>
-        <h3 class="setting-label">デフォルトの採点方式</h3>
-        <fieldset class="radio-group" id="solo-rule-select">
-          <input type="radio" name="solo-rule" id="solo-rule-warpro" value="warpro" checked>
-          <label for="solo-rule-warpro">ワープロ大会</label>
-          <input type="radio" name="solo-rule" id="solo-rule-mainichi" value="mainichi">
-          <label for="solo-rule-mainichi">毎日パソコン入力コンクール</label>
-          <input type="radio" name="solo-rule" id="solo-rule-intersteno" value="intersteno">
-          <label for="solo-rule-intersteno">Intersteno</label>
-        </fieldset>
-      </div>
-      <div>
-        <h3 class="setting-label">プレイ時間</h3>
-        <fieldset class="radio-group" id="solo-duration-select">
-          <input type="radio" name="solo-duration" id="solo-dur-300" value="300">
-          <label for="solo-dur-300">5分</label>
-          <input type="radio" name="solo-duration" id="solo-dur-600" value="600" checked>
-          <label for="solo-dur-600">10分</label>
-        </fieldset>
-      </div>
-    </div>
-    <p class="form-note">※結果画面ではタブで他方式も確認できます</p>
-  </section>
-  <div class="btn-row">
-    <button class="btn-primary" id="solo-start-btn" disabled onclick="startSoloGame()">ゲームを開始する</button>
-    <button class="btn-secondary" onclick="showScreen('menu-screen')">戻る</button>
+<div id="solo-menu-screen" class="screen split">
+  <div class="split-brand">
+    <h1 class="brand-title">JIKAGAMI</h1>
+    <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
+    <div class="brand-screen">ソロプレイ</div>
   </div>
-</div>
+  <div class="split-main">
+   <div class="split-main-inner">
+    <section class="mcard">
+      <h2 class="mcard-title">課題文を選択</h2>
+      <fieldset class="radio-group" id="solo-text-select">
+        <input type="radio" name="solo-text" id="solo-text-0" value="0">
+        <label for="solo-text-0">① 富士山（短文・動作確認用）</label>
+        <input type="radio" name="solo-text" id="solo-text-1" value="1">
+        <label for="solo-text-1">② 日本国憲法（長文・動作確認用）</label>
+      </fieldset>
+      <select id="solo-server-select" class="text-select-dropdown" style="display:none;">
+        <option value="">（一覧から課題文を選ぶ）</option>
+      </select>
+      <div class="upload-area" onclick="document.getElementById('solo-file-input').click()">txtファイルをアップロード</div>
+      <input type="file" id="solo-file-input" accept=".txt">
+      <div id="solo-selected-info"></div>
+      <p class="form-note">※課題文は全角文字のみで作成してください（半角英数字は不可）</p>
+    </section>
+    <section class="mcard">
+      <h2 class="mcard-title">採点方式</h2>
+      <fieldset class="radio-group" id="solo-rule-select">
+        <input type="radio" name="solo-rule" id="solo-rule-warpro" value="warpro" checked>
+        <label for="solo-rule-warpro">ワープロ大会</label>
+        <input type="radio" name="solo-rule" id="solo-rule-mainichi" value="mainichi">
+        <label for="solo-rule-mainichi">毎日パソコン入力コンクール</label>
+        <input type="radio" name="solo-rule" id="solo-rule-intersteno" value="intersteno">
+        <label for="solo-rule-intersteno">Intersteno</label>
+      </fieldset>
+      <p class="form-note">※結果画面ではタブで他方式も確認できます</p>
+    </section>
+    <section class="mcard">
+      <h2 class="mcard-title">プレイ時間</h2>
+      <div class="duration-slider-wrap">
+        <output class="duration-value" id="solo-duration-value" for="solo-duration-slider">10分</output>
+        <input type="range" class="duration-slider" id="solo-duration-slider"
+          min="1" max="10" step="1" value="10" aria-label="プレイ時間（分）">
+        <div class="duration-scale"><span>1分</span><span>10分</span></div>
+      </div>
+    </section>
+    <div class="action-row">
+      <button class="btn-back" onclick="showScreen('menu-screen')">戻る</button>
+      <button class="btn-primary" id="solo-start-btn" disabled onclick="startSoloGame()">プレイを開始する</button>
+    </div>
+   </div>
+  </div>
 </div>
 
 <!-- ③マルチ：ハンドルネーム入力 -->
-<div id="multi-name-screen" class="screen page-wrap">
-<div class="page-inner">
-  <header class="page-hero"><h1>マルチプレイ</h1><p>ハンドルネームを入力してください</p></header>
-  <section class="mcard">
-    <div class="input-group">
-      <label class="input-label" for="player-name-input">ハンドルネーム</label>
-      <input type="text" id="player-name-input" class="text-input" placeholder="例：タイピング太郎" maxlength="20">
-    </div>
-  </section>
-  <section class="mcard">
-    <h2 class="mcard-title">IMEレギュレーション</h2>
-    <fieldset class="radio-group" id="ime-rule-select">
-      <input type="radio" name="ime-rule" id="ime-normal" value="normal" checked>
-      <label for="ime-normal">通常（変換学習または辞書登録を使う）</label>
-      <p class="ime-split-note">下の特別な条件に当てはまる方は、下の2項目をかわりに選択してください。</p>
-      <input type="radio" name="ime-rule" id="ime-mainichi" value="mainichi">
-      <label for="ime-mainichi">変換学習・辞書登録なし（デフォルトのIMEのみを使う場合に選択。毎パソルール準拠）</label>
-      <input type="radio" name="ime-rule" id="ime-warpro" value="warpro">
-      <label for="ime-warpro">短縮辞書登録あり（「じか」→「時間」など、入力文字数を超える辞書登録を使う場合に選択）</label>
-    </fieldset>
-    <p class="form-note">※申告は自己申告制で、リザルトの参考情報として全員に表示されます。</p>
-  </section>
-  <div id="name-err" class="err-msg">ハンドルネームを入力してください</div>
-  <div class="btn-pair">
-    <button class="btn-primary" onclick="goToHostOrJoin('host')">ルームを作る</button>
-    <button class="btn-primary" onclick="goToHostOrJoin('join')">ルームに入る</button>
+<div id="multi-name-screen" class="screen split">
+  <div class="split-brand">
+    <h1 class="brand-title">JIKAGAMI</h1>
+    <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
+    <div class="brand-screen">マルチプレイ</div>
   </div>
-  <button class="btn-secondary" onclick="showScreen('menu-screen')" style="margin-top:8px;">戻る</button>
-</div>
+  <div class="split-main">
+   <div class="split-main-inner">
+    <section class="mcard">
+      <h2 class="mcard-title">ハンドルネーム</h2>
+      <input type="text" id="player-name-input" class="text-input" placeholder="例：タイピング太郎" maxlength="20">
+    </section>
+    <section class="mcard">
+      <h2 class="mcard-title">IMEレギュレーション</h2>
+      <fieldset class="radio-group" id="ime-rule-select">
+        <input type="radio" name="ime-rule" id="ime-normal" value="normal" checked>
+        <label for="ime-normal">通常（変換学習または辞書登録を使う）</label>
+        <p class="ime-split-note">下の特別な条件に当てはまる方は、下の2項目をかわりに選択してください。</p>
+        <input type="radio" name="ime-rule" id="ime-mainichi" value="mainichi">
+        <label for="ime-mainichi">変換学習・辞書登録なし（デフォルトのIMEのみを使う場合に選択。毎パソルール準拠）</label>
+        <input type="radio" name="ime-rule" id="ime-warpro" value="warpro">
+        <label for="ime-warpro">短縮辞書登録あり（「じか」→「時間」など、入力文字数を超える辞書登録を使う場合に選択）</label>
+      </fieldset>
+      <p class="form-note">※申告は自己申告制で、リザルトの参考情報として全員に表示されます。</p>
+    </section>
+    <div id="name-err" class="err-msg">ハンドルネームを入力してください</div>
+    <div class="btn-pair">
+      <button class="btn-primary" onclick="goToHostOrJoin('host')">ルームを作る</button>
+      <button class="btn-primary" onclick="goToHostOrJoin('join')">ルームに入る</button>
+    </div>
+    <button class="btn-back" onclick="showScreen('menu-screen')">戻る</button>
+   </div>
+  </div>
 </div>
 
 <!-- ④ホスト：課題文指定 -->
-<div id="host-setup-screen" class="screen page-wrap">
-<div class="page-inner">
-  <header class="page-hero"><h1>ルームを作る</h1></header>
-  <section class="mcard">
-    <h2 class="mcard-title">課題文を指定</h2>
-    <fieldset class="radio-group" id="host-text-select">
-      <input type="radio" name="host-text" id="host-text-0" value="0">
-      <label for="host-text-0">① 富士山（短文・動作確認用）</label>
-      <input type="radio" name="host-text" id="host-text-1" value="1">
-      <label for="host-text-1">② 日本国憲法（長文・動作確認用）</label>
-    </fieldset>
-    <select id="host-server-select" class="text-select-dropdown" style="display:none;">
-      <option value="">（一覧から課題文を選ぶ）</option>
-    </select>
-    <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
-    <input type="file" id="host-file-input" accept=".txt">
-    <div id="host-selected-info"></div>
-    <p class="form-note">※課題文は全角文字のみで作成してください（半角英数字は不可）</p>
-  </section>
-  <section class="mcard">
-    <h2 class="mcard-title">プレイ設定</h2>
-    <div class="settings-grid">
-      <div>
-        <h3 class="setting-label">順位表のデフォルト採点方式</h3>
-        <fieldset class="radio-group" id="host-rule-select">
-          <input type="radio" name="host-rule" id="host-rule-warpro" value="warpro" checked>
-          <label for="host-rule-warpro">ワープロ大会</label>
-          <input type="radio" name="host-rule" id="host-rule-mainichi" value="mainichi">
-          <label for="host-rule-mainichi">毎日パソコン入力</label>
-          <input type="radio" name="host-rule" id="host-rule-intersteno" value="intersteno">
-          <label for="host-rule-intersteno">Intersteno</label>
-        </fieldset>
-      </div>
-      <div>
-        <h3 class="setting-label">プレイ時間</h3>
-        <fieldset class="radio-group" id="host-duration-select">
-          <input type="radio" name="host-duration" id="host-dur-300" value="300">
-          <label for="host-dur-300">5分</label>
-          <input type="radio" name="host-duration" id="host-dur-600" value="600" checked>
-          <label for="host-dur-600">10分</label>
-        </fieldset>
-      </div>
-    </div>
-    <p class="form-note">※結果画面では各自タブで他方式も確認できます</p>
-  </section>
-  <div id="host-err" class="err-msg">課題文を選択してください</div>
-  <div class="btn-row">
-    <button class="btn-primary" id="create-room-btn" onclick="createRoom()">ルームを作成してスタンバイ</button>
-    <button class="btn-secondary" onclick="showScreen('multi-name-screen')">戻る</button>
+<div id="host-setup-screen" class="screen split">
+  <div class="split-brand">
+    <h1 class="brand-title">JIKAGAMI</h1>
+    <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
+    <div class="brand-screen">ルームを作る</div>
   </div>
-</div>
+  <div class="split-main">
+   <div class="split-main-inner">
+    <section class="mcard">
+      <h2 class="mcard-title">課題文を指定</h2>
+      <fieldset class="radio-group" id="host-text-select">
+        <input type="radio" name="host-text" id="host-text-0" value="0">
+        <label for="host-text-0">① 富士山（短文・動作確認用）</label>
+        <input type="radio" name="host-text" id="host-text-1" value="1">
+        <label for="host-text-1">② 日本国憲法（長文・動作確認用）</label>
+      </fieldset>
+      <select id="host-server-select" class="text-select-dropdown" style="display:none;">
+        <option value="">（一覧から課題文を選ぶ）</option>
+      </select>
+      <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
+      <input type="file" id="host-file-input" accept=".txt">
+      <div id="host-selected-info"></div>
+      <p class="form-note">※課題文は全角文字のみで作成してください（半角英数字は不可）</p>
+    </section>
+    <section class="mcard">
+      <h2 class="mcard-title">順位表のデフォルト採点方式</h2>
+      <fieldset class="radio-group" id="host-rule-select">
+        <input type="radio" name="host-rule" id="host-rule-warpro" value="warpro" checked>
+        <label for="host-rule-warpro">ワープロ大会</label>
+        <input type="radio" name="host-rule" id="host-rule-mainichi" value="mainichi">
+        <label for="host-rule-mainichi">毎日パソコン入力</label>
+        <input type="radio" name="host-rule" id="host-rule-intersteno" value="intersteno">
+        <label for="host-rule-intersteno">Intersteno</label>
+      </fieldset>
+      <p class="form-note">※結果画面では各自タブで他方式も確認できます</p>
+    </section>
+    <section class="mcard">
+      <h2 class="mcard-title">プレイ時間</h2>
+      <div class="duration-slider-wrap">
+        <output class="duration-value" id="host-duration-value" for="host-duration-slider">10分</output>
+        <input type="range" class="duration-slider" id="host-duration-slider"
+          min="1" max="10" step="1" value="10" aria-label="プレイ時間（分）">
+        <div class="duration-scale"><span>1分</span><span>10分</span></div>
+      </div>
+    </section>
+    <div id="host-err" class="err-msg">課題文を選択してください</div>
+    <div class="action-row">
+      <button class="btn-back" onclick="showScreen('multi-name-screen')">戻る</button>
+      <button class="btn-primary" id="create-room-btn" onclick="createRoom()">ルームを作成してスタンバイ</button>
+    </div>
+   </div>
+  </div>
 </div>
 
 <!-- ⑤参加者：ルームID入力 -->
-<div id="join-screen" class="screen page-wrap">
-<div class="page-inner">
-  <div class="page-hero"><h1>ルームに入る</h1></div>
-  <div class="mcard">
-    <div class="input-group">
-      <label class="input-label">ルームID（ホストに確認してください）</label>
+<div id="join-screen" class="screen split">
+  <div class="split-brand">
+    <h1 class="brand-title">JIKAGAMI</h1>
+    <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
+    <div class="brand-screen">ルームに入る</div>
+  </div>
+  <div class="split-main">
+   <div class="split-main-inner">
+    <section class="mcard">
+      <h2 class="mcard-title">ルームID</h2>
+      <p class="form-note" style="margin-top:0;margin-bottom:8px;">ホストに確認してください</p>
       <input type="text" id="room-id-input" class="text-input" placeholder="例：AB12C" maxlength="5"
-        style="text-transform:uppercase;font-size:20px;letter-spacing:.1em;">
+        style="text-transform:uppercase;font-size:24px;letter-spacing:.15em;text-align:center;">
+    </section>
+    <div id="join-err" class="err-msg"></div>
+    <div class="action-row">
+      <button class="btn-back" onclick="showScreen('multi-name-screen')">戻る</button>
+      <button class="btn-primary" onclick="joinRoom()">入室する</button>
     </div>
+   </div>
   </div>
-  <div id="join-err" class="err-msg"></div>
-  <div class="btn-row">
-    <button class="btn-primary" onclick="joinRoom()">入室する</button>
-    <button class="btn-secondary" onclick="showScreen('multi-name-screen')">戻る</button>
-  </div>
-</div>
 </div>
 
 <!-- ⑥ロビー（ホスト・参加者共通） -->
-<div id="lobby-screen" class="screen page-wrap">
-<div class="page-inner">
-  <div class="page-hero"><h1>ロビー</h1></div>
-  <div class="room-id-display">
-    <div class="label">ルームID</div>
-    <div class="id" id="lobby-room-id">-----</div>
+<div id="lobby-screen" class="screen split">
+  <div class="split-brand">
+    <h1 class="brand-title">JIKAGAMI</h1>
+    <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
+    <div class="brand-screen">ロビー</div>
+    <!-- ルームIDは参加者への共有に使うため、ブランドパネル側で大きく見せる -->
+    <div class="room-id-display">
+      <div class="label">ルームID</div>
+      <div class="id" id="lobby-room-id">-----</div>
+    </div>
   </div>
-  <div class="mcard">
-    <div class="mcard-title">参加者</div>
-    <div class="player-list" id="lobby-player-list"></div>
-    <div id="lobby-text-info" style="font-size:13px;color:#4658a8;margin-top:4px;"></div>
-    <a id="lobby-download-link" href="#" download style="display:none;font-size:13px;color:var(--navy);margin-top:6px;text-decoration:underline;">📄 課題文をダウンロード</a>
+  <div class="split-main">
+   <div class="split-main-inner">
+    <section class="mcard">
+      <h2 class="mcard-title">参加者</h2>
+      <div class="player-list" id="lobby-player-list"></div>
+      <div id="lobby-text-info" style="font-size:13px;color:#4658a8;margin-top:4px;"></div>
+    </section>
+    <div id="lobby-err" class="err-msg"></div>
+    <!-- 練習入力：IMEモードの調整や指慣らし用。採点対象外・他プレイヤーには共有されない -->
+    <section class="mcard">
+      <h2 class="mcard-title">練習入力</h2>
+      <textarea id="practice-input" class="practice-textarea" rows="3"
+        placeholder="ここでIMEの切り替えや指慣らしができます（採点対象外・他のプレイヤーには表示されません）"
+        spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+    </section>
+    <div class="action-row">
+      <button class="btn-back" onclick="leaveRoom()">退出する</button>
+      <!-- ホスト用 -->
+      <div id="host-controls" style="display:none;">
+        <button class="btn-primary" id="lobby-start-btn" onclick="hostStartGame()">ゲームを開始する</button>
+      </div>
+      <!-- 参加者用 -->
+      <div id="guest-controls" style="display:none;">
+        <button class="btn-primary" id="ready-btn" onclick="toggleReady()">スタンバイする</button>
+      </div>
+    </div>
+   </div>
   </div>
-  <div id="lobby-err" class="err-msg"></div>
-  <!-- 練習入力：IMEモードの調整や指慣らし用。採点対象外・他プレイヤーには共有されない -->
-  <div class="mcard">
-    <div class="mcard-title">練習入力</div>
-    <textarea id="practice-input" class="practice-textarea" rows="3"
-      placeholder="ここでIMEの切り替えや指慣らしができます（採点対象外・他のプレイヤーには表示されません）"
-      spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
-  </div>
-  <!-- ホスト用 -->
-  <div id="host-controls" style="display:none;">
-    <button class="btn-primary" id="lobby-start-btn" onclick="hostStartGame()">ゲームを開始する</button>
-  </div>
-  <!-- 参加者用 -->
-  <div id="guest-controls" style="display:none;">
-    <button class="btn-primary" id="ready-btn" onclick="toggleReady()">スタンバイする</button>
-  </div>
-  <button class="btn-secondary" onclick="leaveRoom()" style="margin-top:8px;">ルームを退出する</button>
-</div>
 </div>
 
 <!-- ⑦カウントダウン -->
@@ -825,6 +846,10 @@ input[type="file"]{display:none;}
           <dt>余字</dt>
           <dd><b id="bd-yoji">0</b></dd>
         </div>
+        <div class="score-line">
+          <dt class="rs-label">変換確定後文字のBackSpace回数（参考）</dt>
+          <dd class="rs-value" id="res-backspace">0</dd>
+        </div>
       </dl>
     </div>
   </section>
@@ -841,6 +866,11 @@ input[type="file"]{display:none;}
   <!-- diff表示（折りたたみ可能、デフォルト展開） -->
   <details class="diff-card" open>
     <summary><h2>入力内容の比較</h2></summary>
+    <!-- マルチ時のみ表示。他のプレイヤーの正誤判定に切り替えられる -->
+    <div class="diff-player-row" id="diff-player-row" style="display:none;">
+      <label class="diff-player-label" for="diff-player-select">表示するプレイヤー</label>
+      <select id="diff-player-select" class="text-select-dropdown" onchange="renderSelectedDiff()"></select>
+    </div>
     <div class="legend">
       <div class="ld"><div class="ld-dot" style="background:var(--del-bg);border:1px solid #f87171;"></div>削除（脱字・誤字）</div>
       <div class="ld"><div class="ld-dot" style="background:var(--ins-bg);border:1px solid #4ade80;"></div>追加（余字）</div>
@@ -881,11 +911,13 @@ let currentFontSize=14, currentLhPx=22;
 let allSourceLines=[], currentPage=0;
 let isMulti=false;        // マルチプレイ中か
 let isComposing=false;    // IME composition中か（スペース入力妨害防止用）
+let backspaceCount=0;     // プレイ中に押したバックスペースの回数（採点対象外の参考記録）
 
 // マルチプレイ状態
 let ws=null;
 let playerName='';
 let currentRoomId='';
+let myPlayerId=null;      // サーバーが割り当てた自分の識別子（同名プレイヤーの区別用）
 let isHost=false;
 let isReady=false;
 let gameStartAt=null;     // カウントダウン終了時刻（ローカル時刻、Unix ms）
@@ -936,10 +968,21 @@ document.getElementById('solo-text-select').addEventListener('change',e=>{
 document.getElementById('solo-rule-select').addEventListener('change',e=>{
   if(e.target.name==='solo-rule') soloSelectedRule=e.target.value;
 });
+// プレイ時間スライダーの共通処理。
+// スライダーの値は「分」で扱い、内部の状態（およびサーバーとのやり取り）は「秒」で持つ。
+function bindDurationSlider(sliderId, valueId, onChange){
+  const slider=document.getElementById(sliderId);
+  const valueEl=document.getElementById(valueId);
+  const sync=()=>{
+    const minutes=parseInt(slider.value);
+    valueEl.textContent=minutes+'分';
+    onChange(minutes*60);
+  };
+  slider.addEventListener('input', sync);
+  sync(); // 初期表示と初期値を同期させる
+}
 // ソロ：プレイ時間の選択
-document.getElementById('solo-duration-select').addEventListener('change',e=>{
-  if(e.target.name==='solo-duration') soloSelectedDuration=parseInt(e.target.value);
-});
+bindDurationSlider('solo-duration-slider','solo-duration-value',sec=>{ soloSelectedDuration=sec; });
 document.getElementById('solo-file-input').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f)return;
   const seq=++soloSelectionSeq;
@@ -1042,9 +1085,7 @@ document.getElementById('host-rule-select').addEventListener('change',e=>{
   if(e.target.name==='host-rule') hostSelectedRule=e.target.value;
 });
 // ホストのプレイ時間選択
-document.getElementById('host-duration-select').addEventListener('change',e=>{
-  if(e.target.name==='host-duration') hostSelectedDuration=parseInt(e.target.value);
-});
+bindDurationSlider('host-duration-slider','host-duration-value',sec=>{ hostSelectedDuration=sec; });
 
 function createRoom(){
   if(!hostText){ document.getElementById('host-err').classList.add('show'); return; }
@@ -1110,15 +1151,6 @@ function renderLobby(state){
   const RULE_LABELS_J={warpro:'ワープロ大会', mainichi:'毎日パソコン入力', intersteno:'Intersteno'};
   if(state.defaultRule) infoParts.push('デフォルト採点方式：'+(RULE_LABELS_J[state.defaultRule]||state.defaultRule));
   document.getElementById('lobby-text-info').textContent=infoParts.join('　/　');
-  // サーバー上の課題文のときのみダウンロードリンクを表示
-  const dl=document.getElementById('lobby-download-link');
-  if(state.serverName){
-    dl.href='/texts/'+encodeURIComponent(state.serverName);
-    dl.style.display='inline-block';
-  } else {
-    dl.removeAttribute('href');
-    dl.style.display='none';
-  }
   const list=document.getElementById('lobby-player-list');
   list.innerHTML='';
   for(const p of state.players){
@@ -1153,6 +1185,7 @@ function handleServerMsg(msg){
 
     case 'ROOM_CREATED':
       currentRoomId=msg.roomId;
+      myPlayerId=msg.playerId||null;
       document.getElementById('lobby-room-id').textContent=msg.roomId;
       document.getElementById('host-controls').style.display='block';
       document.getElementById('guest-controls').style.display='none';
@@ -1161,6 +1194,7 @@ function handleServerMsg(msg){
 
     case 'JOIN_OK':
       currentRoomId=msg.roomId;
+      myPlayerId=msg.playerId||null;
       // 課題文名等の表示はこの直後に届くROOM_STATEで一括設定される
       document.getElementById('host-controls').style.display='none';
       document.getElementById('guest-controls').style.display='block';
@@ -1482,6 +1516,20 @@ function startGame(textObj, startAt){
     updateTimer();
     ta.focus();
     isComposing=false;
+    // バックスペース回数の計測（採点には影響しない参考記録）。
+    // 数えるだけでDOM操作もpreventDefaultも行わないため、IME compositionには干渉しない。
+    //
+    // IME変換中のキーイベントの扱いは実装依存で、変換中のキーを 'Process' として
+    // 報告する環境（Chrome + Windows日本語IME など）もあれば、実際のキー名を
+    // そのまま報告する環境もある。前者では変換中の打ち直しが数えられず、後者では
+    // 数えられるため、放置すると同じ打ち方でも環境によって数字が変わってしまう。
+    // そこで isComposing で変換中を明示的に除外し、どの環境でも
+    // 「確定後のバックスペース」だけを数える定義に揃える。
+    // e.isComposing に加えて自前のフラグも見るのは、両者が食い違う環境への保険。
+    backspaceCount=0;
+    ta.onkeydown=e=>{
+      if(e.key==='Backspace' && !e.isComposing && !isComposing) backspaceCount++;
+    };
     ta.oncompositionstart=()=>{ isComposing=true; };
     // compositionend後に1回updateSourcePageを呼ぶ（確定後のページ同期）
     ta.oncompositionend=()=>{ isComposing=false; onUpdate(); };
@@ -1522,9 +1570,10 @@ function startGame(textObj, startAt){
       secondsLeft=Math.max(0, playDuration-drift);
     }
     updateTimer();
-    // 2分前のアラートはプレイ時間が3分以上の場合のみ有効
-    // （5分以下では2分前=ゲーム中盤過ぎ、開始間もない通知になり不要）
-    const enable2minWarning = (playDuration > 300);
+    // 2分前のアラートは最長の10分を選んだときのみ有効。
+    // それより短いと、2分前＝ゲーム中盤以前の通知になり意味を持たないため。
+    // 残り10秒のアラートはプレイ時間によらず常に有効。
+    const enable2minWarning = (playDuration === 600);
     timerInterval=setInterval(()=>{
       secondsLeft--; updateTimer();
       if(enable2minWarning && secondsLeft===120 && !warningShown){warningShown=true;triggerFlash();}
@@ -1547,6 +1596,8 @@ let lastScore=null;
 let rankingRule='warpro';
 // 直近の全員結果を保持（タブ切り替え時の再描画用）
 let latestResults=null;
+// 正誤判定（diff）を表示しているプレイヤーのid。マルチ時のみ使用し、初期値は自分。
+let diffPlayerId=null;
 
 const RULE_LABELS={warpro:'ワープロ大会', mainichi:'毎日パソコン入力', intersteno:'Intersteno'};
 const IME_LABELS={normal:'通常', mainichi:'変換学習・辞書なし', warpro:'短縮辞書登録あり'};
@@ -1562,6 +1613,8 @@ function endGame(){
   const result=scoreAll(selectedText.content, input);
   lastScore=result;
   document.getElementById('diff-output').innerHTML=result.diffHtml;
+  // バックスペース回数は採点方式に依存しないため、タブ切替時ではなくここで一度だけ設定する
+  document.getElementById('res-backspace').textContent=backspaceCount;
 
   // 表示方式：マルチはホスト指定のデフォルト、ソロはソロ選択のデフォルト
   currentRule = isMulti ? (multiDefaultRule||'warpro') : (soloSelectedRule||'warpro');
@@ -1585,13 +1638,19 @@ function endGame(){
         warpro:{points:result.warpro.points, miss:result.warpro.miss, disqualified:result.warpro.disqualified},
         mainichi:{points:result.mainichi.points, miss:result.mainichi.miss, disqualified:result.mainichi.disqualified},
         intersteno:{points:result.intersteno.points, miss:result.intersteno.miss, disqualified:result.intersteno.disqualified},
-      }
+      },
+      // 他プレイヤーが正誤判定を描画できるよう、入力内容そのものを共有する
+      input,
     }));
   }
   // マルチプレイでは同じ部屋での再戦を行わないため、再挑戦ボタンは表示しない
   document.getElementById('retry-btn').style.display='none';
+  // 正誤判定の表示対象は自分を初期値にする（他プレイヤーの結果が届き次第、選択肢が増える）
+  diffPlayerId=myPlayerId;
+  document.getElementById('diff-player-row').style.display='block';
   } else {
     rankSection.style.display='none';
+    document.getElementById('diff-player-row').style.display='none';
     document.getElementById('retry-btn').style.display='';
     document.getElementById('retry-btn').onclick=()=>{ isMulti=false; soloCountdownStart(); };
   }
@@ -1644,6 +1703,43 @@ function switchRule(rule){
     document.getElementById('rank-point-head').textContent=RULE_LABELS[rule]+' 得点';
     if(latestResults) renderRanking(latestResults);
   }
+}
+
+// 正誤判定の表示対象プレイヤーを選ぶプルダウンを、最新の結果にあわせて作り直す。
+// 選択中のプレイヤーは維持し、対象がいなくなった場合は自分に戻す。
+function refreshDiffPlayerSelect(){
+  const sel=document.getElementById('diff-player-select');
+  if(!sel||!latestResults) return;
+  if(!latestResults.some(r=>r.id===diffPlayerId)) diffPlayerId=myPlayerId;
+  sel.innerHTML='';
+  for(const r of latestResults){
+    const o=document.createElement('option');
+    o.value=r.id;
+    // 名前は重複しうるので、自分の行だけは明示する
+    o.textContent=r.name+(r.id===myPlayerId?'（自分）':'');
+    sel.appendChild(o);
+  }
+  sel.value=diffPlayerId||'';
+  // 自分の結果が一覧にない場合（送信前に切断したなど）は先頭のプレイヤーに合わせる
+  if(sel.value!==diffPlayerId) diffPlayerId=sel.value||null;
+}
+
+// 選択中のプレイヤーの入力内容から正誤判定を描画する。
+// 表示用HTMLは各クライアントが手元で組み立てる（他人から受け取ったHTMLは描画しない）。
+function renderSelectedDiff(){
+  const sel=document.getElementById('diff-player-select');
+  const out=document.getElementById('diff-output');
+  if(sel) diffPlayerId=sel.value;
+  const rec=(latestResults||[]).find(r=>r.id===diffPlayerId);
+  if(!rec){ return; }
+  if(rec.input==null){
+    out.innerHTML='';
+    out.textContent='このプレイヤーの結果はまだ集計中です。';
+    out.classList.add('diff-empty');
+    return;
+  }
+  out.classList.remove('diff-empty');
+  out.innerHTML=scoreAll(selectedText.content, rec.input).diffHtml;
 }
 
 function renderRanking(results){
@@ -1700,6 +1796,10 @@ function renderRanking(results){
     tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdPoint); tr.appendChild(tdTotal); tr.appendChild(tdErr);
     tbody.appendChild(tr);
   });
+  // 正誤判定の選択肢と表示内容も、最新の結果にあわせて更新する
+  // （表示中のプレイヤーの結果が後から届いた場合もここで反映される）
+  refreshDiffPlayerSelect();
+  renderSelectedDiff();
 }
 
 function leaveRoom(){

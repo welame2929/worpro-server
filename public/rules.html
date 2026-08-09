@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ルール説明｜JIKAGAMI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&family=BIZ+UDGothic:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#1A1E3F;--blue:#8098D6;--blue-mid:#b8c8ea;
+  --white:#ffffff;--text:#1a1e3f;--border:#d0d8ee;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--navy);color:var(--text);}
+.page-wrap{min-height:100vh;background:var(--navy);}
+.page-inner{max-width:760px;margin:0 auto;padding:1.5rem 1.25rem 3rem;}
+.page-hero{text-align:center;padding:1.5rem 0 1.25rem;}
+.page-hero h1.app-title{
+  font-size:40px; font-weight:700; color:var(--white);
+  font-family:'BIZ UDGothic',sans-serif; letter-spacing:.08em;
+}
+.page-hero p.app-subtitle{font-size:15px;color:var(--blue-mid);margin-top:10px;}
+
+/* セクション見出し */
+.section-head{
+  font-size:15px; color:var(--blue-mid); letter-spacing:.1em;
+  margin:2rem 0 .75rem; padding-left:2px;
+}
+.section-head:first-of-type{margin-top:1rem;}
+
+/* カード */
+.mcard{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
+.mcard-title{font-size:18px;font-weight:500;color:var(--navy);margin-bottom:12px;letter-spacing:.04em;}
+/* カード冒頭の説明文（箇条書きにするほどでもない導入文） */
+.mcard-lead{font-size:15px;color:#2e3658;line-height:1.9;}
+.mcard-lead + .rule-list{margin-top:10px;}
+.rule-list{list-style:none;font-size:15px;color:#2e3658;}
+.rule-list li{padding:7px 0 7px 18px;position:relative;line-height:1.8;}
+.rule-list li::before{
+  content:'';position:absolute;left:4px;top:13px;
+  width:5px;height:5px;border-radius:50%;background:#8098D6;
+}
+.rule-list li b{color:var(--navy);font-weight:500;}
+/* 得点式などの強調ボックス（白地に赤アクセント） */
+.rule-highlight{
+  background:#ffffff; border-left:4px solid #c0392b;
+  border-radius:6px; padding:10px 14px; margin:12px 0;
+  font-size:14.5px; color:var(--navy); line-height:1.75;
+}
+.rule-highlight b{color:var(--navy);font-weight:500;}
+.rule-highlight-sub{font-size:13px;color:#4658a8;}
+/* 種別テーブル */
+.err-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px;margin:10px 0;}
+.err-table th{background:transparent;color:var(--navy);padding:6px 8px;text-align:left;font-weight:500;font-size:13px;letter-spacing:.04em;border-bottom:2px solid #8098D6;}
+.err-table th:first-child{width:5em;}
+.err-table td{padding:8px 8px;color:#2e3658;vertical-align:top;line-height:1.6;word-break:break-word;overflow-wrap:anywhere;}
+.err-table td:first-child{color:var(--navy);font-weight:500;width:5em;}
+/* 補足の囲み */
+.err-example{margin-top:8px;background:#dfe7f5;border:1px solid #b3c3e2;border-radius:6px;padding:8px 10px;font-size:13px;color:#2e3658;line-height:1.8;}
+.err-example b{color:var(--navy);font-weight:500;}
+/* 注意書き（アンバー系） */
+.notice-box{background:#fdf4e0;border:1px solid #f0cd84;border-radius:8px;padding:14px 18px;margin-bottom:1rem;font-size:15px;color:#5f4310;line-height:1.8;}
+.notice-box b{color:#42300a;font-weight:500;}
+.notice-title{font-size:17px;font-weight:500;color:#42300a;margin-bottom:8px;letter-spacing:.04em;}
+.notice-box .rule-list{color:#5f4310;}
+.notice-box .rule-list li b{color:#42300a;}
+.notice-box .rule-list li::before{background:#c9a95a;}
+
+/* プレイ画面のイメージ */
+.hero-image{
+  display:block; width:100%; height:auto;
+  border-radius:10px; margin-bottom:1rem;
+  box-shadow:0 4px 16px rgba(0,0,0,0.25);
+}
+.hero-caption{font-size:12px;color:var(--blue-mid);text-align:center;margin:-0.5rem 0 1rem;}
+
+.btn-secondary{
+  display:block; width:100%;padding:12px;background:transparent;color:var(--blue-mid);
+  border:1px solid rgba(128,152,214,0.4);border-radius:8px;font-size:15px;cursor:pointer;
+  font-family:inherit;transition:all .15s;text-align:center;text-decoration:none;margin-top:1.5rem;
+}
+.btn-secondary:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<div class="page-inner">
+  <header class="page-hero">
+    <h1 class="app-title">JIKAGAMI</h1>
+    <p class="app-subtitle">ルール説明</p>
+  </header>
+
+  <aside class="notice-box">
+    <h2 class="notice-title">はじめにご確認ください</h2>
+    <p>文字サイズはウィンドウ幅をもとに自動設定されます。<b>まずサンプル文章でゲームを開始し</b>、表示を確認してください。</p>
+  </aside>
+
+  <h2 class="section-head">競技の進め方</h2>
+  <img class="hero-image" src="/hero-image.png" alt="プレイ画面のイメージ。左に課題文、右に入力欄が並ぶ">
+  <p class="hero-caption">プレイ画面。左に課題文、右に入力欄が表示される。</p>
+  <section class="mcard">
+    <h3 class="mcard-title">競技ルール</h3>
+    <p class="mcard-lead">
+      本ソフトは、文章入力の速度を競う練習ソフトです。<br>
+      画面左側に表示される課題文を、画面右側のボックスに正確に入力してください。<br>
+      プレイ終了後に、字数と正確性に応じて得点が計算されます。（ミスが多すぎると失格になります。）
+    </p>
+    <ul class="rule-list">
+      <li>制限時間は1分から10分まで、1分刻みで設定できます。</li>
+      <li>残り時間が少なくなると、画面の周囲が赤く点滅します。通常は残り10秒、ただし10分設定の場合は残り2分と残り10秒のタイミングで通知されます。</li>
+      <li>このツールは、オリジナルの課題文をtxtファイルで読み込ませることができます。課題文はすべて全角文字で記述されたものを使用してください。（半角文字を含むと、改ページが正確に動作しない可能性があります。）</li>
+    </ul>
+    <div class="rule-highlight">
+      採点は下記の3大会のルールに従ってそれぞれ行い、<b>結果画面で3通りの得点が表示できます</b>。<br>
+      <span class="rule-highlight-sub">※採点処理は擬似的なものであり、各大会における実際の採点と異なる可能性があります。</span>
+    </div>
+  </section>
+
+  <section class="mcard">
+    <h3 class="mcard-title">表示の仕様</h3>
+    <ul class="rule-list">
+      <li>課題文は、1行30文字の配置で30行ずつ表示します。次のページに達すると、表示部分が自動で切り替わります。</li>
+      <li>残り10秒になると、画面の周囲が赤く点滅します。（ただし10分に設定した場合のみ、残り2分でも通知されます。）</li>
+      <li>課題文中の <b style="color:#c0392b;">↵</b> のある場所では、Enterキーによる改行が必要です。</li>
+    </ul>
+  </section>
+
+  <h2 class="section-head">エラーの種類</h2>
+  <section class="mcard">
+    <h3 class="mcard-title">エラー種別</h3>
+    <table class="err-table">
+      <thead><tr><th>種別</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>誤字</td><td>課題文の文字を別の文字と打ち間違えるエラー。（例：最新の→細心の）</td></tr>
+        <tr><td>脱字</td><td>課題文の文字を入力せずに飛ばすエラー。（例：最新の→最の）</td></tr>
+        <tr><td>余字</td><td>課題文にない文字を余分に入力するエラー。（例：最新の→最新版の）</td></tr>
+      </tbody>
+    </table>
+    <div class="err-example">
+      この他に毎日パソコン入力コンクールでは「未変換」、Interstenoでは「反転」がありますが、このソフトでは扱いません。
+    </div>
+    <div class="err-example">
+      プレイ終了時に入力末尾に未変換の文字などのエラーが残ってしまった場合、<u>原則的にそのミスは採点に含めないようにします</u>。（除外判定は機械的に行うため、すべてのケースに対応できない場合があります。）
+    </div>
+  </section>
+
+  <h2 class="section-head">3大会の採点ルール</h2>
+
+  <section class="mcard">
+    <h3 class="mcard-title">採点ルール1：全国高等学校ワープロ競技大会</h3>
+    <p class="mcard-lead">全国の商業高校生が参加するワープロ大会。<br>変換学習の使用や、入力字数を超えるものも含めた辞書登録が認められている。</p>
+    <table class="err-table">
+      <thead><tr><th>種別</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>誤字</td><td>対象箇所の<u>課題文側の文字数</u>をカウント。</td></tr>
+        <tr><td>脱字</td><td>1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></td></tr>
+        <tr><td>余字</td><td>1<u>箇所</u>につき1エラー。（連続する余字はまとめて1エラー扱い。）</td></tr>
+      </tbody>
+    </table>
+    <div class="rule-highlight">
+      <b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字）×10。
+    </div>
+    <div class="err-example">
+      <b>誤字の例</b>：「最新版」を「さいしんばん」「saisinban」「再審判」と入力した場合、「最新版」が3文字なのですべて3エラー。
+    </div>
+    <div class="err-example">
+      <b>失格ルール</b>：エラーカウントが30以上になると失格。
+    </div>
+  </section>
+
+  <section class="mcard">
+    <h3 class="mcard-title">採点ルール2：毎日パソコン入力コンクール</h3>
+    <p class="mcard-lead">小学生～高校生を中心に全国の参加者が集う大規模なコンクール。<br>変換学習や辞書登録は認められていない。エラー数に応じた特別点が存在するため、正確な入力が重要。</p>
+    <table class="err-table">
+      <thead><tr><th>種別</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>誤字</td><td>1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</td></tr>
+        <tr><td>脱字</td><td>1文字につき1エラー。<u>脱行はその文字数分（最大30字）がエラー。</u></td></tr>
+        <tr><td>余字</td><td>1文字につき1エラー。</td></tr>
+      </tbody>
+    </table>
+    <div class="rule-highlight">
+      <b>得点</b>：総字数 − エラーカウント（誤字＋脱字＋余字） ＋ 特別点。<br><u>特別点はエラーが3字以内だったときのボーナス。0字で総字数の20%、1字で15%、2字で10%、3字で5%が加点される（小数点以下切り上げ）。</u>
+    </div>
+    <div class="err-example">
+      <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6エラー。「さ」と入力した場合、誤字1＋脱字2の3エラー。
+    </div>
+    <div class="err-example">
+      <b>失格ルール</b>：エラーカウントが9以上になると失格。
+    </div>
+  </section>
+
+  <section class="mcard">
+    <h3 class="mcard-title">採点ルール3：Intersteno Internet Contests</h3>
+    <p class="mcard-lead">タイピングの世界大会。日本語も含めた十数言語のタイピング競技をオンラインで行う。<br>変換学習や辞書登録は可能だが、入力字数を超える辞書登録は認められていない。</p>
+    <table class="err-table">
+      <thead><tr><th>種別</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td>誤字</td><td>1文字につき1エラー。課題文側と入力側の文字数が異なる場合、少ない方の数を誤字数とし、残りを脱字または余字としてカウント。</td></tr>
+        <tr><td>脱字</td><td>1<u>箇所</u>につき1エラー。（連続する脱字はまとめて1エラー扱い。）</td></tr>
+        <tr><td>余字</td><td>1文字につき1エラー。</td></tr>
+      </tbody>
+    </table>
+    <div class="rule-highlight">
+      <b>得点</b>：換算字数（総字数×2.95） − エラーカウント（誤字＋脱字＋余字）×50。小数点以下切り上げ。
+    </div>
+    <div class="err-example">
+      <b>誤字の例</b>：「最新版」を「さいしんばん」と入力した場合、誤字3＋余字3の6エラー。「さ」と入力した場合、誤字1＋脱字1の2エラー。
+    </div>
+    <div class="err-example">
+      <b>失格ルール</b>：エラーカウントが換算字数の0.5%（小数点切り上げ）以上になると失格。
+    </div>
+  </section>
+
+  <a class="btn-secondary" href="/">トップに戻る</a>
+</div>
+</div>
+</body>
+</html>

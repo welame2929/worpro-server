@@ -79,9 +79,13 @@ const httpServer = http.createServer((req, res) => {
     return;
   }
 
-  // アップデート内容ページ
-  if (url === '/updates.html' || url === '/updates') {
-    const filePath = path.join(__dirname, 'public', 'updates.html');
+  // index.html以外の独立したページ（ルール説明・アップデート内容など）。
+  // 拡張子ありなしの両方（/rules.html と /rules）で開けるようにする。
+  // ここに列挙したものだけを配信し、public/配下の任意のファイルは公開しない。
+  const SUB_PAGES = ['rules', 'updates'];
+  const pageName = url.replace(/^\//, '').replace(/\.html$/i, '');
+  if (SUB_PAGES.includes(pageName)) {
+    const filePath = path.join(__dirname, 'public', pageName + '.html');
     fs.readFile(filePath, (err, data) => {
       if (err) { res.writeHead(404); res.end('Not found'); return; }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -104,12 +108,18 @@ const wss = new WebSocketServer({ server: httpServer });
 
 // rooms: Map<roomId, Room>
 // Room: { hostWs, text, textName, players: Map<ws, Player>, gameState }
-// Player: { name, ready, result }
+// Player: { id, name, ready, result }
 // gameState: 'waiting' | 'playing' | 'finished'
 const rooms = new Map();
 
 function genRoomId() {
   return Math.random().toString(36).slice(2, 7).toUpperCase();
+}
+
+// プレイヤーの識別子。ハンドルネームは重複しうる（未入力時は全員「名無し」になる）ため、
+// 「リザルトのどの行が自分か」をクライアント側で判別するために使う。
+function genPlayerId() {
+  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 }
 
 function broadcast(room, msg) {
@@ -133,10 +143,14 @@ function buildResults(room) {
   const results = [];
   for (const [, p] of room.players) {
     results.push({
+      id: p.id,
       name: p.name,
       imeRule: p.imeRule,
       totalChars: p.result ? p.result.totalChars : null,
       scores: p.result ? p.result.scores : null,
+      // 入力内容そのものを配る。各クライアントが手元の課題文と突き合わせて
+      // 正誤判定（diff）を描画するため、整形済みHTMLではなく素のテキストを渡す。
+      input: p.result ? p.result.input : null,
     });
   }
   return results;
@@ -167,8 +181,11 @@ wss.on('connection', (ws) => {
       // ── ルーム作成 ───────────────────────────────────────────
       case 'CREATE_ROOM': {
         const roomId = genRoomId();
-        // プレイ時間は300秒(5分)または600秒(10分)のみ許可
-        const duration = (msg.duration === 300) ? 300 : 600;
+        // プレイ時間は1〜10分（60〜600秒）の1分刻みのみ許可。
+        // 範囲外・非整数・未指定はすべて既定の10分にフォールバックする。
+        const durationMin = Math.round(Number(msg.duration) / 60);
+        const duration = (Number.isInteger(durationMin) && durationMin >= 1 && durationMin <= 10)
+          ? durationMin * 60 : 600;
         // IMEレギュレーションは3種のみ許可、未指定・不正値は normal にフォールバック
         const IME_ALLOWED = ['normal','mainichi','warpro'];
         let imeRule = 'normal';
@@ -190,10 +207,11 @@ wss.on('connection', (ws) => {
           gameState: 'waiting',
           timerInterval: null,
         };
-        room.players.set(ws, { name: msg.name, imeRule, ready: false, result: null, connected: true });
+        const hostId = genPlayerId();
+        room.players.set(ws, { id: hostId, name: msg.name, imeRule, ready: false, result: null, connected: true });
         rooms.set(roomId, room);
         currentRoomId = roomId;
-        ws.send(JSON.stringify({ type: 'ROOM_CREATED', roomId }));
+        ws.send(JSON.stringify({ type: 'ROOM_CREATED', roomId, playerId: hostId }));
         broadcast(room, roomState(room, roomId));
         console.log(`Room created: ${roomId} by ${msg.name} (duration ${duration}s, IME ${imeRule}, serverName ${serverName || '-'})`);
         break;
@@ -215,9 +233,10 @@ wss.on('connection', (ws) => {
           if (['normal','mainichi','warpro'].includes(msg.imeRule)) imeRule = msg.imeRule;
           else console.warn(`[JOIN_ROOM] Invalid imeRule '${msg.imeRule}' from ${msg.name}, falling back to 'normal'`);
         }
-        room.players.set(ws, { name: msg.name, imeRule, ready: false, result: null, connected: true });
+        const guestId = genPlayerId();
+        room.players.set(ws, { id: guestId, name: msg.name, imeRule, ready: false, result: null, connected: true });
         currentRoomId = msg.roomId;
-        ws.send(JSON.stringify({ type: 'JOIN_OK', roomId: msg.roomId, textName: room.textName }));
+        ws.send(JSON.stringify({ type: 'JOIN_OK', roomId: msg.roomId, textName: room.textName, playerId: guestId }));
         broadcast(room, roomState(room, msg.roomId));
         console.log(`${msg.name} joined room ${msg.roomId} (IME ${imeRule})`);
         break;
@@ -285,6 +304,9 @@ wss.on('connection', (ws) => {
         player.result = {
           totalChars: msg.totalChars,
           scores: msg.scores,
+          // 他プレイヤーの正誤判定表示用。課題文より極端に長い入力は
+          // 中継する意味がないため、念のため上限を設けて切り詰める。
+          input: (typeof msg.input === 'string') ? msg.input.slice(0, 20000) : '',
         };
         broadcast(room, { type: 'RESULTS_UPDATE', results: buildResults(room) });
         break;
