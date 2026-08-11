@@ -82,7 +82,7 @@ const httpServer = http.createServer((req, res) => {
   // index.html以外の独立したページ（ルール説明・アップデート内容など）。
   // 拡張子ありなしの両方（/rules.html と /rules）で開けるようにする。
   // ここに列挙したものだけを配信し、public/配下の任意のファイルは公開しない。
-  const SUB_PAGES = ['rules', 'updates'];
+  const SUB_PAGES = ['rules', 'updates', 'qa'];
   const pageName = url.replace(/^\//, '').replace(/\.html$/i, '');
   if (SUB_PAGES.includes(pageName)) {
     const filePath = path.join(__dirname, 'public', pageName + '.html');

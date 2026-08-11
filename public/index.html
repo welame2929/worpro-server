@@ -160,6 +160,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .btn-primary:focus-visible{outline:2px solid var(--cyan-bright);outline-offset:2px;}
 .btn-secondary{width:100%;padding:12px;background:transparent;color:var(--blue-mid);border:1px solid rgba(128,152,214,0.4);border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit;transition:all .15s;}
 .btn-secondary:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
+/* Xへの結果シェアボタン。X本体のブランドカラー（黒）にして他の操作ボタンと区別する */
+.btn-share{
+  width:100%;padding:13px;background:#000000;color:#ffffff;
+  border:none;border-radius:8px;font-size:16px;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .15s;
+}
+.btn-share:hover{background:#242424;}
+.btn-share:focus-visible{outline:2px solid var(--cyan-bright);outline-offset:2px;}
 .btn-row{display:flex;flex-direction:column;gap:8px;}
 .btn-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
 /* 分割レイアウトの画面下部の操作列：左に「戻る」、右に主アクションを幅広で置く */
@@ -527,7 +536,7 @@ input[type="file"]{display:none;}
         <a href="https://github.com/welame2929/worpro-server/tree/main/public/texts" target="_blank" rel="noopener noreferrer">課題文txt一覧</a>
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfb3YxhlhfkzLhUAV1nGt9VM6058ParbCyKL8y9hM7Exgaj3A/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">不具合報告フォーム</a>
       </div>
-      <div class="footer-version">v1.1.0</div>
+      <div class="footer-version">v1.1.1</div>
     </div>
   </div>
   <div class="split-main">
@@ -543,6 +552,9 @@ input[type="file"]{display:none;}
       </button>
       <a class="mode-card mode-card-alt" href="/rules.html">
         <span class="mode-name">ルール説明</span>
+      </a>
+      <a class="mode-card mode-card-alt" href="/qa.html">
+        <span class="mode-name">Q&amp;A</span>
       </a>
     </div>
    </div>
@@ -847,6 +859,10 @@ input[type="file"]{display:none;}
           <dd><b id="bd-yoji">0</b></dd>
         </div>
         <div class="score-line">
+          <dt class="rs-label">プレイ時間</dt>
+          <dd class="rs-value" id="res-duration">0分</dd>
+        </div>
+        <div class="score-line">
           <dt class="rs-label">変換確定後文字のBackSpace回数（参考）</dt>
           <dd class="rs-value" id="res-backspace">0</dd>
         </div>
@@ -878,6 +894,10 @@ input[type="file"]{display:none;}
     <div class="diff-content" id="diff-output"></div>
   </details>
   <div class="btn-row">
+    <button class="btn-share" onclick="shareToX()">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      <span>結果をXでシェア</span>
+    </button>
     <button class="btn-secondary" id="retry-btn">同じ課題文でもう一度</button>
     <button class="btn-primary" onclick="goHome()">メニューに戻る</button>
   </div>
@@ -905,6 +925,7 @@ const SAMPLE_TEXTS=[
 let selectedText=null;    // {name, content}
 let timerInterval=null;
 let secondsLeft=600;
+let currentPlayDuration=600;  // 直近にプレイしたゲームの制限時間（秒）。リザルト表示・シェア用
 let warningShown=false, lastSecFlashShown=false;
 let flashEl=null, flashTimeout=null;
 let currentFontSize=14, currentLhPx=22;
@@ -1501,6 +1522,7 @@ function startGame(textObj, startAt){
   selectedText=textObj;
   // プレイ時間：マルチはサーバー指定、ソロは選択値
   const playDuration = isMulti ? (multiDuration||600) : (soloSelectedDuration||600);
+  currentPlayDuration=playDuration;
   secondsLeft=playDuration; warningShown=false; lastSecFlashShown=false; currentPage=0;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('play-screen').classList.add('active');
@@ -1613,7 +1635,8 @@ function endGame(){
   const result=scoreAll(selectedText.content, input);
   lastScore=result;
   document.getElementById('diff-output').innerHTML=result.diffHtml;
-  // バックスペース回数は採点方式に依存しないため、タブ切替時ではなくここで一度だけ設定する
+  // プレイ時間・バックスペース回数は採点方式に依存しないため、タブ切替時ではなくここで一度だけ設定する
+  document.getElementById('res-duration').textContent=(currentPlayDuration/60)+'分';
   document.getElementById('res-backspace').textContent=backspaceCount;
 
   // 表示方式：マルチはホスト指定のデフォルト、ソロはソロ選択のデフォルト
@@ -1688,6 +1711,30 @@ function renderMyScore(){
   const noteEl=document.getElementById('res-dq-note');
   if(s.disqualified){ noteEl.textContent=dqNoteText(currentRule,s); noteEl.style.display='block'; }
   else { noteEl.style.display='none'; }
+}
+
+// 結果画面に表示中の内容（現在選択中の採点方式）をXの投稿画面に渡す。
+// 課題文名はサーバー上課題文・アップロードファイルいずれも".txt"を含みうるため、
+// プルダウン表示（displayName）と同様に拡張子を落として見せる。
+function shareToX(){
+  if(!lastScore || !selectedText) return;
+  const s=lastScore[currentRule];
+  const textName=(selectedText.name||'').replace(/\.txt$/i,'');
+  // Interstenoのみ結果カードと同様に「換算字数」で表示する（総字数×2.95切り上げ）
+  const totalLine = (currentRule==='intersteno')
+    ? `換算字数：${s.convChars}`
+    : `総字数：${lastScore.totalChars}`;
+  // 失格ラインに達している場合、得点はそのまま参考値として記載しつつ、その旨を明記する
+  const dqLine = s.disqualified ? `\n※参考記録（失格相当）` : '';
+  const text=`課題文『${textName}』にて、${s.points}点を達成しました！\n\n`+
+    `プレイ時間：${currentPlayDuration/60}分\n`+
+    `採点ルール：${RULE_LABELS[currentRule]}\n`+
+    `${totalLine}\n`+
+    `エラー数：${s.miss}（誤字${s.goji}、脱字${s.datsuji}、余字${s.yoji}）${dqLine}\n\n`+
+    `https://worpro-server-production.up.railway.app/\n`+
+    `#JIKAGAMI`;
+  const url='https://x.com/intent/tweet?text='+encodeURIComponent(text);
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 // 採点方式タブの切り替え（自分のスコア＋順位表の両方に反映）

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Q&A｜JIKAGAMI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&family=BIZ+UDGothic:wght@400;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#1A1E3F;--blue:#8098D6;--blue-mid:#b8c8ea;
+  --white:#ffffff;--text:#1a1e3f;--border:#d0d8ee;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--navy);color:var(--text);}
+.page-wrap{min-height:100vh;background:var(--navy);}
+.page-inner{max-width:760px;margin:0 auto;padding:1.5rem 1.25rem 3rem;}
+.page-hero{text-align:center;padding:1.5rem 0 1.25rem;}
+.page-hero h1.app-title{
+  font-size:40px; font-weight:700; color:var(--white);
+  font-family:'BIZ UDGothic',sans-serif; letter-spacing:.08em;
+}
+.page-hero p.app-subtitle{font-size:15px;color:var(--blue-mid);margin-top:10px;}
+
+/* Q&A項目：質問（見出し）＋回答（本文）の1組を1枚のカードにする */
+.qa-item{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
+.qa-question{
+  display:flex; gap:10px; align-items:flex-start;
+  font-size:16px; font-weight:500; color:var(--navy);
+  letter-spacing:.02em; line-height:1.6;
+}
+.qa-question .qa-mark{color:#0E9BBD; flex-shrink:0;}
+.qa-answer{
+  display:flex; gap:10px; align-items:flex-start;
+  font-size:15px; color:#2e3658; line-height:1.85;
+  margin-top:10px; padding-top:10px; border-top:1px solid #aebfe0;
+}
+.qa-answer .qa-mark{color:#4658a8; flex-shrink:0;}
+.qa-answer b{color:var(--navy); font-weight:500;}
+
+.qa-empty{
+  background:#fdf4e0;border:1px solid #f0cd84;border-radius:8px;
+  padding:14px 18px;margin-bottom:1rem;font-size:15px;color:#5f4310;line-height:1.8;
+}
+
+.btn-secondary{
+  display:block; width:100%;padding:12px;background:transparent;color:var(--blue-mid);
+  border:1px solid rgba(128,152,214,0.4);border-radius:8px;font-size:15px;cursor:pointer;
+  font-family:inherit;transition:all .15s;text-align:center;text-decoration:none;margin-top:1.5rem;
+}
+.btn-secondary:hover{background:rgba(128,152,214,0.15);border-color:var(--blue);color:var(--white);}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<div class="page-inner">
+  <header class="page-hero">
+    <h1 class="app-title">JIKAGAMI</h1>
+    <p class="app-subtitle">Q&amp;A</p>
+  </header>
+
+  <!-- ここにQ&A項目を追加していく。1項目 = .qa-item 1枚。 -->
+  <div class="qa-item">
+    <div class="qa-question"><span class="qa-mark">Q.</span><span>このツールをプレイしている映像や画像を、動画・配信・SNS投稿に使用してよいですか？</span></div>
+    <div class="qa-answer"><span class="qa-mark">A.</span><span>動画・静止画のいずれも、動画投稿サイトやSNSでのご利用は営利・非営利を問わず自由に行っていただけます。クレジット表記も不要です。</span></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-question"><span class="qa-mark">Q.</span><span>このツール、またはツール内の文章を練習会に使用してよいですか？</span></div>
+    <div class="qa-answer"><span class="qa-mark">A.</span><span>
+      管理人への事前の連絡や許可申請なしで、自由にお使いいただけます。<br><br>
+      ただし個人で制作しているツールのため、動作を完全に保証するものではありません。これまでに判明した不具合には対応していますが、万が一未知の不具合、または過度な負荷による動作不良が発生した場合は、恐れ入りますが責任を負いかねます（営利目的のご利用の場合も同様です）。<br><br>
+      なお、課題文はサンプルの「日本国憲法」を除き、すべて当サイトのオリジナルです（作成の一部にAIを使用しております）。元のtxtファイルは、メニュー画面下部の「課題文txt一覧」からダウンロードできます。
+    </span></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-question"><span class="qa-mark">Q.</span><span>結果画面にて、なぜ変換確定後のBackSpaceしかカウントしないのですか？</span></div>
+    <div class="qa-answer"><span class="qa-mark">A.</span><span>
+      IME変換中に押されたキーの情報は、環境によって扱いが異なります。一部の環境（Chrome＋Windowsの日本語IMEなど）では、変換中に押されたキーがすべて種類の判別できない値に置き換えられてしまい、BackSpaceが押されたかどうかを判定できません。<br><br>
+      変換中のBackSpaceも含めてしまうと、環境によってカウントできたりできなかったりする不公平な指標になってしまいます。そのため、どの環境でも変わらず判定できる「変換確定後の文字に対するBackSpace」だけを対象としています。
+    </span></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-question"><span class="qa-mark">Q.</span><span>ルール説明に「入力末尾の未確定な文字は採点に含めない」とありますが、具体的にはどのような処理をしていますか？</span></div>
+    <div class="qa-answer"><span class="qa-mark">A.</span><span>
+      基本的な方針は、入力の末尾がエラーになっている場合、その部分を採点対象から除外するというものです。<br><br>
+      ただし、これをそのまま実装すると、末尾のエラー文字列が偶然にも課題文の直後の文字列と一致してしまった場合、その間の範囲がすべて誤字・脱字としてカウントされてしまう問題が残ります。これを防ぐため、さらに次の2つの処理を組み合わせています。<br><br>
+      <b>①採点範囲の制限</b>：採点の際、入力した文字数に、その約5%（最低10文字）を加えた範囲までしか課題文をチェックしません。<br><br>
+      <b>②短い一致の切り捨て</b>：入力の末尾から見て、3文字未満（＝2文字以下）しか連続して一致していない部分は「たまたま一致しただけ」とみなして切り捨てます。切り捨てた結果、さらに末尾がエラー扱いになる場合は、3文字以上の一致が見つかるところまでこの処理を繰り返します。<br><br>
+      これらの処理により、ほとんどのケースで末尾のエラーをカットできるようになっています。
+    </span></div>
+  </div>
+
+  <a class="btn-secondary" href="/">トップに戻る</a>
+</div>
+</div>
+</body>
+</html>
