@@ -108,12 +108,18 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .mcard-collapsible[open] > *:last-child{margin-bottom:1rem;}
 .mcard-collapsible[open] > summary{padding-bottom:0.5rem;}
 .mcard-title{font-size:18px;font-weight:500;color:var(--navy);margin-bottom:12px;letter-spacing:.04em;}
+/* 見出し直下に置く設定項目の説明文（プレイ設定画面用） */
+.mcard-desc{font-size:13px;color:#4658a8;line-height:1.7;margin:-6px 0 14px;}
+/* アップロードボタン直上の注記。見出し直下のmcard-descと文字の見た目は揃えつつ、
+   直前の要素（プルダウン等）との間隔を保つため上マージンは詰めない。 */
+.upload-note{font-size:13px;color:#4658a8;line-height:1.6;margin:0 0 8px;}
+.mcard-desc u, .upload-note u{text-decoration-color:#c0392b;text-underline-offset:2px;}
 /* カード内のサブセクション見出し（カード統合用） */
 .mcard-subtitle{font-size:15px;font-weight:500;color:var(--navy);letter-spacing:.06em;margin:18px 0 10px;padding-top:14px;border-top:1px solid #aebfe0;}
 .rule-list{list-style:none;font-size:15px;color:#2e3658;}
 .rule-list li{padding:7px 0 7px 18px;position:relative;line-height:1.8;}
 .rule-list li::before{
-  content:'';position:absolute;left:4px;top:13px;
+  content:'';position:absolute;left:4px;top:18px;
   width:5px;height:5px;border-radius:50%;background:#8098D6;
 }
 .rule-list li b{color:var(--navy);font-weight:500;}
@@ -354,10 +360,51 @@ input[type="file"]{display:none;}
 .badge-ready{background:#d6f0dd;color:#1f7a3a;}
 .badge-notready{background:#eceef5;color:#7a82a0;}
 .ime-tag{font-size:12px;color:#3a4aa0;background:#dde3f7;padding:2px 8px;border-radius:4px;}
-/* ロビーのルームID表示。ブランドパネル内に置き、参加者へ伝えやすいよう大きく見せる */
-.room-id-display{text-align:center;margin-top:20px;}
-.room-id-display .label{font-size:12px;color:var(--blue-mid);margin-bottom:4px;letter-spacing:.08em;}
-.room-id-display .id{font-size:38px;font-weight:500;color:var(--white);letter-spacing:.18em;font-family:'BIZ UDGothic',monospace;}
+/* チーム名タグ。IMEタグと並ぶため、色を変えて役割を区別する */
+.team-tag{font-size:12px;color:#7a4a10;background:#f7e6c8;padding:2px 8px;border-radius:4px;}
+/* ロビーのルームID表示。「参加者」ボックスの真上に置き、共有すべき情報だと
+   一目で伝わるようにする（初見でも迷わないよう説明文を添える） */
+.room-id-card{text-align:center;}
+.room-id-card .room-id-label{font-size:12px;color:#4658a8;letter-spacing:.08em;margin-bottom:6px;}
+.room-id-card .room-id-value{font-size:38px;font-weight:500;color:var(--navy);letter-spacing:.18em;font-family:'BIZ UDGothic',monospace;}
+.room-id-card .room-id-hint{font-size:13px;color:#4658a8;margin-top:10px;}
+
+/* ===ロビーのチャット=== */
+.chat-log{
+  height:160px; overflow-y:auto; background:#eaf0fa;
+  border:1px solid #aebfe0; border-radius:8px; padding:8px 10px;
+  display:flex; flex-direction:column; gap:6px; margin-bottom:8px;
+}
+.chat-msg{font-size:13.5px; line-height:1.5; word-break:break-word; overflow-wrap:anywhere;}
+.chat-msg-name{color:#3a4aa0; font-weight:500; margin-right:6px;}
+.chat-msg-self .chat-msg-name{color:var(--cyan-deep);}
+.chat-msg-text{color:#2e3658;}
+.chat-empty{font-size:12px; color:#8794ba; font-style:italic;}
+.chat-input-row{display:flex; gap:8px;}
+.chat-input-row .text-input{flex:1;}
+.chat-input-row .chat-send-btn{width:auto; padding:10px 18px; flex-shrink:0;}
+
+/* ===団体戦=== */
+/* チーム名入力欄（チーム設定画面）。行頭に「1」「2」…の番号を添える */
+.team-name-row{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+.team-name-row .team-no{
+  flex:0 0 auto; width:1.8em; text-align:center;
+  font-size:13px; color:#3a4aa0;
+}
+.team-name-row .text-input{flex:1; min-width:0;}
+/* ロビーのチーム選択ボタン。選択中は塗りつぶして「選ばれている感」を出す
+   （ラジオボタン .radio-group label と同じ配色ルールに揃える） */
+.team-choice-list{display:flex; flex-wrap:wrap; gap:8px;}
+.team-choice{
+  padding:9px 16px; background:#ffffff; border:1.5px solid #9fb1da; border-radius:8px;
+  color:#2e3658; font-size:14px; font-family:inherit; cursor:pointer; transition:all .15s;
+}
+.team-choice:hover{border-color:var(--cyan); background:#f4fbfd;}
+.team-choice.selected{
+  background:var(--cyan); border-color:var(--cyan); color:#ffffff; font-weight:500;
+  box-shadow:0 2px 6px rgba(14,155,189,0.3);
+}
+.team-choice:focus-visible{outline:2px solid var(--cyan); outline-offset:2px;}
 
 /* ===カウントダウン=== */
 #countdown-screen .page-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;}
@@ -387,18 +434,22 @@ input[type="file"]{display:none;}
 .page-indicator{font-size:14px;color:var(--navy);}
 .input-char-count{font-size:15px;font-weight:500;color:var(--text);}
 #source-frame{border:2px solid var(--navy);border-radius:4px;background:var(--white);flex-shrink:0;overflow:hidden;}
-#source-display{overflow:hidden;}
+/* 中間ページで1行分スクロールする際にtransformをアニメーションさせる
+   （#source-frame側のoverflow:hiddenがビューポートとして余分な1行分を隠す） */
+#source-display{overflow:hidden;transition:transform .3s ease;}
 .src-row{display:flex;align-items:stretch;}
-/* ピーク行：前ページ最終行の続き表示（改ページ境界の単語を見失わないための文脈行） */
-.src-row-peek{opacity:0.45;}
+/* ピーク行：前ページ最終行／次ページ先頭行の文脈表示（改ページ境界の単語を見失わないため）。
+   opacityにtransitionを付け、スクロールと同時にフェードイン・フェードアウトさせる。 */
+.src-row-peek{opacity:0.45;transition:opacity .3s ease;}
 .src-text{font-family:'BIZ UDGothic',monospace;white-space:pre;color:var(--text);flex:1;}
 .enter-mark{color:#c0392b;opacity:0.8;font-family:'Noto Sans JP',sans-serif;pointer-events:none;margin-left:1px;}
 .src-count-wrap{display:flex;align-items:center;flex-shrink:0;border-left:1px solid var(--border);}
 .src-count{font-size:10px;color:#aab4cc;text-align:right;padding:0 5px 0 2px;white-space:nowrap;}
 #ta-frame{border:2px solid var(--navy);border-radius:4px;background:var(--white);flex-shrink:0;overflow:hidden;}
 #ta-wrapper{overflow:hidden;background:var(--white);}
+/* 課題文側の1行ピークシフトと同期してtransformをアニメーションさせる（updateSourcePeekShift参照） */
 #typing-area{display:block;border:none;resize:none;padding:0;margin:0;font-family:'BIZ UDGothic',monospace;background:var(--white);color:var(--text);outline:none;overflow-y:hidden;overflow-x:hidden;
-  white-space:pre-wrap;line-break:anywhere;word-break:break-all;overflow-wrap:anywhere;}
+  white-space:pre-wrap;line-break:anywhere;word-break:break-all;overflow-wrap:anywhere;transition:transform .3s ease;}
 .flash-border{position:fixed;pointer-events:none;top:0;left:0;right:0;bottom:0;z-index:999;animation:flashB .5s step-end infinite;}
 @keyframes flashB{0%,100%{box-shadow:inset 0 0 0 7px rgba(248,113,113,.8);}50%{box-shadow:inset 0 0 0 7px transparent;}}
 
@@ -536,7 +587,7 @@ input[type="file"]{display:none;}
         <a href="https://github.com/welame2929/worpro-server/tree/main/public/texts" target="_blank" rel="noopener noreferrer">課題文txt一覧</a>
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfb3YxhlhfkzLhUAV1nGt9VM6058ParbCyKL8y9hM7Exgaj3A/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">不具合報告フォーム</a>
       </div>
-      <div class="footer-version">v1.1.1</div>
+      <div class="footer-version">v1.1.2</div>
     </div>
   </div>
   <div class="split-main">
@@ -572,22 +623,22 @@ input[type="file"]{display:none;}
    <div class="split-main-inner">
     <section class="mcard">
       <h2 class="mcard-title">課題文を選択</h2>
+      <p class="mcard-desc">プレイする文章を選択します。「一覧から課題文を選ぶ」のリストより、サイトオリジナルの課題文を使用可能です。</p>
       <fieldset class="radio-group" id="solo-text-select">
         <input type="radio" name="solo-text" id="solo-text-0" value="0">
-        <label for="solo-text-0">① 富士山（短文・動作確認用）</label>
-        <input type="radio" name="solo-text" id="solo-text-1" value="1">
-        <label for="solo-text-1">② 日本国憲法（長文・動作確認用）</label>
+        <label for="solo-text-0">日本国憲法（動作確認用）</label>
       </fieldset>
       <select id="solo-server-select" class="text-select-dropdown" style="display:none;">
         <option value="">（一覧から課題文を選ぶ）</option>
       </select>
+      <p class="upload-note">txtファイルをアップロードし、自分で用意した課題文を使用することもできます。<u>文章は全角文字のみで作成してください</u>（半角英数字を使用するとうまく動作しない可能性があります）。</p>
       <div class="upload-area" onclick="document.getElementById('solo-file-input').click()">txtファイルをアップロード</div>
       <input type="file" id="solo-file-input" accept=".txt">
       <div id="solo-selected-info"></div>
-      <p class="form-note">※課題文は全角文字のみで作成してください（半角英数字は不可）</p>
     </section>
     <section class="mcard">
       <h2 class="mcard-title">採点方式</h2>
+      <p class="mcard-desc">結果画面にデフォルトで表示される採点方式を選びます。他の方式も同じ画面で確認できます。</p>
       <fieldset class="radio-group" id="solo-rule-select">
         <input type="radio" name="solo-rule" id="solo-rule-warpro" value="warpro" checked>
         <label for="solo-rule-warpro">ワープロ大会</label>
@@ -596,10 +647,10 @@ input[type="file"]{display:none;}
         <input type="radio" name="solo-rule" id="solo-rule-intersteno" value="intersteno">
         <label for="solo-rule-intersteno">Intersteno</label>
       </fieldset>
-      <p class="form-note">※結果画面ではタブで他方式も確認できます</p>
     </section>
     <section class="mcard">
       <h2 class="mcard-title">プレイ時間</h2>
+      <p class="mcard-desc">プレイする時間を1～10分の間で選べます。</p>
       <div class="duration-slider-wrap">
         <output class="duration-value" id="solo-duration-value" for="solo-duration-slider">10分</output>
         <input type="range" class="duration-slider" id="solo-duration-slider"
@@ -629,17 +680,19 @@ input[type="file"]{display:none;}
       <input type="text" id="player-name-input" class="text-input" placeholder="例：タイピング太郎" maxlength="20">
     </section>
     <section class="mcard">
-      <h2 class="mcard-title">IMEレギュレーション</h2>
+      <h2 class="mcard-title">使用するIME方式</h2>
+      <p class="mcard-desc">自分が使用するIME方式を選択します（分からなければ「通常」で構いません）。参考情報であり、採点には影響しません。</p>
       <fieldset class="radio-group" id="ime-rule-select">
         <input type="radio" name="ime-rule" id="ime-normal" value="normal" checked>
         <label for="ime-normal">通常（変換学習または辞書登録を使う）</label>
-        <p class="ime-split-note">下の特別な条件に当てはまる方は、下の2項目をかわりに選択してください。</p>
+        <p class="ime-split-note">下の特別な条件に当てはまる方は、かわりにこれらの項目を選択してください。</p>
         <input type="radio" name="ime-rule" id="ime-mainichi" value="mainichi">
-        <label for="ime-mainichi">変換学習・辞書登録なし（デフォルトのIMEのみを使う場合に選択。毎パソルール準拠）</label>
+        <label for="ime-mainichi">変換学習・辞書登録なし（学習機能の一切をOFFにし、デフォルトのIMEのみを使う場合に選択）</label>
         <input type="radio" name="ime-rule" id="ime-warpro" value="warpro">
         <label for="ime-warpro">短縮辞書登録あり（「じか」→「時間」など、入力文字数を超える辞書登録を使う場合に選択）</label>
+        <input type="radio" name="ime-rule" id="ime-kanjichoku" value="kanjichoku">
+        <label for="ime-kanjichoku">漢字直接入力（T-codeなど、漢字を直接入力できる方式を使う場合に選択）</label>
       </fieldset>
-      <p class="form-note">※申告は自己申告制で、リザルトの参考情報として全員に表示されます。</p>
     </section>
     <div id="name-err" class="err-msg">ハンドルネームを入力してください</div>
     <div class="btn-pair">
@@ -651,7 +704,66 @@ input[type="file"]{display:none;}
   </div>
 </div>
 
-<!-- ④ホスト：課題文指定 -->
+<!-- ④ホスト：対戦形式（個人戦／団体戦）の選択 -->
+<div id="multi-mode-screen" class="screen split">
+  <div class="split-brand">
+    <h1 class="brand-title">JIKAGAMI</h1>
+    <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
+    <div class="brand-screen">ルームを作る</div>
+  </div>
+  <div class="split-main">
+   <div class="split-main-inner">
+    <section class="mcard">
+      <h2 class="mcard-title">対戦形式</h2>
+      <p class="mcard-desc">個人戦では参加者ひとりずつの順位を表示します。団体戦ではチームを作り、結果画面にチームごとの合計得点も表示されます。</p>
+      <fieldset class="radio-group" id="room-mode-select">
+        <input type="radio" name="room-mode" id="room-mode-individual" value="individual" checked>
+        <label for="room-mode-individual">個人戦</label>
+        <input type="radio" name="room-mode" id="room-mode-team" value="team">
+        <label for="room-mode-team">団体戦（チームに分かれて合計得点を競う）</label>
+      </fieldset>
+    </section>
+    <div class="action-row">
+      <button class="btn-back" onclick="showScreen('multi-name-screen')">戻る</button>
+      <button class="btn-primary" onclick="goFromModeSelect()">次へ</button>
+    </div>
+   </div>
+  </div>
+</div>
+
+<!-- ⑤ホスト：チーム設定（団体戦のみ） -->
+<div id="team-setup-screen" class="screen split">
+  <div class="split-brand">
+    <h1 class="brand-title">JIKAGAMI</h1>
+    <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
+    <div class="brand-screen">チーム設定</div>
+  </div>
+  <div class="split-main">
+   <div class="split-main-inner">
+    <section class="mcard">
+      <h2 class="mcard-title">チーム数</h2>
+      <p class="mcard-desc">参加するチームの数を2～10の間で選べます。</p>
+      <div class="duration-slider-wrap">
+        <output class="duration-value" id="team-count-value" for="team-count-slider">2チーム</output>
+        <input type="range" class="duration-slider" id="team-count-slider"
+          min="2" max="10" step="1" value="2" aria-label="チーム数">
+        <div class="duration-scale"><span>2チーム</span><span>10チーム</span></div>
+      </div>
+    </section>
+    <section class="mcard">
+      <h2 class="mcard-title">チーム名</h2>
+      <p class="mcard-desc">各チームの名前を入力します。空欄のままにすると「チームA」「チームB」…と自動で設定されます。</p>
+      <div id="team-name-inputs"></div>
+    </section>
+    <div class="action-row">
+      <button class="btn-back" onclick="showScreen('multi-mode-screen')">戻る</button>
+      <button class="btn-primary" onclick="finishTeamSetup()">完了</button>
+    </div>
+   </div>
+  </div>
+</div>
+
+<!-- ⑥ホスト：課題文指定 -->
 <div id="host-setup-screen" class="screen split">
   <div class="split-brand">
     <h1 class="brand-title">JIKAGAMI</h1>
@@ -662,22 +774,22 @@ input[type="file"]{display:none;}
    <div class="split-main-inner">
     <section class="mcard">
       <h2 class="mcard-title">課題文を指定</h2>
+      <p class="mcard-desc">プレイする文章を選択します。「一覧から課題文を選ぶ」のリストより、サイトオリジナルの課題文を使用可能です。</p>
       <fieldset class="radio-group" id="host-text-select">
         <input type="radio" name="host-text" id="host-text-0" value="0">
-        <label for="host-text-0">① 富士山（短文・動作確認用）</label>
-        <input type="radio" name="host-text" id="host-text-1" value="1">
-        <label for="host-text-1">② 日本国憲法（長文・動作確認用）</label>
+        <label for="host-text-0">日本国憲法（動作確認用）</label>
       </fieldset>
       <select id="host-server-select" class="text-select-dropdown" style="display:none;">
         <option value="">（一覧から課題文を選ぶ）</option>
       </select>
+      <p class="upload-note">txtファイルをアップロードし、自分で用意した課題文を使用することもできます。<u>文章は全角文字のみで作成してください</u>（半角英数字を使用するとうまく動作しない可能性があります）。</p>
       <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
       <input type="file" id="host-file-input" accept=".txt">
       <div id="host-selected-info"></div>
-      <p class="form-note">※課題文は全角文字のみで作成してください（半角英数字は不可）</p>
     </section>
     <section class="mcard">
       <h2 class="mcard-title">順位表のデフォルト採点方式</h2>
+      <p class="mcard-desc">結果画面にデフォルトで表示される採点方式を選びます。他の方式も同じ画面で確認できます。</p>
       <fieldset class="radio-group" id="host-rule-select">
         <input type="radio" name="host-rule" id="host-rule-warpro" value="warpro" checked>
         <label for="host-rule-warpro">ワープロ大会</label>
@@ -686,10 +798,10 @@ input[type="file"]{display:none;}
         <input type="radio" name="host-rule" id="host-rule-intersteno" value="intersteno">
         <label for="host-rule-intersteno">Intersteno</label>
       </fieldset>
-      <p class="form-note">※結果画面では各自タブで他方式も確認できます</p>
     </section>
     <section class="mcard">
       <h2 class="mcard-title">プレイ時間</h2>
+      <p class="mcard-desc">プレイする時間を1～10分の間で選べます。</p>
       <div class="duration-slider-wrap">
         <output class="duration-value" id="host-duration-value" for="host-duration-slider">10分</output>
         <input type="range" class="duration-slider" id="host-duration-slider"
@@ -699,7 +811,7 @@ input[type="file"]{display:none;}
     </section>
     <div id="host-err" class="err-msg">課題文を選択してください</div>
     <div class="action-row">
-      <button class="btn-back" onclick="showScreen('multi-name-screen')">戻る</button>
+      <button class="btn-back" onclick="backFromHostSetup()">戻る</button>
       <button class="btn-primary" id="create-room-btn" onclick="createRoom()">ルームを作成してスタンバイ</button>
     </div>
    </div>
@@ -736,20 +848,38 @@ input[type="file"]{display:none;}
     <h1 class="brand-title">JIKAGAMI</h1>
     <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
     <div class="brand-screen">ロビー</div>
-    <!-- ルームIDは参加者への共有に使うため、ブランドパネル側で大きく見せる -->
-    <div class="room-id-display">
-      <div class="label">ルームID</div>
-      <div class="id" id="lobby-room-id">-----</div>
-    </div>
   </div>
   <div class="split-main">
    <div class="split-main-inner">
+    <!-- ルームIDは「参加者」ボックスの直上に配置し、共有すべき情報だと分かるよう説明文を添える -->
+    <section class="mcard room-id-card">
+      <div class="room-id-label">ルームID</div>
+      <div class="room-id-value" id="lobby-room-id">-----</div>
+      <p class="room-id-hint">ルームIDを参加者に共有してください</p>
+    </section>
     <section class="mcard">
       <h2 class="mcard-title">参加者</h2>
       <div class="player-list" id="lobby-player-list"></div>
       <div id="lobby-text-info" style="font-size:13px;color:#4658a8;margin-top:4px;"></div>
     </section>
     <div id="lobby-err" class="err-msg"></div>
+    <!-- チーム選択：団体戦のときだけ表示。選択内容は「参加者」一覧にも反映される -->
+    <section class="mcard" id="team-select-card" style="display:none;">
+      <h2 class="mcard-title">チームを選択</h2>
+      <p class="mcard-desc">参加するチームをクリックして選んでください。選ばなかった場合はチームなしとして扱われます。</p>
+      <div class="team-choice-list" id="team-choice-list"></div>
+    </section>
+    <!-- チャット：部屋内の参加者同士のやり取り用。ルーム退出・部屋消滅で内容は残らない -->
+    <section class="mcard">
+      <h2 class="mcard-title">チャット</h2>
+      <div class="chat-log" id="chat-log" role="log" aria-live="polite"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" class="text-input" placeholder="メッセージを入力…" maxlength="200"
+          autocomplete="off">
+        <button class="btn-primary chat-send-btn" onclick="sendChatMessage()">送信</button>
+      </div>
+      <div id="chat-err" class="err-msg" style="margin-top:6px;"></div>
+    </section>
     <!-- 練習入力：IMEモードの調整や指慣らし用。採点対象外・他プレイヤーには共有されない -->
     <section class="mcard">
       <h2 class="mcard-title">練習入力</h2>
@@ -870,6 +1000,16 @@ input[type="file"]{display:none;}
     </div>
   </section>
 
+  <!-- 団体戦のみ：チームごとの合計得点 -->
+  <section id="team-score-section" class="mcard" style="display:none;">
+    <h2 class="mcard-title">チーム合計得点</h2>
+    <p class="mcard-desc">各チームのメンバー合計点です（失格者除く）。</p>
+    <table class="ranking-table">
+      <thead><tr><th>順位</th><th>チーム</th><th id="team-point-head">得点</th><th>人数</th></tr></thead>
+      <tbody id="team-score-body"></tbody>
+    </table>
+  </section>
+
   <!-- マルチ時：全員の順位表 -->
   <section id="ranking-section" class="mcard" style="display:none;">
     <h2 class="mcard-title">順位表</h2>
@@ -917,8 +1057,7 @@ const PEEK_ROWS=1;
 const PAD_L=14, PAD_R=14, COUNT_W=48;
 
 const SAMPLE_TEXTS=[
-  {name:"① 富士山（短文・動作確認用）",content:`　富士山の高さは３７７６メートル。子どものころに学校で習ったこの数字は、大正時代の測量により決定されたもので、長い間この数字が使われてきた。\n　ところが、最新の技術を利用して正確に測り直したところ、従来の高さより６５センチ程度低いことがわかった。`},
-  {name:"② 日本国憲法（長文・動作確認用）",content:`日本国憲法（前文＋全１１章１０３条より冒頭を抜粋）\n\n　日本国民は、正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたつて自由のもたらす恵沢を確保し、政府の行為によつて再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。そもそも国政は、国民の厳粛な信託によるものであつて、その権威は国民に由来し、その権力は国民の代表者がこれを行使し、その福利は国民がこれを享受する。これは人類普遍の原理であり、この憲法は、かかる原理に基くものである。われらは、これに反する一切の憲法、法令及び詔勅を排除する。\n\n　日本国民は、恒久の平和を念願し、人間相互の関係を支配する崇高な理想を深く自覚するのであつて、平和を愛する諸国民の公正と信義に信頼して、われらの安全と生存を保持しようと決意した。われらは、平和を維持し、専制と隷従、圧迫と偏狭を地上から永遠に除去しようと努めてゐる国際社会において、名誉ある地位を占めたいと思ふ。われらは、全世界の国民が、ひとしく恐怖と欠乏から免かれ、平和のうちに生存する権利を有することを確認する。\n\n　われらは、いづれの国家も、自国のことのみに専念して他国を無視してはならないのであつて、政治道徳の法則は、普遍的なものであり、この法則に従ふことは、自国の主権を維持し、他国と対等関係に立たうとする各国の責務であると信ずる。\n\n　日本国民は、国家の名誉にかけ、全力をあげてこの崇高な理想と目的を達成することを誓ふ。\n\n第一条\n天皇は、日本国の象徴であり日本国民統合の象徴であつて、この地位は、主権の存する日本国民の総意に基く。\n\n第二条\n皇位は、世襲のものであつて、国会の議決した皇室典範の定めるところにより、これを継承する。\n\n第三条\n天皇の国事に関するすべての行為には、内閣の助言と承認を必要とし、内閣が、その責任を負ふ。\n\n第四条\n天皇は、この憲法の定める国事に関する行為のみを行ひ、国政に関する権能を有しない。\n天皇は、法律の定めるところにより、その国事に関する行為を委任することができる。\n\n第五条\n皇室典範の定めるところにより摂政を置くときは、摂政は、天皇の名でその国事に関する行為を行ふ。この場合には、前条第一項の規定を準用する。\n\n第六条\n天皇は、国会の指名に基いて、内閣総理大臣を任命する。\n天皇は、内閣の指名に基いて、最高裁判所の長たる裁判官を任命する。\n\n第七条\n天皇は、内閣の助言と承認により、国民のために、左の国事に関する行為を行ふ。憲法改正、法律、政令及び条約を公布すること。国会を召集すること。衆議院を解散すること。国会議員の総選挙の施行を公示すること。国務大臣及び法律の定めるその他の官吏の任免並びに全権委任状及び大使及び公使の信任状を認証すること。大赦、特赦、減刑、刑の執行の免除及び復権を認証すること。栄典を授与すること。批准書及び法律の定めるその他の外交文書を認証すること。外国の大使及び公使を接受すること。儀式を行ふこと。`}
+  {name:"日本国憲法（動作確認用）",content:`日本国憲法（前文＋全１１章１０３条より冒頭を抜粋）\n\n　日本国民は、正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたつて自由のもたらす恵沢を確保し、政府の行為によつて再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。そもそも国政は、国民の厳粛な信託によるものであつて、その権威は国民に由来し、その権力は国民の代表者がこれを行使し、その福利は国民がこれを享受する。これは人類普遍の原理であり、この憲法は、かかる原理に基くものである。われらは、これに反する一切の憲法、法令及び詔勅を排除する。\n\n　日本国民は、恒久の平和を念願し、人間相互の関係を支配する崇高な理想を深く自覚するのであつて、平和を愛する諸国民の公正と信義に信頼して、われらの安全と生存を保持しようと決意した。われらは、平和を維持し、専制と隷従、圧迫と偏狭を地上から永遠に除去しようと努めてゐる国際社会において、名誉ある地位を占めたいと思ふ。われらは、全世界の国民が、ひとしく恐怖と欠乏から免かれ、平和のうちに生存する権利を有することを確認する。\n\n　われらは、いづれの国家も、自国のことのみに専念して他国を無視してはならないのであつて、政治道徳の法則は、普遍的なものであり、この法則に従ふことは、自国の主権を維持し、他国と対等関係に立たうとする各国の責務であると信ずる。\n\n　日本国民は、国家の名誉にかけ、全力をあげてこの崇高な理想と目的を達成することを誓ふ。\n\n第一条\n天皇は、日本国の象徴であり日本国民統合の象徴であつて、この地位は、主権の存する日本国民の総意に基く。\n\n第二条\n皇位は、世襲のものであつて、国会の議決した皇室典範の定めるところにより、これを継承する。\n\n第三条\n天皇の国事に関するすべての行為には、内閣の助言と承認を必要とし、内閣が、その責任を負ふ。\n\n第四条\n天皇は、この憲法の定める国事に関する行為のみを行ひ、国政に関する権能を有しない。\n天皇は、法律の定めるところにより、その国事に関する行為を委任することができる。\n\n第五条\n皇室典範の定めるところにより摂政を置くときは、摂政は、天皇の名でその国事に関する行為を行ふ。この場合には、前条第一項の規定を準用する。\n\n第六条\n天皇は、国会の指名に基いて、内閣総理大臣を任命する。\n天皇は、内閣の指名に基いて、最高裁判所の長たる裁判官を任命する。\n\n第七条\n天皇は、内閣の助言と承認により、国民のために、左の国事に関する行為を行ふ。憲法改正、法律、政令及び条約を公布すること。国会を召集すること。衆議院を解散すること。国会議員の総選挙の施行を公示すること。国務大臣及び法律の定めるその他の官吏の任免並びに全権委任状及び大使及び公使の信任状を認証すること。大赦、特赦、減刑、刑の執行の免除及び復権を認証すること。栄典を授与すること。批准書及び法律の定めるその他の外交文書を認証すること。外国の大使及び公使を接受すること。儀式を行ふこと。`}
 ];
 
 // ゲーム状態
@@ -930,6 +1069,9 @@ let warningShown=false, lastSecFlashShown=false;
 let flashEl=null, flashTimeout=null;
 let currentFontSize=14, currentLhPx=22;
 let allSourceLines=[], currentPage=0;
+// 中間ページ（前後どちらのページも存在するページ）で、入力が2行目以降に進んだときに
+// 表示を1行スクロールし、下端に次ページ1行目のピーク行を見せているかどうか
+let sourcePeekShifted=false;
 let isMulti=false;        // マルチプレイ中か
 let isComposing=false;    // IME composition中か（スペース入力妨害防止用）
 let backspaceCount=0;     // プレイ中に押したバックスペースの回数（採点対象外の参考記録）
@@ -950,6 +1092,13 @@ let soloSelectedDuration=600;  // ソロ時のプレイ時間（秒）
 let hostSelectedDuration=600;  // ホスト設定中のプレイ時間（秒）
 let multiDuration=600;         // マルチ時にサーバーから受信したプレイ時間
 let playerImeRule='normal';    // マルチ時の自己申告IMEレギュレーション
+// 団体戦。ホスト設定中の値（hostSelected*）と、サーバーから受信した確定値（multi*）を分ける。
+// multiTeams は ROOM_STATE と GAME_START の両方で更新され、リザルトの集計にも使う。
+let hostSelectedMode='individual'; // ホストが選んだ対戦形式（'individual' | 'team'）
+let hostSelectedTeams=[];          // ホストが入力したチーム名（未入力は空文字のまま保持）
+let multiMode='individual';        // サーバーから受信した対戦形式
+let multiTeams=null;               // サーバーから受信したチーム名配列（個人戦ではnull）
+let myTeamId=null;                 // 自分が選んだチームのインデックス（未選択はnull）
 // 課題文選択の世代番号。async選択（FileReader / fetch）の完了時に自分が最新の
 // 選択かどうかを判定するために使う。ラジオ切替や別方式の選択で++され、
 // 古いasync完了は捨てられる。これがないと「読み込み中に別のを選んだ」「読み込み中に
@@ -1053,9 +1202,81 @@ function goToHostOrJoin(mode){
   document.getElementById('name-err').classList.remove('show');
   playerName=name;
   connectWS(()=>{
-    if(mode==='host') showScreen('host-setup-screen');
+    // ホストは対戦形式（個人戦／団体戦）の選択を挟んでから課題文設定に進む
+    if(mode==='host') showScreen('multi-mode-screen');
     else showScreen('join-screen');
   });
+}
+
+// =====================================================================
+// マルチプレイ：対戦形式の選択 → チーム設定
+// =====================================================================
+document.getElementById('room-mode-select').addEventListener('change',e=>{
+  if(e.target.name==='room-mode') hostSelectedMode=e.target.value;
+});
+
+function goFromModeSelect(){
+  // 団体戦のみチーム設定画面を挟む。個人戦はそのまま課題文設定へ
+  if(hostSelectedMode==='team'){
+    renderTeamNameInputs();
+    showScreen('team-setup-screen');
+  } else {
+    showScreen('host-setup-screen');
+  }
+}
+
+// 課題文設定からの「戻る」。団体戦ならチーム設定、個人戦なら形式選択に戻す
+function backFromHostSetup(){
+  showScreen(hostSelectedMode==='team' ? 'team-setup-screen' : 'multi-mode-screen');
+}
+
+// チーム数スライダーに合わせて入力欄を作り直す。
+// 入力済みの名前は hostSelectedTeams に退避してあるため、増減しても消えない。
+function renderTeamNameInputs(){
+  const count=parseInt(document.getElementById('team-count-slider').value);
+  const wrap=document.getElementById('team-name-inputs');
+  wrap.innerHTML='';
+  for(let i=0;i<count;i++){
+    const row=document.createElement('div');
+    row.className='team-name-row';
+    const no=document.createElement('span');
+    no.className='team-no';
+    no.textContent=(i+1);
+    const input=document.createElement('input');
+    input.type='text';
+    input.className='text-input';
+    input.maxLength=20;
+    input.placeholder='チーム'+String.fromCharCode(65+i); // チームA..チームJ
+    input.value=hostSelectedTeams[i]||'';
+    input.addEventListener('input',()=>{ hostSelectedTeams[i]=input.value; });
+    row.appendChild(no); row.appendChild(input);
+    wrap.appendChild(row);
+  }
+}
+
+(function bindTeamCountSlider(){
+  const slider=document.getElementById('team-count-slider');
+  const valueEl=document.getElementById('team-count-value');
+  slider.addEventListener('input',()=>{
+    valueEl.textContent=slider.value+'チーム';
+    renderTeamNameInputs();
+  });
+})();
+
+function finishTeamSetup(){
+  showScreen('host-setup-screen');
+}
+
+// ホストが確定したチーム名の配列を作る。未入力欄は「チームA」形式で補う
+// （サーバー側でも同じ補完を行うが、ここで埋めておくと送信内容と表示が一致する）
+function buildTeamsPayload(){
+  const count=parseInt(document.getElementById('team-count-slider').value);
+  const teams=[];
+  for(let i=0;i<count;i++){
+    const name=(hostSelectedTeams[i]||'').trim();
+    teams.push(name.length>0 ? name : 'チーム'+String.fromCharCode(65+i));
+  }
+  return teams;
 }
 
 // WebSocket接続（まだ繋がっていない場合のみ）
@@ -1121,7 +1342,9 @@ function createRoom(){
     serverName:hostText.serverName||null,
     defaultRule:hostSelectedRule,
     duration:hostSelectedDuration,
-    imeRule:playerImeRule
+    imeRule:playerImeRule,
+    mode:hostSelectedMode,
+    teams:hostSelectedMode==='team' ? buildTeamsPayload() : null
   }));
 }
 
@@ -1163,8 +1386,91 @@ function hostStartGame(force){
   ws.send(JSON.stringify({ type:'START_GAME', force:!!force }));
 }
 
+// =====================================================================
+// マルチプレイ：ロビーチャット
+// =====================================================================
+// Enterで送信（IME変換確定のEnterと衝突しないよう isComposing を確認）
+document.getElementById('chat-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter' && !e.isComposing){
+    e.preventDefault();
+    sendChatMessage();
+  }
+});
+
+function sendChatMessage(){
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text || !ws || ws.readyState!==WebSocket.OPEN) return;
+  ws.send(JSON.stringify({ type:'CHAT_MESSAGE', text }));
+  input.value='';
+}
+
+// 受信したチャットをログに追加。name/textは必ずtextContentで挿入し、
+// HTMLとして解釈させない（XSS対策。相手が<script>等を送ってもただの文字列として表示される）
+function appendChatMessage(msg){
+  const log=document.getElementById('chat-log');
+  const empty=log.querySelector('.chat-empty');
+  if(empty) empty.remove();
+  const row=document.createElement('div');
+  row.className='chat-msg'+(msg.playerId && msg.playerId===myPlayerId?' chat-msg-self':'');
+  const nameEl=document.createElement('span');
+  nameEl.className='chat-msg-name';
+  nameEl.textContent=msg.name+'：';
+  const textEl=document.createElement('span');
+  textEl.className='chat-msg-text';
+  textEl.textContent=msg.text;
+  row.appendChild(nameEl); row.appendChild(textEl);
+  log.appendChild(row);
+  log.scrollTop=log.scrollHeight;
+}
+
+// ルーム退出・新規入室時に前の部屋のログを消す（部屋をまたいで内容を残さない）
+function resetChatLog(){
+  const log=document.getElementById('chat-log');
+  log.innerHTML='';
+  // 空のログは何も起きていないのか壊れているのか区別がつかないため、案内を置く
+  // （最初のメッセージ受信時に appendChatMessage が取り除く）
+  const empty=document.createElement('div');
+  empty.className='chat-empty';
+  empty.textContent='まだメッセージはありません';
+  log.appendChild(empty);
+  document.getElementById('chat-input').value='';
+  document.getElementById('chat-err').classList.remove('show');
+}
+
+// 団体戦のチーム選択ボタンを描画する。選択中のチームは塗りつぶして示す。
+// 「チームなし」も明示的な選択肢として置き、選び直せるようにする。
+function renderTeamChoices(){
+  const card=document.getElementById('team-select-card');
+  if(multiMode!=='team'||!multiTeams){ card.style.display='none'; return; }
+  card.style.display='block';
+  const list=document.getElementById('team-choice-list');
+  list.innerHTML='';
+  const addBtn=(label,teamId)=>{
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='team-choice'+(myTeamId===teamId?' selected':'');
+    btn.textContent=label;
+    btn.onclick=()=>selectTeam(teamId);
+    list.appendChild(btn);
+  };
+  multiTeams.forEach((name,i)=>addBtn(name,i));
+  addBtn('チームなし',null);
+}
+
+function selectTeam(teamId){
+  if(!ws||ws.readyState!==WebSocket.OPEN) return;
+  myTeamId=teamId;
+  ws.send(JSON.stringify({ type:'SET_TEAM', teamId }));
+  renderTeamChoices(); // 応答を待たず即座に見た目へ反映（直後のROOM_STATEで確定する）
+}
+
 function renderLobby(state){
   document.getElementById('lobby-room-id').textContent=state.roomId;
+  // 対戦形式・チーム構成はホストが決めるため、参加者はROOM_STATEで初めて知る
+  if(state.mode) multiMode=state.mode;
+  if(state.teams) multiTeams=state.teams;
+  renderTeamChoices();
   // 課題文名・プレイ時間・採点方式を案内
   const infoParts=[];
   if(state.textName) infoParts.push('課題文：'+state.textName);
@@ -1183,6 +1489,13 @@ function renderLobby(state){
     nameEl.className='player-name';
     nameEl.textContent=p.name+(p.isHost?' （ホスト）':'');
     leftWrap.appendChild(nameEl);
+    // 団体戦では所属チームを名前の隣に出す（未選択は「チームなし」と明示）
+    if(multiMode==='team'&&multiTeams){
+      const teamTag=document.createElement('span');
+      teamTag.className='team-tag';
+      teamTag.textContent=(p.teamId==null) ? 'チームなし' : (multiTeams[p.teamId]||'—');
+      leftWrap.appendChild(teamTag);
+    }
     if(p.imeRule){
       const imeTag=document.createElement('span');
       imeTag.className='ime-tag';
@@ -1210,6 +1523,8 @@ function handleServerMsg(msg){
       document.getElementById('lobby-room-id').textContent=msg.roomId;
       document.getElementById('host-controls').style.display='block';
       document.getElementById('guest-controls').style.display='none';
+      myTeamId=null; // チーム所属は入室ごとにリセット（直後のROOM_STATEで一覧が描画される）
+      resetChatLog();
       showScreen('lobby-screen');
       break;
 
@@ -1222,12 +1537,25 @@ function handleServerMsg(msg){
       isReady=false;
       document.getElementById('ready-btn').textContent='スタンバイする';
       document.getElementById('ready-btn').style.cssText='';
+      myTeamId=null; // チーム所属は入室ごとにリセット（直後のROOM_STATEで一覧が描画される）
+      resetChatLog();
       showScreen('lobby-screen');
       break;
 
     case 'ROOM_STATE':
       renderLobby(msg);
       break;
+
+    case 'CHAT_MESSAGE':
+      appendChatMessage(msg);
+      break;
+
+    case 'CHAT_ERROR':{
+      const chatErr=document.getElementById('chat-err');
+      chatErr.textContent=msg.message; chatErr.classList.add('show');
+      setTimeout(()=>chatErr.classList.remove('show'),4000);
+      break;
+    }
 
     case 'ERROR':{
       // join画面かロビー画面かで表示先を変える
@@ -1260,6 +1588,9 @@ function handleServerMsg(msg){
       isMulti=true;
       if(msg.defaultRule) multiDefaultRule=msg.defaultRule;
       if(msg.duration) multiDuration=msg.duration;
+      // 開始後はROOM_STATEが届かない場合があるため、チーム構成はここでも受け取る
+      if(msg.mode) multiMode=msg.mode;
+      if(msg.teams) multiTeams=msg.teams;
       startCountdown();
       break;
 
@@ -1345,6 +1676,16 @@ function wrapToLines(text){
   return out;
 }
 
+// transitionを一時的に無効化してから即座にtransformを変更する。
+// 改ページ直後などシフト済みの状態から瞬時にリセットしたい場面で使う
+// （そのままtransformだけ書き換えるとCSSのtransitionが働いてアニメーションしてしまうため）。
+function setTransformInstant(el, transformValue){
+  el.style.transition='none';
+  el.style.transform=transformValue;
+  void el.offsetHeight; // 強制リフローでtransition:noneを確実に反映させる
+  el.style.transition='';
+}
+
 function renderSourcePage(page,fs){
   const lhPx=Math.round(fs*lineHRatio(fs));
   currentLhPx=lhPx;
@@ -1353,12 +1694,15 @@ function renderSourcePage(page,fs){
   const totalPages=Math.ceil(allSourceLines.length/PAGE_ROWS);
   const display=document.getElementById('source-display');
   display.innerHTML='';
+  setTransformInstant(display,'translateY(0)'); // 再描画のたびに未シフト状態に戻す（アニメーションなし）
+  sourcePeekShifted=false;
   // 1行分の課題文行を <div class="src-row"> に描画する共通処理。
   // peek=true のとき src-row-peek クラスを付与し薄色表示にする。
   // row が null（page 0 のピーク行など「実データなし」の場合）は空行を作る。
-  const appendRow=(row, peek)=>{
+  const appendRow=(row, peek, id)=>{
     const div=document.createElement('div');
     div.className='src-row'+(peek?' src-row-peek':'');
+    if(id) div.id=id;
     div.style.height=lhPx+'px';
     const txt=document.createElement('span'); txt.className='src-text';
     txt.style.fontSize=fs+'px'; txt.style.lineHeight=lhPx+'px'; txt.style.paddingLeft=PAD_L+'px';
@@ -1381,6 +1725,7 @@ function renderSourcePage(page,fs){
     }
     div.appendChild(cntWrap);
     display.appendChild(div);
+    return div;
   };
   if(page===0){
     // ページ0（1ページ目）は前ページが存在せず、上端のピーク行が空白のスペーサになって
@@ -1392,8 +1737,16 @@ function renderSourcePage(page,fs){
   } else {
     // ページ1以降：前ページ最終行を上端に薄色で表示する（改ページ境界の単語追跡を助ける）。
     const peekIdx=startRow-1;
-    appendRow(allSourceLines[peekIdx], true);
+    appendRow(allSourceLines[peekIdx], true, 'source-peek-top');
     for(let i=startRow;i<endRow;i++) appendRow(allSourceLines[i], false);
+    // 前後どちらのページも存在する「中間ページ」のみ、次ページ1行目を非表示のピーク行として
+    // 末尾にあらかじめ描画しておく。2行目に入った時点で updateSourcePeekShift が
+    // 1行分スクロールしてこの行をフェードインさせる（最終ページには次ページがないため対象外）。
+    const nextPageFirstIdx=endRow;
+    if(page<totalPages-1 && nextPageFirstIdx<allSourceLines.length){
+      const bottomPeek=appendRow(allSourceLines[nextPageFirstIdx], true, 'source-peek-bottom');
+      bottomPeek.style.opacity='0';
+    }
   }
   document.getElementById('page-indicator').textContent=totalPages>1?(page+1)+' / '+totalPages+' ページ':'';
 }
@@ -1495,6 +1848,34 @@ function syncInputView(){
   if(ta.scrollTop!==0) ta.scrollTop=0; // 変化した場合のみ代入
   const targetScrollTop=currentPage*PAGE_ROWS*currentLhPx;
   if(wrapper.scrollTop!==targetScrollTop) wrapper.scrollTop=targetScrollTop;
+  // 課題文側が中間ページのピークシフトで1行分スクロールしているときは、入力欄も
+  // 同じ量だけ追従させ、打っている行と課題文の該当行の高さが常に一致するようにする。
+  // sourcePeekShiftedの変化はupdateSourcePeekShiftが本関数より先に確定させているため、
+  // ここで読むだけでよい（アニメーションはCSSのtransition、page切替時の瞬時リセットは
+  // updateSourcePage側のsetTransformInstantが担う）。
+  const shiftTransform=sourcePeekShifted?`translateY(-${currentLhPx}px)`:'translateY(0)';
+  if(ta.style.transform!==shiftTransform) ta.style.transform=shiftTransform;
+}
+
+// 中間ページ（前後どちらのページも存在するページ）で、入力位置がページ内1行目から
+// 2行目以降に進んだら1行分スクロールし、上端の前ページ末尾行をフェードアウト、
+// 下端の次ページ1行目をフェードインさせる。1行目に戻れば（Backspace等）元に戻す。
+function updateSourcePeekShift(srcLine){
+  const totalPages=Math.ceil(allSourceLines.length/PAGE_ROWS);
+  const display=document.getElementById('source-display');
+  const topPeek=document.getElementById('source-peek-top');
+  const bottomPeek=document.getElementById('source-peek-bottom');
+  if(currentPage===0 || currentPage>=totalPages-1 || !topPeek || !bottomPeek){
+    if(sourcePeekShifted){ display.style.transform='translateY(0)'; sourcePeekShifted=false; }
+    return;
+  }
+  const localRow=srcLine-currentPage*PAGE_ROWS;
+  const shouldShift=localRow>=1;
+  if(shouldShift===sourcePeekShifted) return;
+  sourcePeekShifted=shouldShift;
+  display.style.transform=shouldShift?`translateY(-${currentLhPx}px)`:'translateY(0)';
+  topPeek.style.opacity=shouldShift?'0':'';
+  bottomPeek.style.opacity=shouldShift?'':'0';
 }
 
 function updateSourcePage(){
@@ -1504,10 +1885,13 @@ function updateSourcePage(){
   if(page!==currentPage){
     currentPage=page;
     renderSourcePage(currentPage,currentFontSize);
+    // 課題文側と同様、改ページの瞬間は入力欄側のシフトもアニメーションなしで即座にリセットする
+    setTransformInstant(ta,'translateY(0)');
     const frameH=currentLhPx*(PAGE_ROWS+PEEK_ROWS);
     document.getElementById('ta-frame').style.height=frameH+'px';
     document.getElementById('ta-wrapper').style.height=frameH+'px';
   }
+  updateSourcePeekShift(srcLine);
   // 入力欄の表示位置を課題文ページに同期
   syncInputView();
   document.getElementById('cur-line').textContent=srcLine+1;
@@ -1622,7 +2006,7 @@ let latestResults=null;
 let diffPlayerId=null;
 
 const RULE_LABELS={warpro:'ワープロ大会', mainichi:'毎日パソコン入力', intersteno:'Intersteno'};
-const IME_LABELS={normal:'通常', mainichi:'変換学習・辞書なし', warpro:'短縮辞書登録あり'};
+const IME_LABELS={normal:'通常', mainichi:'変換学習・辞書なし', warpro:'短縮辞書登録あり', kanjichoku:'漢字直接入力'};
 
 function endGame(){
   clearInterval(timerInterval); stopFlash();
@@ -1673,6 +2057,8 @@ function endGame(){
   document.getElementById('diff-player-row').style.display='block';
   } else {
     rankSection.style.display='none';
+    // ソロでは団体戦の集計は存在しない（直前にマルチをプレイしていた場合の残留を消す）
+    document.getElementById('team-score-section').style.display='none';
     document.getElementById('diff-player-row').style.display='none';
     document.getElementById('retry-btn').style.display='';
     document.getElementById('retry-btn').onclick=()=>{ isMulti=false; soloCountdownStart(); };
@@ -1822,6 +2208,11 @@ function renderRanking(results){
     nameWrap.style.display='inline-flex'; nameWrap.style.alignItems='center'; nameWrap.style.gap='8px';
     const nameText=document.createElement('span'); nameText.textContent=r.name;
     nameWrap.appendChild(nameText);
+    if(multiMode==='team'&&multiTeams){
+      const teamTag=document.createElement('span'); teamTag.className='team-tag';
+      teamTag.textContent=(r.teamId==null) ? 'チームなし' : (multiTeams[r.teamId]||'—');
+      nameWrap.appendChild(teamTag);
+    }
     if(r.imeRule){
       const imeTag=document.createElement('span'); imeTag.className='ime-tag';
       imeTag.textContent='IME：'+(IME_LABELS[r.imeRule]||'—');
@@ -1843,10 +2234,53 @@ function renderRanking(results){
     tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdPoint); tr.appendChild(tdTotal); tr.appendChild(tdErr);
     tbody.appendChild(tr);
   });
+  // 団体戦のチーム合計得点も同じ結果から集計する
+  renderTeamScores(results);
   // 正誤判定の選択肢と表示内容も、最新の結果にあわせて更新する
   // （表示中のプレイヤーの結果が後から届いた場合もここで反映される）
   refreshDiffPlayerSelect();
   renderSelectedDiff();
+}
+
+// 団体戦のチーム合計得点。失格者は0点として合算し、未提出者も0点扱いで人数には含める。
+// チーム未選択（teamId===null）のプレイヤーはどのチームにも計上しない。
+function renderTeamScores(results){
+  const section=document.getElementById('team-score-section');
+  if(!isMulti||multiMode!=='team'||!multiTeams){ section.style.display='none'; return; }
+  section.style.display='block';
+  document.getElementById('team-point-head').textContent=RULE_LABELS[rankingRule]+' 合計得点';
+
+  const totals=multiTeams.map((name,i)=>({name, index:i, points:0, members:0}));
+  for(const r of results){
+    if(r.teamId==null||!totals[r.teamId]) continue;
+    const t=totals[r.teamId];
+    t.members++;
+    if(!r.scores) continue;                                  // 未提出は0点のまま
+    const s=r.scores[rankingRule];
+    if(s&&!s.disqualified) t.points+=s.points;               // 失格者は0点として計上
+  }
+
+  const sorted=[...totals].sort((a,b)=>b.points-a.points);
+  const tbody=document.getElementById('team-score-body');
+  tbody.innerHTML='';
+  sorted.forEach((t,i)=>{
+    const tr=document.createElement('tr');
+    if(i===0) tr.className='rank-1';
+    const tdRank=document.createElement('td'); tdRank.textContent=(i+1);
+    const tdName=document.createElement('td'); tdName.textContent=t.name;
+    const tdPts=document.createElement('td'); tdPts.textContent=t.points;
+    const tdMembers=document.createElement('td'); tdMembers.textContent=t.members+'人';
+    tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdPts); tr.appendChild(tdMembers);
+    tbody.appendChild(tr);
+  });
+}
+
+// 退出・メニュー復帰時に団体戦の状態を捨てる。
+// 残したままだと次に個人戦のルームへ入ったときチーム欄が出てしまう。
+function resetTeamState(){
+  multiMode='individual'; multiTeams=null; myTeamId=null;
+  document.getElementById('team-select-card').style.display='none';
+  document.getElementById('team-score-section').style.display='none';
 }
 
 function leaveRoom(){
@@ -1859,6 +2293,8 @@ function leaveRoom(){
   document.getElementById('ready-btn').textContent='スタンバイする';
   document.getElementById('ready-btn').style.cssText='';
   document.getElementById('lobby-err').classList.remove('show');
+  resetChatLog();
+  resetTeamState();
   showScreen('menu-screen');
 }
 
@@ -1875,6 +2311,8 @@ function goHome(){
   isMulti=false; isHost=false;
   document.getElementById('ready-btn').textContent='スタンバイする';
   document.getElementById('ready-btn').style.cssText='';
+  resetChatLog();
+  resetTeamState();
   showScreen('menu-screen');
 }
 

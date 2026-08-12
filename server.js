@@ -129,14 +129,27 @@ function broadcast(room, msg) {
   }
 }
 
+// 団体戦のチーム名を正規化する。空欄は「チームA」「チームB」…で補う。
+// チーム数は2〜10のみ許可し、範囲外・非配列は団体戦として成立しないため null を返す。
+function sanitizeTeams(raw) {
+  if (!Array.isArray(raw)) return null;
+  if (raw.length < 2 || raw.length > 10) return null;
+  return raw.map((t, i) => {
+    const s = (typeof t === 'string') ? t.replace(/[\r\n\t]/g, ' ').trim().slice(0, 20) : '';
+    return s.length > 0 ? s : 'チーム' + String.fromCharCode(65 + i); // チームA..チームJ
+  });
+}
+
 function roomState(room, roomId) {
   const players = [];
   for (const [ws, p] of room.players) {
-    players.push({ name: p.name, imeRule: p.imeRule, ready: p.ready, isHost: ws === room.hostWs });
+    players.push({ name: p.name, imeRule: p.imeRule, ready: p.ready,
+                   isHost: ws === room.hostWs, teamId: p.teamId });
   }
   return { type: 'ROOM_STATE', roomId, players, gameState: room.gameState,
            textName: room.textName, serverName: room.serverName || null,
-           duration: room.duration, defaultRule: room.defaultRule };
+           duration: room.duration, defaultRule: room.defaultRule,
+           mode: room.mode, teams: room.teams };
 }
 
 function buildResults(room) {
@@ -146,6 +159,7 @@ function buildResults(room) {
       id: p.id,
       name: p.name,
       imeRule: p.imeRule,
+      teamId: p.teamId,
       totalChars: p.result ? p.result.totalChars : null,
       scores: p.result ? p.result.scores : null,
       // 入力内容そのものを配る。各クライアントが手元の課題文と突き合わせて
@@ -187,7 +201,7 @@ wss.on('connection', (ws) => {
         const duration = (Number.isInteger(durationMin) && durationMin >= 1 && durationMin <= 10)
           ? durationMin * 60 : 600;
         // IMEレギュレーションは3種のみ許可、未指定・不正値は normal にフォールバック
-        const IME_ALLOWED = ['normal','mainichi','warpro'];
+        const IME_ALLOWED = ['normal','mainichi','warpro','kanjichoku'];
         let imeRule = 'normal';
         if (msg.imeRule != null) {
           if (IME_ALLOWED.includes(msg.imeRule)) imeRule = msg.imeRule;
@@ -196,6 +210,13 @@ wss.on('connection', (ws) => {
         // サーバー上の課題文ファイル名が指定されていれば、リストと照合してダウンロード可否を確定
         const serverName = (typeof msg.serverName === 'string' && availableTexts.some(t => t.name === msg.serverName))
           ? msg.serverName : null;
+        // 団体戦はチーム名リストが正しく揃っている場合のみ成立させ、
+        // 不正な場合は個人戦にフォールバックする（チーム無しの団体戦を作らせない）
+        const teams = (msg.mode === 'team') ? sanitizeTeams(msg.teams) : null;
+        const mode = teams ? 'team' : 'individual';
+        if (msg.mode === 'team' && !teams) {
+          console.warn(`[CREATE_ROOM] Invalid teams from ${msg.name}, falling back to individual mode`);
+        }
         const room = {
           hostWs: ws,
           text: msg.text || '',
@@ -203,17 +224,23 @@ wss.on('connection', (ws) => {
           serverName,                      // ダウンロード可能なサーバー側ファイル名（無ければnull）
           defaultRule: msg.defaultRule || 'warpro',
           duration,
+          mode,                            // 'individual' | 'team'
+          teams,                           // 団体戦のチーム名配列（個人戦ではnull）
           players: new Map(),
           gameState: 'waiting',
           timerInterval: null,
+          // チャットの連投制限用。ルームのみに保持し、履歴自体は残さない
+          // （リレーするだけなのでルーム破棄と同時に自然に消える）
+          chatLastSenderId: null,
+          chatStreak: 0,
         };
         const hostId = genPlayerId();
-        room.players.set(ws, { id: hostId, name: msg.name, imeRule, ready: false, result: null, connected: true });
+        room.players.set(ws, { id: hostId, name: msg.name, imeRule, teamId: null, ready: false, result: null, connected: true });
         rooms.set(roomId, room);
         currentRoomId = roomId;
         ws.send(JSON.stringify({ type: 'ROOM_CREATED', roomId, playerId: hostId }));
         broadcast(room, roomState(room, roomId));
-        console.log(`Room created: ${roomId} by ${msg.name} (duration ${duration}s, IME ${imeRule}, serverName ${serverName || '-'})`);
+        console.log(`Room created: ${roomId} by ${msg.name} (duration ${duration}s, IME ${imeRule}, mode ${mode}${teams ? ` [${teams.join(', ')}]` : ''}, serverName ${serverName || '-'})`);
         break;
       }
 
@@ -230,11 +257,11 @@ wss.on('connection', (ws) => {
         }
         let imeRule = 'normal';
         if (msg.imeRule != null) {
-          if (['normal','mainichi','warpro'].includes(msg.imeRule)) imeRule = msg.imeRule;
+          if (['normal','mainichi','warpro','kanjichoku'].includes(msg.imeRule)) imeRule = msg.imeRule;
           else console.warn(`[JOIN_ROOM] Invalid imeRule '${msg.imeRule}' from ${msg.name}, falling back to 'normal'`);
         }
         const guestId = genPlayerId();
-        room.players.set(ws, { id: guestId, name: msg.name, imeRule, ready: false, result: null, connected: true });
+        room.players.set(ws, { id: guestId, name: msg.name, imeRule, teamId: null, ready: false, result: null, connected: true });
         currentRoomId = msg.roomId;
         ws.send(JSON.stringify({ type: 'JOIN_OK', roomId: msg.roomId, textName: room.textName, playerId: guestId }));
         broadcast(room, roomState(room, msg.roomId));
@@ -249,6 +276,22 @@ wss.on('connection', (ws) => {
         const player = room.players.get(ws);
         if (!player) return;
         player.ready = msg.ready;
+        broadcast(room, roomState(room, currentRoomId));
+        break;
+      }
+
+      // ── チーム選択（団体戦のみ） ─────────────────────────────
+      case 'SET_TEAM': {
+        const room = rooms.get(currentRoomId);
+        if (!room || room.mode !== 'team') return;
+        // 開始後の変更は順位表の集計と食い違うため、ロビー段階のみ受け付ける
+        if (room.gameState !== 'waiting') return;
+        const player = room.players.get(ws);
+        if (!player) return;
+        const t = msg.teamId;
+        if (t == null) player.teamId = null;                                   // チームなし
+        else if (Number.isInteger(t) && t >= 0 && t < room.teams.length) player.teamId = t;
+        else return;                                                           // 不正値は黙って無視
         broadcast(room, roomState(room, currentRoomId));
         break;
       }
@@ -282,6 +325,10 @@ wss.on('connection', (ws) => {
           textName: room.textName,
           defaultRule: room.defaultRule,
           duration: room.duration,
+          // リザルトのチーム合計得点で使う。開始後は ROOM_STATE が届かない場合があるため
+          // ここでも配り、各クライアントが確実にチーム名を持てるようにする
+          mode: room.mode,
+          teams: room.teams,
         });
         console.log(`Game started in room ${currentRoomId} (duration ${room.duration}s)`);
 
@@ -309,6 +356,38 @@ wss.on('connection', (ws) => {
           input: (typeof msg.input === 'string') ? msg.input.slice(0, 20000) : '',
         };
         broadcast(room, { type: 'RESULTS_UPDATE', results: buildResults(room) });
+        break;
+      }
+
+      // ── ロビーチャット ───────────────────────────────────────
+      case 'CHAT_MESSAGE': {
+        const room = rooms.get(currentRoomId);
+        if (!room) return;
+        const player = room.players.get(ws);
+        if (!player) return;
+
+        // 改行・制御文字を除去し、最大200文字に切り詰める。
+        // HTMLエスケープはクライアント側でtextContent描画により行うため、
+        // ここでは長さ・空文字のみをチェックする。
+        const raw = typeof msg.text === 'string' ? msg.text : '';
+        const text = raw.replace(/[\r\n\t]/g, ' ').trim().slice(0, 200);
+        if (!text) return;
+
+        // 連投制限：同一プレイヤーの連続投稿は15回まで。他プレイヤーが発言するとリセットされる
+        if (room.chatLastSenderId !== player.id) {
+          room.chatLastSenderId = player.id;
+          room.chatStreak = 0;
+        }
+        if (room.chatStreak >= 15) {
+          ws.send(JSON.stringify({
+            type: 'CHAT_ERROR',
+            message: '連続投稿は15回までです。他の人が発言すると解除されます。',
+          }));
+          return;
+        }
+        room.chatStreak++;
+
+        broadcast(room, { type: 'CHAT_MESSAGE', playerId: player.id, name: player.name, text });
         break;
       }
     }

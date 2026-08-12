@@ -37,7 +37,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--navy);color:var(--te
 .rule-list{list-style:none;font-size:15px;color:#2e3658;}
 .rule-list li{padding:7px 0 7px 18px;position:relative;line-height:1.8;}
 .rule-list li::before{
-  content:'';position:absolute;left:4px;top:13px;
+  content:'';position:absolute;left:4px;top:18px;
   width:5px;height:5px;border-radius:50%;background:#8098D6;
 }
 .rule-list li b{color:var(--navy);font-weight:500;}
@@ -106,9 +106,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--navy);color:var(--te
       プレイ終了後に、字数と正確性に応じて得点が計算されます。（ミスが多すぎると失格になります。）
     </p>
     <ul class="rule-list">
-      <li>制限時間は1分から10分まで、1分刻みで設定できます。</li>
-      <li>残り時間が少なくなると、画面の周囲が赤く点滅します。通常は残り10秒、ただし10分設定の場合は残り2分と残り10秒のタイミングで通知されます。</li>
-      <li>このツールは、オリジナルの課題文をtxtファイルで読み込ませることができます。課題文はすべて全角文字で記述されたものを使用してください。（半角文字を含むと、改ページが正確に動作しない可能性があります。）</li>
     </ul>
     <div class="rule-highlight">
       採点は下記の3大会のルールに従ってそれぞれ行い、<b>結果画面で3通りの得点が表示できます</b>。<br>
@@ -121,6 +118,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--navy);color:var(--te
     <ul class="rule-list">
       <li>課題文は、1行30文字の配置で30行ずつ表示します。次のページに達すると、表示部分が自動で切り替わります。</li>
       <li>課題文中の <b style="color:#c0392b;">↵</b> のある場所では、Enterキーによる改行が必要です。</li>
+      <li>残り時間が少なくなると、画面の周囲が赤く点滅します。通常は残り10秒、ただし10分設定の場合は残り2分と残り10秒のタイミングで通知されます。</li>
     </ul>
   </section>
 

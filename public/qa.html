@@ -61,7 +61,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--navy);color:var(--te
   <!-- ここにQ&A項目を追加していく。1項目 = .qa-item 1枚。 -->
   <div class="qa-item">
     <div class="qa-question"><span class="qa-mark">Q.</span><span>このツールをプレイしている映像や画像を、動画・配信・SNS投稿に使用してよいですか？</span></div>
-    <div class="qa-answer"><span class="qa-mark">A.</span><span>動画・静止画のいずれも、動画投稿サイトやSNSでのご利用は営利・非営利を問わず自由に行っていただけます。クレジット表記も不要です。</span></div>
+    <div class="qa-answer"><span class="qa-mark">A.</span><span>いずれも営利・非営利を問わず自由に行っていただけます。クレジット表記も不要です。</span></div>
   </div>
 
   <div class="qa-item">
@@ -74,10 +74,38 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--navy);color:var(--te
   </div>
 
   <div class="qa-item">
+    <div class="qa-question"><span class="qa-mark">Q.</span><span>採点ルールや時間設定の選択肢がたくさんありますが、どのような組み合わせでプレイするのが一般的でしょうか？</span></div>
+    <div class="qa-answer"><span class="qa-mark">A.</span><span>
+      このツールの採点ルールはいずれも現実の大会をシミュレートしており、それらの公式ルールを基準とすれば以下の組み合わせが標準的です。<br><br>
+      ・ワープロ大会 - 10分<br>
+      ・毎日パソコン入力コンクール - 5分<br>
+      ・Intersteno - 10分<br><br>
+      基本的にはお好みの設定でプレイしていただきたいと考えていますが、迷ったらこれらの組み合わせでプレイすることをお勧めします。
+    </span></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-question"><span class="qa-mark">Q.</span><span>公式で定期的に主催しているマルチプレイ練習会はありますか？</span></div>
+    <div class="qa-answer"><span class="qa-mark">A.</span><span>
+      現在、管理人が毎週日曜11時より<a href="https://www.youtube.com/@welch2929">YouTubeチャンネル</a>にて練習会を開催しております。<br>
+      （都合により中止・延期となる場合があります）
+    </span></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-question"><span class="qa-mark">Q.</span><span>新しい課題文はどのタイミングで追加されますか？</span></div>
+    <div class="qa-answer"><span class="qa-mark">A.</span><span>
+      原則的には一週間に一回、日曜日に追加します。<br>
+      現状では管理人主催の練習会（上記回答参照）で初見課題文として使用した後、サイト上にアップロードしています。
+    </span></div>
+  </div>
+
+  <div class="qa-item">
     <div class="qa-question"><span class="qa-mark">Q.</span><span>結果画面にて、なぜ変換確定後のBackSpaceしかカウントしないのですか？</span></div>
     <div class="qa-answer"><span class="qa-mark">A.</span><span>
-      IME変換中に押されたキーの情報は、環境によって扱いが異なります。一部の環境（Chrome＋Windowsの日本語IMEなど）では、変換中に押されたキーがすべて種類の判別できない値に置き換えられてしまい、BackSpaceが押されたかどうかを判定できません。<br><br>
-      変換中のBackSpaceも含めてしまうと、環境によってカウントできたりできなかったりする不公平な指標になってしまいます。そのため、どの環境でも変わらず判定できる「変換確定後の文字に対するBackSpace」だけを対象としています。
+      変換中のBackSpaceは、プレイヤー側の環境によってサイト側から取得できないことがあるためです。<br><br>
+      IME変換中に押されたキーの情報は、環境によって扱いが異なります。一部の環境では、変換中に押されたキーの情報がすべて種類の判別できない値に置き換えられてしまい、どのキーが押されたのか検知することができません。<br><br>
+      そのため、どの環境でも平等にカウントできる「変換確定後の文字に対するBackSpace」だけを対象としています。
     </span></div>
   </div>
 
@@ -87,7 +115,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--navy);color:var(--te
       基本的な方針は、入力の末尾がエラーになっている場合、その部分を採点対象から除外するというものです。<br><br>
       ただし、これをそのまま実装すると、末尾のエラー文字列が偶然にも課題文の直後の文字列と一致してしまった場合、その間の範囲がすべて誤字・脱字としてカウントされてしまう問題が残ります。これを防ぐため、さらに次の2つの処理を組み合わせています。<br><br>
       <b>①採点範囲の制限</b>：採点の際、入力した文字数に、その約5%（最低10文字）を加えた範囲までしか課題文をチェックしません。<br><br>
-      <b>②短い一致の切り捨て</b>：入力の末尾から見て、3文字未満（＝2文字以下）しか連続して一致していない部分は「たまたま一致しただけ」とみなして切り捨てます。切り捨てた結果、さらに末尾がエラー扱いになる場合は、3文字以上の一致が見つかるところまでこの処理を繰り返します。<br><br>
+      <b>②短い一致の切り捨て</b>：入力の末尾から見て、2文字以下しか連続して一致していない部分は「たまたま一致しただけ」とみなして切り捨てます。切り捨てた結果、さらに末尾がエラー扱いになる場合は、3文字以上の一致が見つかるところまでこの処理を繰り返します。<br><br>
       これらの処理により、ほとんどのケースで末尾のエラーをカットできるようになっています。
     </span></div>
   </div>
