@@ -1633,6 +1633,30 @@ function startCountdown(){
 // =====================================================================
 function lineHRatio(fs){ return fs>=18?1.45:fs>=14?1.50:1.55; }
 
+// BIZ UDGothicは外部CDN（Googleフォント）から@importで読み込んでいるため、
+// 回線状況によってはプレイ開始時点でまだダウンロードが完了していないことがある。
+// 未読み込みのままレイアウト計算（measureCharWidth等）を行うと代替フォントの
+// 字形幅を拾ってしまい、後から本来のフォントに差し替わった瞬間（FOUT）に
+// 本文・入力欄の文字が桁の罫線からはみ出して見える
+// （「フォントが変わって表示が崩れる」という報告の原因）。
+// プレイ開始前に読み込み完了を待ち（最大4秒）、間に合わなければ一旦代替フォントで
+// 進行し、本来のフォントの読み込みが完了し次第レイアウトを計算し直して自己修復する。
+function waitForBizUdGothic(){
+  if(!('fonts' in document)) return Promise.resolve();
+  const spec="16px 'BIZ UDGothic'";
+  const loaded=Promise.resolve()
+    .then(()=>document.fonts.load(spec))
+    .catch(()=>{})
+    .then(()=>document.fonts.ready)
+    .catch(()=>{});
+  let timedOut=false;
+  const timeout=new Promise(resolve=>setTimeout(()=>{ timedOut=true; resolve(); },4000));
+  loaded.then(()=>{
+    if(timedOut && document.getElementById('play-screen').classList.contains('active')) applyLayout();
+  });
+  return Promise.race([loaded, timeout]);
+}
+
 function measureCharWidth(fs){
   const el=document.createElement('span');
   el.style.cssText=`position:absolute;visibility:hidden;white-space:pre;`+
@@ -1914,7 +1938,8 @@ function startGame(textObj, startAt){
   secondsLeft=playDuration; warningShown=false; lastSecFlashShown=false; currentPage=0;
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('play-screen').classList.add('active');
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  requestAnimationFrame(()=>requestAnimationFrame(async ()=>{
+    await waitForBizUdGothic();
     allSourceLines=wrapToLines(selectedText.content);
     applyLayout();
     const ta=document.getElementById('typing-area');
