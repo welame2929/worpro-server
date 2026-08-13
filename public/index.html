@@ -2137,7 +2137,6 @@ function switchRule(rule){
   // マルチの順位表も同じ方式に切り替える
   if(isMulti){
     rankingRule=rule;
-    document.getElementById('rank-point-head').textContent=RULE_LABELS[rule]+' 得点';
     if(latestResults) renderRanking(latestResults);
   }
 }
@@ -2183,7 +2182,6 @@ function renderRanking(results){
   latestResults=results;
   const tbody=document.getElementById('ranking-body');
   tbody.innerHTML='';
-  document.getElementById('rank-point-head').textContent=RULE_LABELS[rankingRule]+' 得点';
   // Interstenoは総字数列を「換算字数」に切り替える
   const isInter=(rankingRule==='intersteno');
   document.getElementById('rank-total-head').textContent=isInter?'換算字数':'総字数';
@@ -2252,7 +2250,6 @@ function renderTeamScores(results){
   const section=document.getElementById('team-score-section');
   if(!isMulti||multiMode!=='team'||!multiTeams){ section.style.display='none'; return; }
   section.style.display='block';
-  document.getElementById('team-point-head').textContent=RULE_LABELS[rankingRule]+' 合計得点';
 
   const totals=multiTeams.map((name,i)=>({name, index:i, points:0, members:0}));
   for(const r of results){
