@@ -573,6 +573,20 @@ input[type="file"]{display:none;}
 .ranking-table tr:last-child td{border-bottom:none;}
 .rank-1 td{color:#9a6b08;font-weight:500;}
 .waiting-result{color:#8794ba;font-style:italic;}
+/* 集計の締め切りボタン（ホストのみ）。主要動線ではないので控えめな枠線ボタンにする */
+.btn-finalize{
+  margin-top:10px; padding:8px 16px;
+  background:#ffffff; border:1.5px solid #9fb1da; border-radius:8px;
+  color:#2e3658; font-size:13px; font-family:inherit; cursor:pointer; transition:all .15s;
+}
+.btn-finalize:hover{border-color:var(--cyan); background:#f4fbfd; color:var(--navy);}
+.btn-finalize:focus-visible{outline:2px solid var(--cyan); outline-offset:2px;}
+.finalize-note{font-size:11px; color:var(--muted); margin-top:6px; line-height:1.6;}
+/* 自分が切断された場合の案内。原因が分かるよう警告色で明示する */
+.ranking-disconnected{
+  background:#fdf4e0; border:1px solid #f0cd84; border-radius:8px;
+  padding:10px 14px; font-size:13px; color:#5f4310; line-height:1.7;
+}
 </style>
 </head>
 <body>
@@ -1022,6 +1036,16 @@ input[type="file"]{display:none;}
       <tbody id="ranking-body"></tbody>
     </table>
     <div id="ranking-waiting" style="font-size:12px;color:var(--muted);">他のプレイヤーの結果を待っています…</div>
+    <!-- 自分の接続が切れた場合。順位表が空のまま待ち続ける状態を避けるための案内 -->
+    <div id="ranking-disconnected" class="ranking-disconnected" style="display:none;">
+      サーバーとの接続が切れたため、順位表とチーム合計得点を表示できません。<br>
+      上の得点は手元で計算したものなので、あなたの成績はそのままご確認いただけます。
+    </div>
+    <!-- ホストのみ表示。結果が届かないプレイヤーがいても順位表を確定できる逃げ道 -->
+    <div id="finalize-row" style="display:none;">
+      <button class="btn-finalize" onclick="finalizeResults()">結果を締め切って確定する</button>
+      <p class="finalize-note">未提出のプレイヤーを待たずに順位表を確定します。締め切り後に届いた結果は反映されます。</p>
+    </div>
   </section>
   <!-- diff表示（折りたたみ可能、デフォルト展開） -->
   <details class="diff-card" open>
@@ -1603,6 +1627,7 @@ function handleServerMsg(msg){
       break;
 
     case 'RESULTS_UPDATE':
+      resultsFinalized=!!msg.finalized;
       renderRanking(msg.results);
       break;
   }
@@ -2031,6 +2056,8 @@ let lastScore=null;
 let rankingRule='warpro';
 // 直近の全員結果を保持（タブ切り替え時の再描画用）
 let latestResults=null;
+// ホストが集計を締め切ったか（サーバーから受信）。trueなら未提出者を待たずに確定表示する
+let resultsFinalized=false;
 // 正誤判定（diff）を表示しているプレイヤーのid。マルチ時のみ使用し、初期値は自分。
 let diffPlayerId=null;
 
@@ -2063,10 +2090,10 @@ function endGame(){
   const rankSection=document.getElementById('ranking-section');
   if(isMulti){
   rankSection.style.display='block';
-  document.getElementById('ranking-waiting').style.display='block';
   rankingRule=multiDefaultRule||'warpro';
   // 3ルール分すべての結果をサーバーへ送信（切断済みの場合は送らず、画面遷移だけ行う）
-  if(ws && ws.readyState===WebSocket.OPEN){
+  const connected = !!(ws && ws.readyState===WebSocket.OPEN);
+  if(connected){
     ws.send(JSON.stringify({
       type:'SUBMIT_RESULT',
       totalChars:result.totalChars,
@@ -2079,6 +2106,12 @@ function endGame(){
       input,
     }));
   }
+  // 自分の接続が切れている場合、結果を送れないのでRESULTS_UPDATEも二度と届かない。
+  // そのまま「他のプレイヤーの結果を待っています…」を出すと永遠に待つことになり
+  // 何が起きたのか分からないため、切断した旨をはっきり伝える。
+  // （上の得点カードは手元で計算しているので、自分の成績自体は通常どおり読める）
+  showRankingDisconnected(!connected);
+  document.getElementById('ranking-waiting').style.display=connected?'block':'none';
   // マルチプレイでは同じ部屋での再戦を行わないため、再挑戦ボタンは表示しない
   document.getElementById('retry-btn').style.display='none';
   // 正誤判定の表示対象は自分を初期値にする（他プレイヤーの結果が届き次第、選択肢が増える）
@@ -2086,8 +2119,9 @@ function endGame(){
   document.getElementById('diff-player-row').style.display='block';
   } else {
     rankSection.style.display='none';
-    // ソロでは団体戦の集計は存在しない（直前にマルチをプレイしていた場合の残留を消す）
+    // ソロでは団体戦の集計も切断案内も存在しない（直前のマルチプレイの残留を消す）
     document.getElementById('team-score-section').style.display='none';
+    showRankingDisconnected(false);
     document.getElementById('diff-player-row').style.display='none';
     document.getElementById('retry-btn').style.display='';
     document.getElementById('retry-btn').onclick=()=>{ isMulti=false; soloCountdownStart(); };
@@ -2203,6 +2237,32 @@ function renderSelectedDiff(){
   out.innerHTML=scoreAll(selectedText.content, rec.input).diffHtml;
 }
 
+// 締め切りボタンの表示制御。「その時点のホスト」かつ「まだ待っている人がいる」ときだけ出す。
+// ホスト権は元ホストの切断時に委譲されるため、自分がホストかは毎回サーバーの結果から取り直す。
+// 自分の接続が切れて順位表が取得できない旨の案内を出し分ける。
+// 切断時はチーム合計得点も集計できないため、あわせて隠す。
+function showRankingDisconnected(show){
+  document.getElementById('ranking-disconnected').style.display=show?'block':'none';
+  if(show){
+    document.getElementById('team-score-section').style.display='none';
+    document.getElementById('finalize-row').style.display='none';
+  }
+}
+
+function updateFinalizeBtn(results, pendingCount){
+  const row=document.getElementById('finalize-row');
+  const me=results.find(r=>r.id===myPlayerId);
+  const amHost=me ? !!me.isHost : isHost;
+  row.style.display=(isMulti && amHost && !resultsFinalized && pendingCount>0) ? 'block' : 'none';
+}
+
+function finalizeResults(){
+  if(!ws||ws.readyState!==WebSocket.OPEN) return;
+  const pending=(latestResults||[]).filter(r=>r.scores==null && r.connected!==false).length;
+  if(!confirm(`まだ結果が届いていないプレイヤーが${pending}人います。\n待たずに順位表を確定しますか？`)) return;
+  ws.send(JSON.stringify({ type:'FINALIZE_RESULTS' }));
+}
+
 function renderRanking(results){
   latestResults=results;
   const tbody=document.getElementById('ranking-body');
@@ -2222,8 +2282,15 @@ function renderRanking(results){
     if(pb===null) return -1;
     return pb-pa;
   });
-  const allDone=sorted.every(r=>r.scores!=null);
-  document.getElementById('ranking-waiting').style.display=allDone?'none':'block';
+  // 集計完了の判定。切断済みのプレイヤーは結果を送ってこないため待たない。
+  // （待ってしまうと「他のプレイヤーの結果を待っています…」が永久に消えなくなる）
+  // ホストが締め切った場合(resultsFinalized)も、未提出者を待たず確定させる。
+  const pending=sorted.filter(r=>r.scores==null && r.connected!==false);
+  const allDone=resultsFinalized || pending.length===0;
+  const waitEl=document.getElementById('ranking-waiting');
+  waitEl.style.display=allDone?'none':'block';
+  waitEl.textContent=`他のプレイヤーの結果を待っています…（残り${pending.length}人）`;
+  updateFinalizeBtn(results, pending.length);
   sorted.forEach((r,i)=>{
     const done=r.scores!=null;
     const tr=document.createElement('tr');
@@ -2255,7 +2322,12 @@ function renderRanking(results){
         tdPoint.appendChild(dqBadge);
       }
     }
-    else { const w=document.createElement('span'); w.className='waiting-result'; w.textContent='集計中'; tdPoint.appendChild(w); }
+    else {
+      // 未提出のまま切断した人は結果が来ないので、待機中と区別して「切断」と示す
+      const w=document.createElement('span'); w.className='waiting-result';
+      w.textContent=(r.connected===false)?'切断':'集計中';
+      tdPoint.appendChild(w);
+    }
     const tdTotal=document.createElement('td'); tdTotal.textContent=done?getTotal(r):'';
     const tdErr=document.createElement('td'); tdErr.textContent=done?getMiss(r):'';
     tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdPoint); tr.appendChild(tdTotal); tr.appendChild(tdErr);
@@ -2307,6 +2379,10 @@ function resetTeamState(){
   multiMode='individual'; multiTeams=null; myTeamId=null;
   document.getElementById('team-select-card').style.display='none';
   document.getElementById('team-score-section').style.display='none';
+  // 締め切り状態・切断案内は1ゲーム限りのものなので、部屋を離れる際に必ず捨てる
+  resultsFinalized=false;
+  document.getElementById('finalize-row').style.display='none';
+  showRankingDisconnected(false);
 }
 
 function leaveRoom(){

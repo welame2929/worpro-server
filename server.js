@@ -154,12 +154,18 @@ function roomState(room, roomId) {
 
 function buildResults(room) {
   const results = [];
-  for (const [, p] of room.players) {
+  for (const [pw, p] of room.players) {
     results.push({
       id: p.id,
       name: p.name,
       imeRule: p.imeRule,
       teamId: p.teamId,
+      // ホスト権は元ホストの切断時に委譲されるため、リザルト側でも都度伝える
+      // （締め切りボタンを出す相手を、その時点のホストに追従させるため）
+      isHost: pw === room.hostWs,
+      // 接続状態。切断済みのプレイヤーは結果を送ってこないため、
+      // クライアントが「まだ入力中の人」と区別して集計完了を判定するのに使う。
+      connected: p.connected !== false,
       totalChars: p.result ? p.result.totalChars : null,
       scores: p.result ? p.result.scores : null,
       // 入力内容そのものを配る。各クライアントが手元の課題文と突き合わせて
@@ -168,6 +174,12 @@ function buildResults(room) {
     });
   }
   return results;
+}
+
+// 順位表更新メッセージ。集計を締め切ったかどうか(finalized)も併せて配り、
+// 未提出者が残っていてもクライアントが待機表示を止められるようにする。
+function resultsUpdate(room) {
+  return { type: 'RESULTS_UPDATE', results: buildResults(room), finalized: !!room.resultsFinalized };
 }
 
 wss.on('connection', (ws) => {
@@ -233,6 +245,8 @@ wss.on('connection', (ws) => {
           // （リレーするだけなのでルーム破棄と同時に自然に消える）
           chatLastSenderId: null,
           chatStreak: 0,
+          // ホストが集計を締め切ったか。未提出者が残っていても順位表を確定させるための逃げ道
+          resultsFinalized: false,
         };
         const hostId = genPlayerId();
         room.players.set(ws, { id: hostId, name: msg.name, imeRule, teamId: null, ready: false, result: null, connected: true });
@@ -355,7 +369,21 @@ wss.on('connection', (ws) => {
           // 中継する意味がないため、念のため上限を設けて切り詰める。
           input: (typeof msg.input === 'string') ? msg.input.slice(0, 20000) : '',
         };
-        broadcast(room, { type: 'RESULTS_UPDATE', results: buildResults(room) });
+        broadcast(room, resultsUpdate(room));
+        break;
+      }
+
+      // ── 集計の締め切り（ホストのみ） ─────────────────────────
+      // 回線切断などで結果を送ってこないプレイヤーが残っても、
+      // ホストの判断で順位表を確定できるようにする。
+      // 締め切り後に遅れて届いた結果は通常どおり反映する（弾く理由がないため）。
+      case 'FINALIZE_RESULTS': {
+        const room = rooms.get(currentRoomId);
+        if (!room || ws !== room.hostWs) return;
+        if (room.resultsFinalized) return;
+        room.resultsFinalized = true;
+        broadcast(room, resultsUpdate(room));
+        console.log(`Results finalized by host in room ${currentRoomId}`);
         break;
       }
 
@@ -428,7 +456,7 @@ wss.on('connection', (ws) => {
     broadcast(room, roomState(room, currentRoomId));
     // ゲーム開始後の切断なら、結果集計中のランキング表示も更新させる
     if (room.gameState !== 'waiting') {
-      broadcast(room, { type: 'RESULTS_UPDATE', results: buildResults(room) });
+      broadcast(room, resultsUpdate(room));
     }
   });
 });
