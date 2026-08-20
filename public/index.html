@@ -267,21 +267,27 @@ input[type="file"]{display:none;}
 .radio-group label{
   display:block;
   background:#ffffff; border:1.5px solid #9fb1da; border-radius:8px;
-  padding:10px 14px 10px 40px; text-align:left; cursor:pointer; font-size:14px;
+  padding:10px 14px 10px 46px; text-align:left; cursor:pointer; font-size:14px;
   color:#2e3658; transition:all .15s; font-family:inherit;
   position:relative;
 }
-/* 外円（ラジオの枠） */
+/* 外枠（角丸の四角）。
+   ページ冒頭の *{box-sizing:border-box} は疑似要素には効かないため、
+   ここで明示的に指定する。これがないと border 分だけ実寸が広がり、
+   下の内側四角と中心がずれる（外枠 14〜38 / 内側 19〜29 で2pxのずれ）。 */
 .radio-group label::before{
   content:''; position:absolute; left:14px; top:50%; transform:translateY(-50%);
-  width:16px; height:16px; border-radius:50%;
+  box-sizing:border-box;
+  width:20px; height:20px; border-radius:6px;
   border:2px solid #9fb1da; background:#ffffff;
   transition:border-color .15s;
 }
-/* 内ドット（選択時のみ表示） */
+/* 内側の四角（選択時のみ表示）。
+   外枠は 14〜34（中心24）、内側は 19〜29（中心24）で中心が一致する。 */
 .radio-group label::after{
   content:''; position:absolute; left:19px; top:50%; transform:translateY(-50%) scale(0);
-  width:10px; height:10px; border-radius:50%;
+  box-sizing:border-box;
+  width:10px; height:10px; border-radius:3px;
   background:var(--cyan);
   transition:transform .12s ease-out;
 }
@@ -297,6 +303,13 @@ input[type="file"]{display:none;}
 .radio-group input:checked + label::after{background:var(--cyan);transform:translateY(-50%) scale(1);}
 .radio-group input:checked + label:hover{background:var(--cyan-deep);border-color:var(--cyan-deep);}
 .radio-group input:focus-visible + label{outline:2px solid var(--cyan);outline-offset:2px;}
+/* IME方式の選択肢だけは説明文が長いため、タイトル（大）＋説明（小）の2行構成にする。
+   選択マークの形状は .radio-group 共通のものをそのまま使う。 */
+#ime-rule-select label{padding:12px 14px 12px 46px;}
+#ime-rule-select .opt-title{display:block;font-size:16px;line-height:1.45;}
+#ime-rule-select .opt-desc{display:block;font-size:12px;line-height:1.55;margin-top:1px;color:#5a6490;}
+/* 選択中は地色がシアンになるため、説明文も白系に寄せて可読性を保つ */
+#ime-rule-select input:checked + label .opt-desc{color:rgba(255,255,255,0.88);}
 /* プレイ時間スライダー（1〜10分・1分刻み） */
 .duration-slider-wrap{
   background:#ffffff; border:1.5px solid #9fb1da; border-radius:8px;
@@ -605,7 +618,7 @@ input[type="file"]{display:none;}
         <a href="https://github.com/welame2929/worpro-server/tree/main/public/texts" target="_blank" rel="noopener noreferrer">課題文txt一覧</a>
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfb3YxhlhfkzLhUAV1nGt9VM6058ParbCyKL8y9hM7Exgaj3A/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">不具合報告フォーム</a>
       </div>
-      <div class="footer-version">v1.1.2</div>
+      <div class="footer-version">v1.1.3</div>
     </div>
   </div>
   <div class="split-main">
@@ -702,14 +715,26 @@ input[type="file"]{display:none;}
       <p class="mcard-desc">自分が使用するIME方式を選択します（分からなければ「通常」で構いません）。参考情報であり、採点には影響しません。</p>
       <fieldset class="radio-group" id="ime-rule-select">
         <input type="radio" name="ime-rule" id="ime-normal" value="normal" checked>
-        <label for="ime-normal">通常（変換学習または辞書登録を使う）</label>
+        <label for="ime-normal">
+          <span class="opt-title">通常</span>
+          <span class="opt-desc">変換学習または辞書登録を使う</span>
+        </label>
         <p class="ime-split-note">下の特別な条件に当てはまる方は、かわりにこれらの項目を選択してください。</p>
         <input type="radio" name="ime-rule" id="ime-mainichi" value="mainichi">
-        <label for="ime-mainichi">変換学習・辞書登録なし（学習機能の一切をOFFにし、デフォルトのIMEのみを使う場合に選択）</label>
+        <label for="ime-mainichi">
+          <span class="opt-title">変換学習・辞書登録なし</span>
+          <span class="opt-desc">学習機能の一切をOFFにし、デフォルトのIMEのみを使う場合に選択</span>
+        </label>
         <input type="radio" name="ime-rule" id="ime-warpro" value="warpro">
-        <label for="ime-warpro">短縮辞書登録あり（「じか」→「時間」など、入力文字数を超える辞書登録を使う場合に選択）</label>
+        <label for="ime-warpro">
+          <span class="opt-title">短縮辞書登録あり</span>
+          <span class="opt-desc">「じか」→「時間」など、入力文字数を超える辞書登録を使う場合に選択</span>
+        </label>
         <input type="radio" name="ime-rule" id="ime-kanjichoku" value="kanjichoku">
-        <label for="ime-kanjichoku">漢字直接入力（T-codeなど、漢字を直接入力できる方式を使う場合に選択）</label>
+        <label for="ime-kanjichoku">
+          <span class="opt-title">漢字直接入力</span>
+          <span class="opt-desc">T-codeなど、漢字を直接入力できる方式を使う場合に選択</span>
+        </label>
       </fieldset>
     </section>
     <div id="name-err" class="err-msg">ハンドルネームを入力してください</div>
