@@ -95,22 +95,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   font-size:12px; color:var(--blue-mid); letter-spacing:.05em;
 }
 .mcard{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
-/* 折りたたみ可能な説明カード（details要素ベース） */
-.mcard-collapsible{padding:0;}
-.mcard-collapsible > summary{
-  list-style:none; cursor:pointer; padding:0.85rem 1.25rem;
-  display:flex; align-items:center; gap:8px;
-  margin-bottom:0; /* mcard-titleのmargin-bottomを打ち消し */
-}
-.mcard-collapsible > summary::-webkit-details-marker{display:none;}
-.mcard-collapsible > summary::before{
-  content:'▶'; font-size:11px; color:var(--navy);
-  transition:transform .15s; flex-shrink:0;
-}
-.mcard-collapsible[open] > summary::before{transform:rotate(90deg);}
-.mcard-collapsible > *:not(summary){margin-left:1.25rem;margin-right:1.25rem;}
-.mcard-collapsible[open] > *:last-child{margin-bottom:1rem;}
-.mcard-collapsible[open] > summary{padding-bottom:0.5rem;}
 .mcard-title{font-size:18px;font-weight:500;color:var(--navy);margin-bottom:12px;letter-spacing:.04em;}
 /* 見出し直下に置く設定項目の説明文（プレイ設定画面用） */
 .mcard-desc{font-size:13px;color:#4658a8;line-height:1.7;margin:-6px 0 14px;}
@@ -136,9 +120,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .rule-highlight b{color:var(--navy);font-weight:500;}
 .rule-highlight-sub{font-size:13px;color:#4658a8;}
 .err-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px;margin:10px 0;}
-/* mcard-collapsible内の子要素はmargin-left/rightで左右余白を確保する方式のため、
-   width:100%のtableはその分だけ幅がはみ出す。他の子要素と同じ実効幅になるよう補正する。 */
-.mcard-collapsible .err-table{width:calc(100% - 2.5rem);}
 .err-table th{background:transparent;color:var(--navy);padding:6px 8px;text-align:left;font-weight:500;font-size:13px;letter-spacing:.04em;border-bottom:2px solid #8098D6;}
 .err-table th:first-child{width:5em;}
 .err-table td{padding:8px 8px;color:#2e3658;vertical-align:top;line-height:1.6;word-break:break-word;overflow-wrap:anywhere;}
@@ -260,7 +241,11 @@ input[type="file"]{display:none;}
 /* 選択肢：本物のラジオボタン（fieldset+input+label）。
    inputは視覚的に隠し、labelにボタン状の見た目と○/●インジケータを持たせる。
    矢印キーでの選択切替・Tabフォーカスはブラウザ標準機能として動作する。 */
-.radio-group{border:none;display:flex;flex-direction:column;gap:6px;margin-bottom:6px;min-width:0;}
+/* position:relative は下の非表示inputの包含ブロックを自分にするために必要。
+   これがないと absolute の input が「初期包含ブロック（＝文書全体）」を基準に扱われ、
+   スクロール領域の外側にはみ出した扱いになってページ全体が縦に伸びる
+   （＝スクロールバーが二重になり、最下部に余白が出る）。 */
+.radio-group{border:none;display:flex;flex-direction:column;gap:6px;margin-bottom:6px;min-width:0;position:relative;}
 .radio-group input[type=radio]{
   position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;
 }
@@ -512,6 +497,19 @@ input[type="file"]{display:none;}
   background:#fde8e8; color:#8b1c1c; border:1px solid #f0b4b4;
   border-radius:4px; font-size:10px; font-weight:500;
 }
+/* 正確賞バッジ・注記：失格バッジと同じ表示方法・位置で、配色のみ緑系（達成を示す）に変える */
+.award-badge{
+  display:inline-block; padding:4px 10px; margin-left:2px;
+  background:var(--ins-bg); color:var(--ins-text); border:1px solid #9fd8ae;
+  border-radius:6px; font-size:13px; font-weight:500; letter-spacing:.04em;
+}
+.award-note{font-size:12px; color:var(--ins-text); margin:-8px 0 16px;}
+/* 順位表内の正確賞バッジ（小さめ、失格バッジと同形） */
+.award-badge-sm{
+  display:inline-block; padding:1px 6px; margin-left:6px;
+  background:var(--ins-bg); color:var(--ins-text); border:1px solid #9fd8ae;
+  border-radius:4px; font-size:10px; font-weight:500;
+}
 /* 統計リスト：項目名の直後に値を置き、視線移動を最小化する。
    dtに最小幅を与えて数値の左端を揃え、行の右側は余白として空ける。 */
 .score-list{display:flex; flex-direction:column; gap:6px;}
@@ -595,6 +593,20 @@ input[type="file"]{display:none;}
 .btn-finalize:hover{border-color:var(--cyan); background:#f4fbfd; color:var(--navy);}
 .btn-finalize:focus-visible{outline:2px solid var(--cyan); outline-offset:2px;}
 .finalize-note{font-size:11px; color:var(--muted); margin-top:6px; line-height:1.6;}
+/* ホスト不在の警告（このルームではもうゲームを開始できない） */
+.host-gone-alert{
+  background:#fdf4e0; border:1px solid #f0cd84; border-radius:8px;
+  padding:12px 16px; margin-bottom:1rem;
+  font-size:13.5px; color:#5f4310; line-height:1.7;
+}
+/* ロビー内の状態タグ（リザルト確認中など） */
+.status-tag{font-size:12px; color:#7a4a10; background:#f7e6c8; padding:2px 8px; border-radius:4px;}
+/* ロビー内の区切り見出し（ホスト限定のプレイ設定を、共有情報と分けて示す） */
+.lobby-section-head{
+  font-size:15px; font-weight:500; color:var(--white); letter-spacing:.08em;
+  margin:1.75rem 0 .75rem; padding-top:1rem;
+  border-top:1px solid rgba(255,255,255,0.25);
+}
 /* 自分が切断された場合の案内。原因が分かるよう警告色で明示する */
 .ranking-disconnected{
   background:#fdf4e0; border:1px solid #f0cd84; border-radius:8px;
@@ -618,7 +630,7 @@ input[type="file"]{display:none;}
         <a href="https://github.com/welame2929/worpro-server/tree/main/public/texts" target="_blank" rel="noopener noreferrer">課題文txt一覧</a>
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfb3YxhlhfkzLhUAV1nGt9VM6058ParbCyKL8y9hM7Exgaj3A/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">不具合報告フォーム</a>
       </div>
-      <div class="footer-version">v1.1.3</div>
+      <div class="footer-version">v1.1.4</div>
     </div>
   </div>
   <div class="split-main">
@@ -655,12 +667,9 @@ input[type="file"]{display:none;}
     <section class="mcard">
       <h2 class="mcard-title">課題文を選択</h2>
       <p class="mcard-desc">プレイする文章を選択します。「一覧から課題文を選ぶ」より、サイトオリジナルの課題文を使用可能です。</p>
-      <fieldset class="radio-group" id="solo-text-select">
-        <input type="radio" name="solo-text" id="solo-text-0" value="0">
-        <label for="solo-text-0">日本国憲法（動作確認用）</label>
-      </fieldset>
-      <select id="solo-server-select" class="text-select-dropdown" style="display:none;">
+      <select id="solo-server-select" class="text-select-dropdown">
         <option value="">（一覧から課題文を選ぶ）</option>
+        <option value="sample:0">日本国憲法（動作確認用）</option>
       </select>
       <p class="upload-note">txtファイルをアップロードし、自分で用意した課題文を使用することもできます。<u>文章は全角文字のみで作成してください</u>（半角英数字を使用するとうまく動作しない可能性があります）。</p>
       <div class="upload-area" onclick="document.getElementById('solo-file-input').click()">txtファイルをアップロード</div>
@@ -806,61 +815,6 @@ input[type="file"]{display:none;}
   </div>
 </div>
 
-<!-- ⑥ホスト：課題文指定 -->
-<div id="host-setup-screen" class="screen split">
-  <div class="split-brand">
-    <h1 class="brand-title">JIKAGAMI</h1>
-    <p class="brand-sub">実用タイピング競技・採点用ツール『字鏡』</p>
-    <div class="brand-screen">ルームを作る</div>
-  </div>
-  <div class="split-main">
-   <div class="split-main-inner">
-    <section class="mcard">
-      <h2 class="mcard-title">課題文を指定</h2>
-      <p class="mcard-desc">プレイする文章を選択します。「一覧から課題文を選ぶ」のリストより、サイトオリジナルの課題文を使用可能です。</p>
-      <fieldset class="radio-group" id="host-text-select">
-        <input type="radio" name="host-text" id="host-text-0" value="0">
-        <label for="host-text-0">日本国憲法（動作確認用）</label>
-      </fieldset>
-      <select id="host-server-select" class="text-select-dropdown" style="display:none;">
-        <option value="">（一覧から課題文を選ぶ）</option>
-      </select>
-      <p class="upload-note">txtファイルをアップロードし、自分で用意した課題文を使用することもできます。<u>文章は全角文字のみで作成してください</u>（半角英数字を使用するとうまく動作しない可能性があります）。</p>
-      <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
-      <input type="file" id="host-file-input" accept=".txt">
-      <div id="host-selected-info"></div>
-    </section>
-    <section class="mcard">
-      <h2 class="mcard-title">順位表のデフォルト採点方式</h2>
-      <p class="mcard-desc">結果画面にデフォルトで表示される採点方式を選びます。他の方式も同じ画面で確認できます。</p>
-      <fieldset class="radio-group" id="host-rule-select">
-        <input type="radio" name="host-rule" id="host-rule-warpro" value="warpro" checked>
-        <label for="host-rule-warpro">ワープロ大会</label>
-        <input type="radio" name="host-rule" id="host-rule-mainichi" value="mainichi">
-        <label for="host-rule-mainichi">毎日パソコン入力</label>
-        <input type="radio" name="host-rule" id="host-rule-intersteno" value="intersteno">
-        <label for="host-rule-intersteno">Intersteno</label>
-      </fieldset>
-    </section>
-    <section class="mcard">
-      <h2 class="mcard-title">プレイ時間</h2>
-      <p class="mcard-desc">プレイする時間を1～10分の間で選べます。</p>
-      <div class="duration-slider-wrap">
-        <output class="duration-value" id="host-duration-value" for="host-duration-slider">10分</output>
-        <input type="range" class="duration-slider" id="host-duration-slider"
-          min="1" max="10" step="1" value="10" aria-label="プレイ時間（分）">
-        <div class="duration-scale"><span>1分</span><span>10分</span></div>
-      </div>
-    </section>
-    <div id="host-err" class="err-msg">課題文を選択してください</div>
-    <div class="action-row">
-      <button class="btn-back" onclick="backFromHostSetup()">戻る</button>
-      <button class="btn-primary" id="create-room-btn" onclick="createRoom()">ルームを作成してスタンバイ</button>
-    </div>
-   </div>
-  </div>
-</div>
-
 <!-- ⑤参加者：ルームID入力 -->
 <div id="join-screen" class="screen split">
   <div class="split-brand">
@@ -906,6 +860,11 @@ input[type="file"]{display:none;}
       <div id="lobby-text-info" style="font-size:13px;color:#4658a8;margin-top:4px;"></div>
     </section>
     <div id="lobby-err" class="err-msg"></div>
+    <!-- ホストが抜けるとゲームを開始できなくなるため、その旨をはっきり伝える -->
+    <div id="host-gone-alert" class="host-gone-alert" style="display:none;">
+      ホストが退出したため、このルームでは新しいゲームを開始できません。<br>
+      続けてプレイする場合は、いったんメニューに戻って新しいルームを作成してください。
+    </div>
     <!-- チーム選択：団体戦のときだけ表示。選択内容は「参加者」一覧にも反映される -->
     <section class="mcard" id="team-select-card" style="display:none;">
       <h2 class="mcard-title">チームを選択</h2>
@@ -930,6 +889,47 @@ input[type="file"]{display:none;}
         placeholder="ここでIMEの切り替えや指慣らしができます（採点対象外・他のプレイヤーには表示されません）"
         spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
     </section>
+    <!-- プレイ設定：ホストのみ表示。部屋を再戦で使い回すため、部屋作成後のロビーで設定する。
+         変更は即座にサーバーへ送られ、全員のROOM_STATEに反映される。
+         全員に関係する情報（ルームID・参加者・チャットなど）より下に置き、
+         ホスト専用の操作であることを見出しで区切って示す。 -->
+    <div id="lobby-settings" style="display:none;">
+      <h2 class="lobby-section-head">プレイ設定（ホスト限定）</h2>
+      <section class="mcard">
+        <h2 class="mcard-title">課題文を指定</h2>
+        <p class="mcard-desc">プレイする文章を選択します。「一覧から課題文を選ぶ」のリストより、サイトオリジナルの課題文を使用可能です。</p>
+        <select id="host-server-select" class="text-select-dropdown">
+          <option value="">（一覧から課題文を選ぶ）</option>
+          <option value="sample:0">日本国憲法（動作確認用）</option>
+        </select>
+        <p class="upload-note">txtファイルをアップロードし、自分で用意した課題文を使用することもできます。<u>文章は全角文字のみで作成してください</u>（半角英数字を使用するとうまく動作しない可能性があります）。</p>
+        <div class="upload-area" onclick="document.getElementById('host-file-input').click()">txtファイルをアップロード</div>
+        <input type="file" id="host-file-input" accept=".txt">
+        <div id="host-selected-info"></div>
+      </section>
+      <section class="mcard">
+        <h2 class="mcard-title">順位表のデフォルト採点方式</h2>
+        <p class="mcard-desc">結果画面にデフォルトで表示される採点方式を選びます。他の方式も同じ画面で確認できます。</p>
+        <fieldset class="radio-group" id="host-rule-select">
+          <input type="radio" name="host-rule" id="host-rule-warpro" value="warpro" checked>
+          <label for="host-rule-warpro">ワープロ大会</label>
+          <input type="radio" name="host-rule" id="host-rule-mainichi" value="mainichi">
+          <label for="host-rule-mainichi">毎日パソコン入力</label>
+          <input type="radio" name="host-rule" id="host-rule-intersteno" value="intersteno">
+          <label for="host-rule-intersteno">Intersteno</label>
+        </fieldset>
+      </section>
+      <section class="mcard">
+        <h2 class="mcard-title">プレイ時間</h2>
+        <p class="mcard-desc">プレイする時間を1～10分の間で選べます。</p>
+        <div class="duration-slider-wrap">
+          <output class="duration-value" id="host-duration-value" for="host-duration-slider">10分</output>
+          <input type="range" class="duration-slider" id="host-duration-slider"
+            min="1" max="10" step="1" value="10" aria-label="プレイ時間（分）">
+          <div class="duration-scale"><span>1分</span><span>10分</span></div>
+        </div>
+      </section>
+    </div>
     <div class="action-row">
       <button class="btn-back" onclick="leaveRoom()">退出する</button>
       <!-- ホスト用 -->
@@ -1008,8 +1008,11 @@ input[type="file"]{display:none;}
         <span class="rh-label" id="res-point-label">得点</span>
         <span class="rh-value" id="res-point">0</span>
         <span class="dq-badge" id="res-dq-badge" style="display:none;">失格</span>
+        <!-- 正確賞：ワープロ大会ルールで総字数1500字以上・ノーミス達成時のみ表示 -->
+        <span class="award-badge" id="res-award-badge" style="display:none;">正確賞</span>
       </div>
       <div class="dq-note" id="res-dq-note" style="display:none;"></div>
+      <div class="award-note" id="res-award-note" style="display:none;"></div>
       <dl class="score-list">
         <div class="score-line">
           <dt class="rs-label" id="res-total-label">総字数</dt>
@@ -1072,6 +1075,17 @@ input[type="file"]{display:none;}
       <p class="finalize-note">未提出のプレイヤーを待たずに順位表を確定します。締め切り後に届いた結果は反映されます。</p>
     </div>
   </section>
+  <!-- マルチ時のみ表示。ロビーと同じ部屋のチャットで、内容も同期している -->
+  <section class="mcard" id="result-chat-card" style="display:none;">
+    <h2 class="mcard-title">チャット</h2>
+    <div class="chat-log" id="result-chat-log" role="log" aria-live="polite"></div>
+    <div class="chat-input-row">
+      <input type="text" id="result-chat-input" class="text-input" placeholder="メッセージを入力…" maxlength="200"
+        autocomplete="off">
+      <button class="btn-primary chat-send-btn" onclick="sendChatMessage('result')">送信</button>
+    </div>
+    <div id="result-chat-err" class="err-msg" style="margin-top:6px;"></div>
+  </section>
   <!-- diff表示（折りたたみ可能、デフォルト展開） -->
   <details class="diff-card" open>
     <summary><h2>入力内容の比較</h2></summary>
@@ -1092,7 +1106,10 @@ input[type="file"]{display:none;}
       <span>結果をXでシェア</span>
     </button>
     <button class="btn-secondary" id="retry-btn">同じ課題文でもう一度</button>
-    <button class="btn-primary" onclick="goHome()">メニューに戻る</button>
+    <!-- マルチ時のみ。戻るタイミングは各自の任意で、次のゲームはロビーに戻った人だけで始まる -->
+    <button class="btn-primary" id="rematch-btn" style="display:none;" onclick="requestRematch()">ロビーに戻って次の対戦に参加する</button>
+    <!-- 再戦（btn-primary）と並ぶため、離脱側は暗色（btn-back）にして押し分けやすくする -->
+    <button class="btn-back" onclick="goHome()">メニューに戻る</button>
   </div>
 </div>
 </div>
@@ -1169,24 +1186,12 @@ function showScreen(id){
 // =====================================================================
 // ソロメニュー
 // =====================================================================
-// 選択の排他制御ヘルパー：ラジオ解除／プルダウン解除
-function uncheckRadios(name){
-  document.querySelectorAll('input[name="'+name+'"]').forEach(r=>r.checked=false);
-}
+// プルダウン解除ヘルパー
 function clearDropdown(id){
   const sel=document.getElementById(id);
   if(sel){ sel.value=''; sel.classList.remove('has-selection'); }
 }
 
-// 課題文選択（サンプル文章のラジオ）
-document.getElementById('solo-text-select').addEventListener('change',e=>{
-  if(e.target.name!=='solo-text') return;
-  ++soloSelectionSeq; // 進行中のasync選択（アップロード・fetch）を無効化
-  clearDropdown('solo-server-select');
-  selectedText=SAMPLE_TEXTS[parseInt(e.target.value)];
-  document.getElementById('solo-selected-info').textContent='選択中：'+selectedText.name;
-  document.getElementById('solo-start-btn').disabled=false;
-});
 // ソロ：デフォルト採点方式の選択
 document.getElementById('solo-rule-select').addEventListener('change',e=>{
   if(e.target.name==='solo-rule') soloSelectedRule=e.target.value;
@@ -1214,8 +1219,7 @@ document.getElementById('solo-file-input').addEventListener('change',e=>{
   selectedText=null;
   document.getElementById('solo-selected-info').textContent='読み込み中…';
   document.getElementById('solo-start-btn').disabled=true;
-  // サンプルラジオ・サーバー上課題文の両方の選択を解除
-  uncheckRadios('solo-text');
+  // 課題文一覧プルダウンの選択を解除
   clearDropdown('solo-server-select');
   const r=new FileReader();
   r.onload=ev=>{
@@ -1269,18 +1273,14 @@ document.getElementById('room-mode-select').addEventListener('change',e=>{
 });
 
 function goFromModeSelect(){
-  // 団体戦のみチーム設定画面を挟む。個人戦はそのまま課題文設定へ
+  // 団体戦のみチーム設定画面を挟む。個人戦はそのまま部屋を作る。
+  // 課題文・採点方式・プレイ時間はロビーで設定する（部屋を再戦で使い回すため）。
   if(hostSelectedMode==='team'){
     renderTeamNameInputs();
     showScreen('team-setup-screen');
   } else {
-    showScreen('host-setup-screen');
+    createRoom();
   }
-}
-
-// 課題文設定からの「戻る」。団体戦ならチーム設定、個人戦なら形式選択に戻す
-function backFromHostSetup(){
-  showScreen(hostSelectedMode==='team' ? 'team-setup-screen' : 'multi-mode-screen');
 }
 
 // チーム数スライダーに合わせて入力欄を作り直す。
@@ -1317,7 +1317,7 @@ function renderTeamNameInputs(){
 })();
 
 function finishTeamSetup(){
-  showScreen('host-setup-screen');
+  createRoom();
 }
 
 // ホストが確定したチーム名の配列を作る。未入力欄は「チームA」形式で補う
@@ -1344,61 +1344,73 @@ function connectWS(callback){
 }
 
 // =====================================================================
-// マルチプレイ：ホスト設定
+// マルチプレイ：ホスト設定（ロビー内で行う）
 // =====================================================================
 let hostText=null;
-// ホスト：課題文選択（サンプル文章のラジオ）
-document.getElementById('host-text-select').addEventListener('change',e=>{
-  if(e.target.name!=='host-text') return;
-  ++hostSelectionSeq; // 進行中のasync選択を無効化
-  clearDropdown('host-server-select');
-  const t=SAMPLE_TEXTS[parseInt(e.target.value)];
-  hostText={name:t.name, content:t.content};
-  document.getElementById('host-selected-info').textContent='選択中：'+t.name;
-});
+
+// 現在ホストが選んでいる設定をサーバーへ送る。
+// 課題文が未選択（hostTextがnull）のあいだは text を送らず、
+// サーバー側の「課題文未選択では開始できない」状態を維持する。
+function sendRoomSettings(){
+  if(!isHost || !ws || ws.readyState!==WebSocket.OPEN) return;
+  const payload={
+    type:'UPDATE_ROOM_SETTINGS',
+    defaultRule:hostSelectedRule,
+    duration:hostSelectedDuration,
+  };
+  if(hostText){
+    payload.text=hostText.content;
+    payload.textName=hostText.name;
+    payload.serverName=hostText.serverName||null;
+  }
+  ws.send(JSON.stringify(payload));
+}
+
 document.getElementById('host-file-input').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f)return;
   const seq=++hostSelectionSeq;
-  // 読み込み中は「未選択」扱い。createRoom側の !hostText チェックで
-  // 「読み込み前の状態で作成」を弾く（前回プレイの残存が使われないように）。
+  // 読み込み中は「未選択」扱い（前回選んだ課題文がそのまま使われないように）
   hostText=null;
   document.getElementById('host-selected-info').textContent='読み込み中…';
-  // サンプルラジオ・サーバー上課題文の両方の選択を解除
-  uncheckRadios('host-text');
+  // 課題文一覧プルダウンの選択を解除
   clearDropdown('host-server-select');
   const r=new FileReader();
   r.onload=ev=>{
     if(seq!==hostSelectionSeq) return; // 別の選択に切り替わっていたら破棄
     hostText={name:f.name,content:ev.target.result};
     document.getElementById('host-selected-info').textContent='選択中：'+f.name;
+    sendRoomSettings();
   };
   r.readAsText(f,'UTF-8');
 });
 
 // ホストのデフォルト採点方式選択
 document.getElementById('host-rule-select').addEventListener('change',e=>{
-  if(e.target.name==='host-rule') hostSelectedRule=e.target.value;
+  if(e.target.name!=='host-rule') return;
+  hostSelectedRule=e.target.value;
+  sendRoomSettings();
 });
-// ホストのプレイ時間選択
+// ホストのプレイ時間選択。表示の追従は input（滑らかに動かすため）、
+// 送信は change（ドラッグ中に大量送信しないよう、離したときだけ）で分ける。
 bindDurationSlider('host-duration-slider','host-duration-value',sec=>{ hostSelectedDuration=sec; });
+document.getElementById('host-duration-slider').addEventListener('change',sendRoomSettings);
 
 function createRoom(){
-  if(!hostText){ document.getElementById('host-err').classList.add('show'); return; }
-  document.getElementById('host-err').classList.remove('show');
   isHost=true;
   multiDefaultRule=hostSelectedRule;
   ws.send(JSON.stringify({
     type:'CREATE_ROOM',
     name:playerName,
-    text:hostText.content,
-    textName:hostText.name,
-    serverName:hostText.serverName||null,
-    defaultRule:hostSelectedRule,
-    duration:hostSelectedDuration,
     imeRule:playerImeRule,
     mode:hostSelectedMode,
     teams:hostSelectedMode==='team' ? buildTeamsPayload() : null
   }));
+}
+
+// 再戦（ホストのみ）。サーバーが部屋をロビー状態に戻し、全員がロビーへ移動する。
+function requestRematch(){
+  if(!ws || ws.readyState!==WebSocket.OPEN) return;
+  ws.send(JSON.stringify({ type:'RETURN_TO_LOBBY' }));
 }
 
 // =====================================================================
@@ -1439,56 +1451,105 @@ function hostStartGame(force){
   ws.send(JSON.stringify({ type:'START_GAME', force:!!force }));
 }
 
+// 自分がロビーへ戻ったときの後始末。
+// 前ラウンドの結果表示を捨て、スタンバイ状態も解除する。
+// チャットログと（団体戦の）チーム所属はそのまま引き継ぐ。
+function returnToLobby(){
+  myRound=null; // 次のGAME_STARTで新しいラウンド番号を受け取る
+  clearInterval(timerInterval); stopFlash();
+  clearInterval(countdownInterval);
+  isMulti=true;
+  isReady=false;
+  latestResults=null;
+  resultsFinalized=false;
+  lastScore=null;
+  document.getElementById('ready-btn').textContent='スタンバイする';
+  document.getElementById('ready-btn').style.cssText='';
+  document.getElementById('ranking-body').innerHTML='';
+  document.getElementById('team-score-body').innerHTML='';
+  document.getElementById('team-score-section').style.display='none';
+  document.getElementById('finalize-row').style.display='none';
+  showRankingDisconnected(false);
+  document.getElementById('lobby-err').classList.remove('show');
+  showScreen('lobby-screen');
+}
+
 // =====================================================================
 // マルチプレイ：ロビーチャット
 // =====================================================================
 // Enterで送信（IME変換確定のEnterと衝突しないよう isComposing を確認）
-document.getElementById('chat-input').addEventListener('keydown',e=>{
-  if(e.key==='Enter' && !e.isComposing){
-    e.preventDefault();
-    sendChatMessage();
-  }
+// チャットはロビーとリザルトの2箇所に同じ内容を表示する。
+// どちらの画面から送っても同じ部屋のチャットで、ログも同期して見える。
+const CHAT_PANES=[
+  {log:'chat-log',        input:'chat-input',        err:'chat-err'},
+  {log:'result-chat-log', input:'result-chat-input', err:'result-chat-err'},
+];
+
+CHAT_PANES.forEach(p=>{
+  document.getElementById(p.input).addEventListener('keydown',e=>{
+    // IME変換確定のEnterと衝突しないよう isComposing を確認する
+    if(e.key==='Enter' && !e.isComposing){
+      e.preventDefault();
+      sendChatMessage(p.input);
+    }
+  });
 });
 
-function sendChatMessage(){
-  const input=document.getElementById('chat-input');
+// inputId 省略時（ロビーのボタン）はロビー側の入力欄を使う
+function sendChatMessage(which){
+  const inputId = which==='result' ? 'result-chat-input' : (which || 'chat-input');
+  const input=document.getElementById(inputId);
   const text=input.value.trim();
   if(!text || !ws || ws.readyState!==WebSocket.OPEN) return;
   ws.send(JSON.stringify({ type:'CHAT_MESSAGE', text }));
   input.value='';
 }
 
-// 受信したチャットをログに追加。name/textは必ずtextContentで挿入し、
+// 受信したチャットを両方のログに追加。name/textは必ずtextContentで挿入し、
 // HTMLとして解釈させない（XSS対策。相手が<script>等を送ってもただの文字列として表示される）
 function appendChatMessage(msg){
-  const log=document.getElementById('chat-log');
-  const empty=log.querySelector('.chat-empty');
-  if(empty) empty.remove();
-  const row=document.createElement('div');
-  row.className='chat-msg'+(msg.playerId && msg.playerId===myPlayerId?' chat-msg-self':'');
-  const nameEl=document.createElement('span');
-  nameEl.className='chat-msg-name';
-  nameEl.textContent=msg.name+'：';
-  const textEl=document.createElement('span');
-  textEl.className='chat-msg-text';
-  textEl.textContent=msg.text;
-  row.appendChild(nameEl); row.appendChild(textEl);
-  log.appendChild(row);
-  log.scrollTop=log.scrollHeight;
+  for(const p of CHAT_PANES){
+    const log=document.getElementById(p.log);
+    const empty=log.querySelector('.chat-empty');
+    if(empty) empty.remove();
+    const row=document.createElement('div');
+    row.className='chat-msg'+(msg.playerId && msg.playerId===myPlayerId?' chat-msg-self':'');
+    const nameEl=document.createElement('span');
+    nameEl.className='chat-msg-name';
+    nameEl.textContent=msg.name+'：';
+    const textEl=document.createElement('span');
+    textEl.className='chat-msg-text';
+    textEl.textContent=msg.text;
+    row.appendChild(nameEl); row.appendChild(textEl);
+    log.appendChild(row);
+    log.scrollTop=log.scrollHeight;
+  }
 }
 
-// ルーム退出・新規入室時に前の部屋のログを消す（部屋をまたいで内容を残さない）
+// チャットのエラー（連投制限など）を両方の欄に出す
+function showChatError(message){
+  for(const p of CHAT_PANES){
+    const el=document.getElementById(p.err);
+    el.textContent=message; el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'),4000);
+  }
+}
+
+// ルーム退出・新規入室時に前の部屋のログを消す（部屋をまたいで内容を残さない）。
+// 再戦ではログを引き継ぐため、ここは呼ばない。
 function resetChatLog(){
-  const log=document.getElementById('chat-log');
-  log.innerHTML='';
-  // 空のログは何も起きていないのか壊れているのか区別がつかないため、案内を置く
-  // （最初のメッセージ受信時に appendChatMessage が取り除く）
-  const empty=document.createElement('div');
-  empty.className='chat-empty';
-  empty.textContent='まだメッセージはありません';
-  log.appendChild(empty);
-  document.getElementById('chat-input').value='';
-  document.getElementById('chat-err').classList.remove('show');
+  for(const p of CHAT_PANES){
+    const log=document.getElementById(p.log);
+    log.innerHTML='';
+    // 空のログは何も起きていないのか壊れているのか区別がつかないため、案内を置く
+    // （最初のメッセージ受信時に appendChatMessage が取り除く）
+    const empty=document.createElement('div');
+    empty.className='chat-empty';
+    empty.textContent='まだメッセージはありません';
+    log.appendChild(empty);
+    document.getElementById(p.input).value='';
+    document.getElementById(p.err).classList.remove('show');
+  }
 }
 
 // 団体戦のチーム選択ボタンを描画する。選択中のチームは塗りつぶして示す。
@@ -1524,13 +1585,40 @@ function renderLobby(state){
   if(state.mode) multiMode=state.mode;
   if(state.teams) multiTeams=state.teams;
   renderTeamChoices();
-  // 課題文名・プレイ時間・採点方式を案内
+  // 課題文名・プレイ時間・採点方式を案内。課題文はロビーでホストが選ぶため未選択があり得る
   const infoParts=[];
-  if(state.textName) infoParts.push('課題文：'+state.textName);
+  infoParts.push('課題文：'+(state.textName || '未選択'));
   if(state.duration) infoParts.push('プレイ時間：'+(state.duration/60)+'分');
   const RULE_LABELS_J={warpro:'ワープロ大会', mainichi:'毎日パソコン入力', intersteno:'Intersteno'};
   if(state.defaultRule) infoParts.push('デフォルト採点方式：'+(RULE_LABELS_J[state.defaultRule]||state.defaultRule));
   document.getElementById('lobby-text-info').textContent=infoParts.join('　/　');
+  // 採点方式はリザルト表示のデフォルトに使うため、参加者側も最新値を保持しておく
+  if(state.defaultRule) multiDefaultRule=state.defaultRule;
+  // 自分がホストかどうかはサーバーの状態に追従させる
+  const me=state.players.find(p=>p.id===myPlayerId);
+  if(me){
+    isHost=!!me.isHost;
+    document.getElementById('host-controls').style.display=isHost?'block':'none';
+    document.getElementById('guest-controls').style.display=isHost?'none':'block';
+    document.getElementById('lobby-settings').style.display=isHost?'block':'none';
+  }
+  // ホストが抜けたルームでは以後ゲームを開始できないため、その旨を警告する
+  const hostGone=(state.hostPresent===false);
+  document.getElementById('host-gone-alert').style.display=hostGone?'block':'none';
+  // 開始できない理由を順に判定してボタンに出す
+  const startBtn=document.getElementById('lobby-start-btn');
+  if(startBtn){
+    const playing=(state.gameState==='playing');
+    // 次のゲームの参加者＝ロビーに戻っている接続中の人
+    const inLobbyCount=state.players.filter(p=>p.inLobby!==false && p.connected!==false).length;
+    let label='ゲームを開始する', disabled=false;
+    if(hostGone){ label='ホストが退出しました'; disabled=true; }
+    else if(playing){ label='ゲーム進行中…'; disabled=true; }
+    else if(!state.textName){ label='課題文を選択してください'; disabled=true; }
+    else if(inLobbyCount>1) label=`ロビーの${inLobbyCount}人でゲームを開始する`;
+    startBtn.disabled=disabled;
+    startBtn.textContent=label;
+  }
   const list=document.getElementById('lobby-player-list');
   list.innerHTML='';
   for(const p of state.players){
@@ -1555,6 +1643,13 @@ function renderLobby(state){
       imeTag.textContent='IME：'+(IME_LABELS[p.imeRule]||'—');
       leftWrap.appendChild(imeTag);
     }
+    // ロビーに戻っていない人は次のゲームの対象外なので、その状態を示す
+    if(p.inLobby===false){
+      const statusTag=document.createElement('span');
+      statusTag.className='status-tag';
+      statusTag.textContent=(p.connected===false)?'切断':'結果を確認中';
+      leftWrap.appendChild(statusTag);
+    }
     const badge=document.createElement('span');
     badge.className='player-badge '+(p.ready?'badge-ready':'badge-notready');
     badge.textContent=p.ready?'スタンバイ済':'未スタンバイ';
@@ -1576,9 +1671,15 @@ function handleServerMsg(msg){
       document.getElementById('lobby-room-id').textContent=msg.roomId;
       document.getElementById('host-controls').style.display='block';
       document.getElementById('guest-controls').style.display='none';
+      // 課題文などの設定はロビーで行う（ホストのみ操作可能）
+      document.getElementById('lobby-settings').style.display='block';
+      hostText=null;
+      document.getElementById('host-selected-info').textContent='';
       myTeamId=null; // チーム所属は入室ごとにリセット（直後のROOM_STATEで一覧が描画される）
       resetChatLog();
       showScreen('lobby-screen');
+      // 部屋作成直後にホストの初期設定（採点方式・プレイ時間）をサーバーへ反映しておく
+      sendRoomSettings();
       break;
 
     case 'JOIN_OK':
@@ -1587,6 +1688,7 @@ function handleServerMsg(msg){
       // 課題文名等の表示はこの直後に届くROOM_STATEで一括設定される
       document.getElementById('host-controls').style.display='none';
       document.getElementById('guest-controls').style.display='block';
+      document.getElementById('lobby-settings').style.display='none'; // 設定はホストのみ
       isReady=false;
       document.getElementById('ready-btn').textContent='スタンバイする';
       document.getElementById('ready-btn').style.cssText='';
@@ -1603,12 +1705,14 @@ function handleServerMsg(msg){
       appendChatMessage(msg);
       break;
 
-    case 'CHAT_ERROR':{
-      const chatErr=document.getElementById('chat-err');
-      chatErr.textContent=msg.message; chatErr.classList.add('show');
-      setTimeout(()=>chatErr.classList.remove('show'),4000);
+    case 'CHAT_ERROR':
+      showChatError(msg.message);
       break;
-    }
+
+    // 自分がロビーへ戻る操作をした（他の人のリザルト表示には影響しない）
+    case 'RETURN_TO_LOBBY_OK':
+      returnToLobby();
+      break;
 
     case 'ERROR':{
       // join画面かロビー画面かで表示先を変える
@@ -1644,6 +1748,8 @@ function handleServerMsg(msg){
       // 開始後はROOM_STATEが届かない場合があるため、チーム構成はここでも受け取る
       if(msg.mode) multiMode=msg.mode;
       if(msg.teams) multiTeams=msg.teams;
+      // 自分が参加するラウンド。以降このラウンドの結果だけを受け取る
+      myRound=(msg.round!=null)?msg.round:null;
       startCountdown();
       break;
 
@@ -1652,6 +1758,9 @@ function handleServerMsg(msg){
       break;
 
     case 'RESULTS_UPDATE':
+      // 別ラウンドの更新は無視する。自分がリザルトを見ている間に
+      // 次のゲームが始まっても、手元の順位表が書き換わらないようにするため。
+      if(myRound!=null && msg.round!=null && msg.round!==myRound) break;
       resultsFinalized=!!msg.finalized;
       renderRanking(msg.results);
       break;
@@ -2083,6 +2192,10 @@ let rankingRule='warpro';
 let latestResults=null;
 // ホストが集計を締め切ったか（サーバーから受信）。trueなら未提出者を待たずに確定表示する
 let resultsFinalized=false;
+// 自分が参加した（＝いま結果を見ている）ラウンド番号。
+// 次のラウンドが始まっても手元のリザルトが書き換わらないよう、
+// これと一致しない RESULTS_UPDATE は無視する。
+let myRound=null;
 // 正誤判定（diff）を表示しているプレイヤーのid。マルチ時のみ使用し、初期値は自分。
 let diffPlayerId=null;
 
@@ -2123,7 +2236,7 @@ function endGame(){
       type:'SUBMIT_RESULT',
       totalChars:result.totalChars,
       scores:{
-        warpro:{points:result.warpro.points, miss:result.warpro.miss, disqualified:result.warpro.disqualified},
+        warpro:{points:result.warpro.points, miss:result.warpro.miss, disqualified:result.warpro.disqualified, accuracyAward:result.warpro.accuracyAward},
         mainichi:{points:result.mainichi.points, miss:result.mainichi.miss, disqualified:result.mainichi.disqualified},
         intersteno:{points:result.intersteno.points, miss:result.intersteno.miss, disqualified:result.intersteno.disqualified},
       },
@@ -2137,17 +2250,23 @@ function endGame(){
   // （上の得点カードは手元で計算しているので、自分の成績自体は通常どおり読める）
   showRankingDisconnected(!connected);
   document.getElementById('ranking-waiting').style.display=connected?'block':'none';
-  // マルチプレイでは同じ部屋での再戦を行わないため、再挑戦ボタンは表示しない
+  // ソロ用の「同じ課題文でもう一度」は使わない（マルチは部屋ごと再戦する）
   document.getElementById('retry-btn').style.display='none';
+  // ロビーへ戻るタイミングは各自の任意。接続が切れている場合は戻る先がないため出さない。
+  document.getElementById('rematch-btn').style.display=connected?'':'none';
+  // 結果画面でもロビーと同じチャットを使えるようにする
+  document.getElementById('result-chat-card').style.display=connected?'block':'none';
   // 正誤判定の表示対象は自分を初期値にする（他プレイヤーの結果が届き次第、選択肢が増える）
   diffPlayerId=myPlayerId;
   document.getElementById('diff-player-row').style.display='block';
   } else {
     rankSection.style.display='none';
-    // ソロでは団体戦の集計も切断案内も存在しない（直前のマルチプレイの残留を消す）
+    // ソロでは団体戦の集計も切断案内もチャットも存在しない（直前のマルチプレイの残留を消す）
     document.getElementById('team-score-section').style.display='none';
     showRankingDisconnected(false);
     document.getElementById('diff-player-row').style.display='none';
+    document.getElementById('result-chat-card').style.display='none';
+    document.getElementById('rematch-btn').style.display='none';
     document.getElementById('retry-btn').style.display='';
     document.getElementById('retry-btn').onclick=()=>{ isMulti=false; soloCountdownStart(); };
   }
@@ -2185,6 +2304,13 @@ function renderMyScore(){
   const noteEl=document.getElementById('res-dq-note');
   if(s.disqualified){ noteEl.textContent=dqNoteText(currentRule,s); noteEl.style.display='block'; }
   else { noteEl.style.display='none'; }
+  // 正確賞：ワープロ大会のスコアにのみ付与されるため、他方式のタブでは自然に非表示になる
+  document.getElementById('res-award-badge').style.display=s.accuracyAward?'inline-block':'none';
+  const awardNoteEl=document.getElementById('res-award-note');
+  if(s.accuracyAward){
+    awardNoteEl.textContent=`※総字数${ACCURACY_AWARD_CHARS}字以上・ノーミスを達成したため、ワープロ大会ルールでは正確賞です。`;
+    awardNoteEl.style.display='block';
+  } else { awardNoteEl.style.display='none'; }
 }
 
 // 結果画面に表示中の内容（現在選択中の採点方式）をXの投稿画面に渡す。
@@ -2279,6 +2405,8 @@ function updateFinalizeBtn(results, pendingCount){
   const me=results.find(r=>r.id===myPlayerId);
   const amHost=me ? !!me.isHost : isHost;
   row.style.display=(isMulti && amHost && !resultsFinalized && pendingCount>0) ? 'block' : 'none';
+  // ローカルの isHost もサーバーの値に合わせておく
+  if(me) isHost=amHost;
 }
 
 function finalizeResults(){
@@ -2299,6 +2427,8 @@ function renderRanking(results){
   const getPts=(r)=> r.scores ? r.scores[rankingRule].points : null;
   const getMiss=(r)=> r.scores ? r.scores[rankingRule].miss : null;
   const getDisq=(r)=> r.scores ? !!r.scores[rankingRule].disqualified : false;
+  // 正確賞はワープロ大会ルールのスコアにのみ付与されるため、他方式のタブでは自然に非表示になる
+  const getAward=(r)=> r.scores ? !!r.scores[rankingRule].accuracyAward : false;
   const getTotal=(r)=> r.totalChars==null ? '' : (isInter ? Math.ceil(r.totalChars*2.95) : r.totalChars);
   const sorted=[...results].sort((a,b)=>{
     const pa=getPts(a), pb=getPts(b);
@@ -2345,6 +2475,10 @@ function renderRanking(results){
       if(getDisq(r)){
         const dqBadge=document.createElement('span'); dqBadge.className='dq-badge-sm'; dqBadge.textContent='失格';
         tdPoint.appendChild(dqBadge);
+      }
+      if(getAward(r)){
+        const awardBadge=document.createElement('span'); awardBadge.className='award-badge-sm'; awardBadge.textContent='正確賞';
+        tdPoint.appendChild(awardBadge);
       }
     }
     else {
@@ -2406,7 +2540,9 @@ function resetTeamState(){
   document.getElementById('team-score-section').style.display='none';
   // 締め切り状態・切断案内は1ゲーム限りのものなので、部屋を離れる際に必ず捨てる
   resultsFinalized=false;
+  myRound=null;
   document.getElementById('finalize-row').style.display='none';
+  document.getElementById('host-gone-alert').style.display='none';
   showRankingDisconnected(false);
 }
 
@@ -2607,6 +2743,11 @@ const DQ_WARPRO_MISS=30;      // ワープロ大会：ミス30以上で失格
 const DQ_MAINICHI_MISS=9;     // 毎日パソコン入力コンクール：ミス9以上で失格
 const DQ_INTERSTENO_RATE=0.005; // Intersteno：換算字数の0.5%（小数点切り上げ）以上のミスで失格
 
+// 正確賞：全国高等学校ワープロ競技大会の実際の基準に準拠し、総字数1500字以上かつ
+// ノーミス（誤字・脱字・余字の合計が0）で達成とする。大会規模によって基準字数は
+// 異なるが、本ソフトでは全国大会基準の1500字を採用する。ワープロ大会ルール限定の賞。
+const ACCURACY_AWARD_CHARS=1500;
+
 // diff表示HTML（3ルール共通の見た目。削除=赤、挿入=緑）
 function buildDiffHtml(diff){
   let html='',i=0;
@@ -2636,7 +2777,8 @@ function scoreAll(original, input){
   return {
     totalChars,
     diffHtml: buildDiffHtml(diff),
-    warpro:{...w, points:pointsWarpro(totalChars,w.miss), disqualified: w.miss>=DQ_WARPRO_MISS},
+    warpro:{...w, points:pointsWarpro(totalChars,w.miss), disqualified: w.miss>=DQ_WARPRO_MISS,
+      accuracyAward: totalChars>=ACCURACY_AWARD_CHARS && w.miss===0},
     mainichi:{...m, points:pointsMainichi(totalChars,m.miss), disqualified: m.miss>=DQ_MAINICHI_MISS},
     intersteno:{...it, points:pointsIntersteno(totalChars,it.miss), convChars,
       disqualified: it.miss>=intersDqThreshold, dqThreshold:intersDqThreshold},
@@ -2686,7 +2828,7 @@ fetch('/api/texts')
   .then(r=>r.ok ? r.json() : {texts:[]})
   .then(data=>{
     const list=data.texts||[];
-    if(list.length===0) return; // サーバー側に課題文がなければ何もしない
+    if(list.length===0) return; // サーバー側に課題文がなければ何もしない（サンプルはHTML側に静的に置いてあるので表示自体は影響なし）
     const soloSel=document.getElementById('solo-server-select');
     const hostSel=document.getElementById('host-server-select');
     for(const t of list){
@@ -2698,16 +2840,36 @@ fetch('/api/texts')
         o.textContent=displayName;
         return o;
       };
+      // 「日本国憲法」（サンプル、value="sample:0"）は静的に先頭へ置いてあるので、
+      // サーバー上の課題文は常にその後ろに追加されていく＝一覧の先頭に来る。
       if(soloSel) soloSel.appendChild(makeOpt());
       if(hostSel) hostSel.appendChild(makeOpt());
     }
-    // 課題文が存在する場合のみプルダウンを表示
-    if(soloSel) soloSel.style.display='block';
-    if(hostSel) hostSel.style.display='block';
   })
-  .catch(()=>{ /* 取得失敗時は何もしない */ });
+  .catch(()=>{ /* 取得失敗時は何もしない（サンプルは選べる状態のまま） */ });
 
-// ソロ：サーバー上課題文プルダウンの変更ハンドラ
+// 課題文一覧プルダウンの選択値を解決する。
+// "sample:<index>" はクライアント側に埋め込み済みのサンプル文章（SAMPLE_TEXTS）、
+// それ以外はサーバー上の課題文ファイル名として扱い、内容をfetchする。
+function resolveTextSelection(name, seq, currentSeqGetter, onLoaded, onError){
+  if(name.startsWith('sample:')){
+    const t=SAMPLE_TEXTS[parseInt(name.slice('sample:'.length))];
+    onLoaded({name:t.name, content:t.content});
+    return;
+  }
+  fetch('/texts/'+encodeURIComponent(name))
+    .then(r=>{ if(!r.ok) throw new Error('Fetch failed'); return r.text(); })
+    .then(content=>{
+      if(seq!==currentSeqGetter()) return; // 別の選択に切り替わっていたら破棄
+      onLoaded({name, content, serverName:name});
+    })
+    .catch(()=>{
+      if(seq!==currentSeqGetter()) return;
+      onError();
+    });
+}
+
+// ソロ：課題文一覧プルダウンの変更ハンドラ
 document.getElementById('solo-server-select').addEventListener('change',e=>{
   const name=e.target.value;
   const sel=e.target;
@@ -2716,27 +2878,21 @@ document.getElementById('solo-server-select').addEventListener('change',e=>{
     return;
   }
   const seq=++soloSelectionSeq;
-  selectedText=null; // fetch完了までは「選択されていない」扱い（前回プレイの残存対策）
+  selectedText=null; // 読み込み完了までは「選択されていない」扱い（前回プレイの残存対策）
   sel.classList.add('has-selection');
-  // サンプル文章ボタンの選択状態を解除
-  uncheckRadios('solo-text');
   document.getElementById('solo-selected-info').textContent='読み込み中…';
   document.getElementById('solo-start-btn').disabled=true;
-  fetch('/texts/'+encodeURIComponent(name))
-    .then(r=>{ if(!r.ok) throw new Error('Fetch failed'); return r.text(); })
-    .then(content=>{
-      if(seq!==soloSelectionSeq) return; // 別の選択に切り替わっていたら破棄
-      selectedText={name, content, serverName:name};
-      document.getElementById('solo-selected-info').textContent='選択中：'+name;
+  resolveTextSelection(name, seq, ()=>soloSelectionSeq,
+    t=>{
+      selectedText=t;
+      document.getElementById('solo-selected-info').textContent='選択中：'+t.name;
       document.getElementById('solo-start-btn').disabled=false;
-    })
-    .catch(()=>{
-      if(seq!==soloSelectionSeq) return;
-      document.getElementById('solo-selected-info').textContent='読み込みに失敗しました';
-    });
+    },
+    ()=>{ document.getElementById('solo-selected-info').textContent='読み込みに失敗しました'; }
+  );
 });
 
-// ホスト：サーバー上課題文プルダウンの変更ハンドラ
+// ホスト：課題文一覧プルダウンの変更ハンドラ
 document.getElementById('host-server-select').addEventListener('change',e=>{
   const name=e.target.value;
   const sel=e.target;
@@ -2745,21 +2901,17 @@ document.getElementById('host-server-select').addEventListener('change',e=>{
     return;
   }
   const seq=++hostSelectionSeq;
-  hostText=null; // fetch完了までは「未選択」扱い（前回プレイの残存対策）
+  hostText=null; // 読み込み完了までは「未選択」扱い（前回プレイの残存対策）
   sel.classList.add('has-selection');
-  uncheckRadios('host-text');
   document.getElementById('host-selected-info').textContent='読み込み中…';
-  fetch('/texts/'+encodeURIComponent(name))
-    .then(r=>{ if(!r.ok) throw new Error('Fetch failed'); return r.text(); })
-    .then(content=>{
-      if(seq!==hostSelectionSeq) return; // 別の選択に切り替わっていたら破棄
-      hostText={name, content, serverName:name};
-      document.getElementById('host-selected-info').textContent='選択中：'+name;
-    })
-    .catch(()=>{
-      if(seq!==hostSelectionSeq) return;
-      document.getElementById('host-selected-info').textContent='読み込みに失敗しました';
-    });
+  resolveTextSelection(name, seq, ()=>hostSelectionSeq,
+    t=>{
+      hostText=t;
+      document.getElementById('host-selected-info').textContent='選択中：'+t.name;
+      sendRoomSettings();
+    },
+    ()=>{ document.getElementById('host-selected-info').textContent='読み込みに失敗しました'; }
+  );
 });
 </script>
 </body>
