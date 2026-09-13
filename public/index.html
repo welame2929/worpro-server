@@ -210,6 +210,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .text-input{width:100%;padding:10px 12px;background:#eaf0fa;border:1px solid #aebfe0;border-radius:8px;color:var(--navy);font-size:15px;font-family:inherit;outline:none;}
 .text-input:focus{border-color:var(--navy);background:#ffffff;}
 .text-input::placeholder{color:#8794ba;}
+/* 接続切れなどで入力できない状態 */
+.text-input:disabled{background:#dfe5f1;color:#8794ba;cursor:not-allowed;}
 /* ロビーの練習入力欄：IME調整・指慣らし用。採点用textareaとは無関係の素朴な入力欄 */
 .practice-textarea{width:100%;padding:10px 12px;background:#eaf0fa;border:1px solid #aebfe0;border-radius:8px;color:var(--navy);font-size:15px;font-family:'BIZ UDGothic',monospace;line-height:1.6;outline:none;resize:vertical;}
 .practice-textarea:focus{border-color:var(--navy);background:#ffffff;}
@@ -865,6 +867,11 @@ input[type="file"]{display:none;}
       ホストが退出したため、このルームでは新しいゲームを開始できません。<br>
       続けてプレイする場合は、いったんメニューに戻って新しいルームを作成してください。
     </div>
+    <!-- 自分の接続が切れた場合。画面は残るが送信は一切できないため、その旨をはっきり伝える -->
+    <div id="lobby-conn-lost" class="host-gone-alert" style="display:none;">
+      サーバーとの接続が切れました。チャットの送信やゲームの開始はできません。<br>
+      「退出する」からメニューに戻り、ルームに入り直してください。
+    </div>
     <!-- チーム選択：団体戦のときだけ表示。選択内容は「参加者」一覧にも反映される -->
     <section class="mcard" id="team-select-card" style="display:none;">
       <h2 class="mcard-title">チームを選択</h2>
@@ -1078,6 +1085,11 @@ input[type="file"]{display:none;}
   <!-- マルチ時のみ表示。ロビーと同じ部屋のチャットで、内容も同期している -->
   <section class="mcard" id="result-chat-card" style="display:none;">
     <h2 class="mcard-title">チャット</h2>
+    <!-- 結果を見ている間に接続が切れた場合の案内 -->
+    <div id="result-conn-lost" class="host-gone-alert" style="display:none;">
+      サーバーとの接続が切れました。チャットの送信・順位表の更新・次の対戦への参加はできません。<br>
+      「メニューに戻る」から入り直してください。
+    </div>
     <div class="chat-log" id="result-chat-log" role="log" aria-live="polite"></div>
     <div class="chat-input-row">
       <input type="text" id="result-chat-input" class="text-input" placeholder="メッセージを入力…" maxlength="200"
@@ -1335,12 +1347,85 @@ function buildTeamsPayload(){
 // WebSocket接続（まだ繋がっていない場合のみ）
 function connectWS(callback){
   if(ws && ws.readyState===WebSocket.OPEN){ callback(); return; }
+  // 接続を張っている途中（ボタンの連打など）は新しい接続を作らない。
+  // 作ると接続が二重になり、置き去りの方が後で閉じたときに現在の接続まで無効化してしまう。
+  if(ws && ws.readyState===WebSocket.CONNECTING) return;
   const proto=location.protocol==='https:'?'wss':'ws';
-  ws=new WebSocket(`${proto}://${location.host}`);
-  ws.onopen=()=>{ callback(); };
-  ws.onmessage=e=>{ handleServerMsg(JSON.parse(e.data)); };
-  ws.onerror=()=>{ alert('サーバーへの接続に失敗しました'); };
-  ws.onclose=()=>{ ws=null; };
+  const sock=new WebSocket(`${proto}://${location.host}`);
+  ws=sock;
+  let opened=false;
+  // 各ハンドラは「その接続が現在の接続であるとき」だけ動かす。
+  // 以前は古い接続の close が遅れて届くと新しい接続の参照（ws）まで消してしまい、
+  // 受信はできるのに送信だけできない（チャット不可・開始ボタン無反応）状態になっていた。
+  sock.onopen=()=>{ opened=true; if(ws===sock) callback(); };
+  sock.onmessage=e=>{ if(ws===sock) handleServerMsg(JSON.parse(e.data)); };
+  // 途中で切れた場合は close 側で案内するので、アラートは最初の接続に失敗したときだけ出す
+  sock.onerror=()=>{ if(ws===sock && !opened) alert('サーバーへの接続に失敗しました'); };
+  sock.onclose=()=>{
+    if(ws!==sock) return; // 意図して閉じた接続・置き去りの接続の close は無視する
+    ws=null;
+    handleConnectionLost();
+  };
+}
+
+// 送信の共通処理。接続が無い／閉じている場合は送らず false を返す。
+// null の ws に send して例外が出て、ボタンを押しても無反応になるのを防ぐ。
+function sendWS(obj){
+  if(!ws || ws.readyState!==WebSocket.OPEN) return false;
+  ws.send(JSON.stringify(obj));
+  return true;
+}
+
+// 意図して接続を閉じる（退出・メニューに戻る）。
+// 先に参照を外してから閉じることで、この close を「予期せぬ切断」と扱わないようにする。
+// 接続途中（CONNECTING）の接続も閉じ、後から開いて置き去りになるのを防ぐ。
+function closeWS(){
+  const sock=ws;
+  ws=null;
+  if(sock && (sock.readyState===WebSocket.OPEN || sock.readyState===WebSocket.CONNECTING)) sock.close();
+}
+
+// 予期せず接続が切れたとき。
+// ルームはサーバーのメモリ上にしかなく（再デプロイでも消える）、再接続しても
+// 同じ部屋には戻れないため、自動再接続はせず「切れたこと」と「入り直す方法」を伝える。
+function handleConnectionLost(){
+  if(currentRoomId){
+    showConnectionLost(true);
+    return;
+  }
+  // ルームに入る前の画面で切れた場合、次の操作が必ず失敗するので最初の画面へ戻す
+  const active=document.querySelector('.screen.active');
+  if(active && ['multi-mode-screen','team-setup-screen','join-screen'].includes(active.id)){
+    alert('サーバーとの接続が切れました。もう一度やり直してください。');
+    showScreen('multi-name-screen');
+  }
+}
+
+// 接続切れの表示を切り替える（ロビー・リザルト共通）。
+// 押しても何も起きない操作は無効化・非表示にし、理由をその場で分かるようにする。
+function showConnectionLost(lost){
+  document.getElementById('lobby-conn-lost').style.display=lost?'block':'none';
+  document.getElementById('result-conn-lost').style.display=lost?'block':'none';
+  for(const p of CHAT_PANES){
+    const input=document.getElementById(p.input);
+    input.disabled=lost;
+    input.placeholder=lost?'接続が切れているため送信できません':'メッセージを入力…';
+  }
+  document.querySelectorAll('.chat-send-btn').forEach(b=>{ b.disabled=lost; });
+  const startBtn=document.getElementById('lobby-start-btn');
+  const readyBtn=document.getElementById('ready-btn');
+  startBtn.disabled=lost;
+  readyBtn.disabled=lost;
+  if(lost){
+    startBtn.textContent='接続が切れています';
+    readyBtn.textContent='接続が切れています';
+    document.getElementById('rematch-btn').style.display='none';
+    document.getElementById('finalize-row').style.display='none';
+    document.getElementById('ranking-waiting').style.display='none';
+  } else {
+    // 実際の表示は次のROOM_STATE（renderLobby）で決まる
+    startBtn.textContent='ゲームを開始する';
+  }
 }
 
 // =====================================================================
@@ -1398,13 +1483,13 @@ document.getElementById('host-duration-slider').addEventListener('change',sendRo
 function createRoom(){
   isHost=true;
   multiDefaultRule=hostSelectedRule;
-  ws.send(JSON.stringify({
+  sendWS({
     type:'CREATE_ROOM',
     name:playerName,
     imeRule:playerImeRule,
     mode:hostSelectedMode,
     teams:hostSelectedMode==='team' ? buildTeamsPayload() : null
-  }));
+  });
 }
 
 // 再戦（ホストのみ）。サーバーが部屋をロビー状態に戻し、全員がロビーへ移動する。
@@ -1420,7 +1505,7 @@ function joinRoom(){
   const rid=document.getElementById('room-id-input').value.trim().toUpperCase();
   if(!rid){ showJoinErr('ルームIDを入力してください'); return; }
   isHost=false;
-  ws.send(JSON.stringify({ type:'JOIN_ROOM', roomId:rid, name:playerName, imeRule:playerImeRule }));
+  sendWS({ type:'JOIN_ROOM', roomId:rid, name:playerName, imeRule:playerImeRule });
 }
 function showJoinErr(msg){
   const el=document.getElementById('join-err');
@@ -1431,8 +1516,9 @@ function showJoinErr(msg){
 // マルチプレイ：ロビー
 // =====================================================================
 function toggleReady(){
+  // 送れなかったのに見た目だけ切り替わり、サーバーと食い違わないよう、送信できたときだけ反映する
+  if(!sendWS({ type:'SET_READY', ready:!isReady })) return;
   isReady=!isReady;
-  ws.send(JSON.stringify({ type:'SET_READY', ready:isReady }));
   const btn=document.getElementById('ready-btn');
   if(isReady){
     btn.textContent='スタンバイ中（クリックで解除）';
@@ -1448,7 +1534,7 @@ function toggleReady(){
 }
 
 function hostStartGame(force){
-  ws.send(JSON.stringify({ type:'START_GAME', force:!!force }));
+  sendWS({ type:'START_GAME', force:!!force });
 }
 
 // 自分がロビーへ戻ったときの後始末。
@@ -1495,13 +1581,19 @@ CHAT_PANES.forEach(p=>{
   });
 });
 
+// 送信済みで、サーバーの応答（自分の発言として反映 or 拒否）を待っているチャット。
+// サーバーは受け取った順に1件ずつ「反映」か「拒否」を返すので、先頭から順に対応づけられる。
+// 送信時に入力欄を空にしているため、拒否されたときに文章を戻すのに使う。
+let pendingChats=[];
+
 // inputId 省略時（ロビーのボタン）はロビー側の入力欄を使う
 function sendChatMessage(which){
   const inputId = which==='result' ? 'result-chat-input' : (which || 'chat-input');
   const input=document.getElementById(inputId);
   const text=input.value.trim();
-  if(!text || !ws || ws.readyState!==WebSocket.OPEN) return;
-  ws.send(JSON.stringify({ type:'CHAT_MESSAGE', text }));
+  if(!text) return;
+  if(!sendWS({ type:'CHAT_MESSAGE', text })) return;
+  pendingChats.push({inputId, text});
   input.value='';
 }
 
@@ -1538,6 +1630,7 @@ function showChatError(message){
 // ルーム退出・新規入室時に前の部屋のログを消す（部屋をまたいで内容を残さない）。
 // 再戦ではログを引き継ぐため、ここは呼ばない。
 function resetChatLog(){
+  pendingChats=[]; // 前の部屋への送信待ちは、応答が来ないので捨てる
   for(const p of CHAT_PANES){
     const log=document.getElementById(p.log);
     log.innerHTML='';
@@ -1702,12 +1795,21 @@ function handleServerMsg(msg){
       break;
 
     case 'CHAT_MESSAGE':
+      // 自分の発言が反映された＝送信待ちの先頭が受理された
+      if(msg.playerId && msg.playerId===myPlayerId) pendingChats.shift();
       appendChatMessage(msg);
       break;
 
-    case 'CHAT_ERROR':
+    case 'CHAT_ERROR':{
       showChatError(msg.message);
+      // 拒否された文章を入力欄に戻す（すでに次の文章を打ち始めていたら上書きしない）
+      const rejected=pendingChats.shift();
+      if(rejected){
+        const input=document.getElementById(rejected.inputId);
+        if(input && !input.value) input.value=rejected.text;
+      }
       break;
+    }
 
     // 自分がロビーへ戻る操作をした（他の人のリザルト表示には影響しない）
     case 'RETURN_TO_LOBBY_OK':
@@ -2548,10 +2650,8 @@ function resetTeamState(){
 
 function leaveRoom(){
   // WebSocket接続を切ることでサーバー側のルーム退出処理（close ハンドラ）を発火させる
-  if(ws&&ws.readyState===WebSocket.OPEN){
-    ws.close();
-  }
-  ws=null;
+  closeWS();
+  showConnectionLost(false);
   currentRoomId=''; isHost=false; isReady=false; isMulti=false;
   document.getElementById('ready-btn').textContent='スタンバイする';
   document.getElementById('ready-btn').style.cssText='';
@@ -2566,10 +2666,8 @@ function goHome(){
   // 切らないと古いルームのメンバーとして残り、次のルーム作成/参加後に
   // 古いルームからの ROOM_STATE ブロードキャストで lobby-room-id が
   // 古いIDに上書きされ、前のルームに飛ばされたように見える。
-  if(ws && ws.readyState===WebSocket.OPEN){
-    ws.close();
-  }
-  ws=null;
+  closeWS();
+  showConnectionLost(false);
   currentRoomId=''; isReady=false;
   isMulti=false; isHost=false;
   document.getElementById('ready-btn').textContent='スタンバイする';
