@@ -488,6 +488,10 @@ wss.on('connection', (ws) => {
         if (room.resultsFinalized) return;
         room.resultsFinalized = true;
         broadcast(room, resultsUpdate(room));
+        // 締め切り＝このラウンドはもう待たない、という判断なのでラウンドも終える。
+        // 以前はフラグを立てるだけで gameState が playing のまま残り、ホストがロビーに
+        // 戻っても開始ボタンが「ゲーム進行中…」のまま（最長でプレイ時間＋約8秒）押せなかった。
+        finishRound(room, currentRoomId);
         console.log(`Results finalized by host in room ${currentRoomId}`);
         break;
       }
