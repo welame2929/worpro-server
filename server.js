@@ -191,7 +191,10 @@ function roomState(room, roomId) {
 // 書き換わらないよう、メッセージ側にラウンド番号を添えて配る。
 function buildResults(room) {
   const results = [];
-  for (const [pw, p] of room.players) {
+  // 在室中のプレイヤーに加え、結果を持ったまま抜けた人（departed）も含める。
+  // 抜けた人はホストではなく、接続もしていないものとして扱う。
+  const entries = [...room.players.entries(), ...room.departed.map(p => [null, p])];
+  for (const [pw, p] of entries) {
     if (p.playingRound !== room.round) continue;
     results.push({
       id: p.id,
@@ -200,7 +203,7 @@ function buildResults(room) {
       teamId: p.teamId,
       // ホスト権は元ホストの切断時に委譲されるため、リザルト側でも都度伝える
       // （締め切りボタンを出す相手を、その時点のホストに追従させるため）
-      isHost: pw === room.hostWs,
+      isHost: pw !== null && pw === room.hostWs,
       // 接続状態。切断済みのプレイヤーは結果を送ってこないため、
       // クライアントが「まだ入力中の人」と区別して集計完了を判定するのに使う。
       connected: p.connected !== false,
@@ -293,6 +296,10 @@ wss.on('connection', (ws) => {
           chatStreak: 0,
           // ホストが集計を締め切ったか。未提出者が残っていても順位表を確定させるための逃げ道
           resultsFinalized: false,
+          // 現在のラウンドの結果を持ったままルームを抜けた人の記録（順位表に残すため）。
+          // ロビーに戻った人は players から削除されるが、その時点でも結果画面を見ている人がいるので、
+          // その人たちの順位表から行が消えないようにここへ退避する。ラウンド開始時に空にする。
+          departed: [],
         };
         const hostId = genPlayerId();
         // inLobby: ロビーにいるか（falseならリザルト画面を見ている＝次のゲームの対象外）
@@ -422,6 +429,9 @@ wss.on('connection', (ws) => {
         room.gameState = 'playing';
         room.round++;
         room.resultsFinalized = false;
+        // 前のラウンドの順位表はもう送り直さない（新ラウンド番号の更新は、前ラウンドの
+        // 結果を見ている人の画面では無視される）ため、退避していた記録は不要になる
+        room.departed = [];
         // 参加者のみ前回の結果を捨ててラウンドに登録する。
         // 非参加者の result/playingRound はそのまま残し、リザルト表示を壊さない。
         for (const [, p] of joining) {
@@ -552,7 +562,13 @@ wss.on('connection', (ws) => {
 
     const wasPlaying = player.playingRound === room.round;
     if (player.inLobby !== false) {
-      // ロビーにいた人の離脱は一覧から削除（順位表に残す結果を持っていない）
+      // ロビーにいた人の離脱は一覧から削除する。
+      // ただし「結果画面 → ロビー → 退出」の人は直前のラウンドの結果を持っており、
+      // その結果はまだ結果画面を見ている人の順位表に載っている。一覧から消すと
+      // 順位表の送り直しから外れて行が消えてしまうため、結果だけ departed に退避する。
+      if (player.result && player.playingRound === room.round) {
+        room.departed.push({ ...player, connected: false });
+      }
       room.players.delete(ws);
     } else {
       // プレイ中／リザルト表示中の離脱は結果を順位表に残すため、Mapからは削除せず
