@@ -215,7 +215,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   box-shadow:0 -8px 12px -8px rgba(0,0,0,0.5);
 }
 .result-actions > *{flex:1; width:auto;}
-.result-actions > #retry-btn, .result-actions > #rematch-btn{flex:2;}
+.result-actions > #rematch-btn{flex:2;}
 @media (max-width:520px){
   .result-actions{flex-direction:column; gap:8px;}
 }
@@ -1379,11 +1379,10 @@ input[type="file"]{display:none;}
   </div>
   <!-- 次の行動を選ぶボタンは画面下部に固定表示する（結果画面は縦に長く、読み終えた位置から
        すぐ次へ進めるようにするため）。他の画面の操作列と同じく、離脱を左・主アクションを右に置く -->
+  <!-- ソロは「メニューに戻る」のみ。マルチは「ロビーに戻って次の対戦に参加する」も並ぶ -->
   <div class="result-actions">
     <!-- 再戦（btn-primary）と並ぶため、離脱側は暗色（btn-back）にして押し分けやすくする -->
     <button class="btn-back" onclick="goHome()">メニューに戻る</button>
-    <!-- ソロ時のみ -->
-    <button class="btn-secondary" id="retry-btn">同じ課題文でもう一度</button>
     <!-- マルチ時のみ。戻るタイミングは各自の任意で、次のゲームはロビーに戻った人だけで始まる -->
     <button class="btn-primary" id="rematch-btn" style="display:none;" onclick="requestRematch()">ロビーに戻って次の対戦に参加する</button>
   </div>
@@ -1626,8 +1625,6 @@ document.getElementById('solo-file-input').addEventListener('change',e=>{
 function startSoloGame(){
   if(!selectedText)return;
   isMulti=false;
-  // 再戦ボタンもカウントダウン経由で開始する
-  document.getElementById('retry-btn').onclick=()=>{ isMulti=false; soloCountdownStart(); };
   soloCountdownStart();
 }
 
@@ -2896,8 +2893,6 @@ function endGame(){
   // （上の得点カードは手元で計算しているので、自分の成績自体は通常どおり読める）
   showRankingDisconnected(!connected);
   document.getElementById('ranking-waiting').style.display=connected?'block':'none';
-  // ソロ用の「同じ課題文でもう一度」は使わない（マルチは部屋ごと再戦する）
-  document.getElementById('retry-btn').style.display='none';
   // ロビーへ戻るタイミングは各自の任意。接続が切れている場合は戻る先がないため出さない。
   document.getElementById('rematch-btn').style.display=connected?'':'none';
   // 結果画面でもロビーと同じチャットを使えるようにする
@@ -2913,8 +2908,6 @@ function endGame(){
     document.getElementById('diff-player-row').style.display='none';
     document.getElementById('result-chat-card').style.display='none';
     document.getElementById('rematch-btn').style.display='none';
-    document.getElementById('retry-btn').style.display='';
-    document.getElementById('retry-btn').onclick=()=>{ isMulti=false; soloCountdownStart(); };
   }
   showScreen('result-screen');
   if(endDlg.open) endDlg.close();
