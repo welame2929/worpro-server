@@ -499,7 +499,10 @@ input[type="file"]{display:none;}
 
 /* ===ロビー画面=== */
 .player-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
-.player-row{display:flex;align-items:center;justify-content:space-between;background:#eaf0fa;border:1px solid #b3c3e2;border-radius:6px;padding:8px 12px;}
+.player-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#eaf0fa;border:1px solid #b3c3e2;border-radius:6px;padding:8px 12px;}
+/* 名前側が残りの幅を使い、右端の状態バッジ（ホスト／スタンバイ済など）は常に見えるようにする */
+.player-row > .name-wrap{flex:1; gap:4px 10px;}
+.player-row > .player-badge{flex-shrink:0;}
 .player-name{font-size:15px;color:var(--navy);}
 .player-badge{font-size:12px;padding:2px 8px;border-radius:4px;font-weight:500;}
 .badge-host{background:#dde3f7;color:#3a4aa0;}
@@ -507,7 +510,26 @@ input[type="file"]{display:none;}
 .badge-notready{background:#eceef5;color:#7a82a0;}
 .ime-tag{font-size:12px;color:#3a4aa0;background:#dde3f7;padding:2px 8px;border-radius:4px;}
 /* チーム名タグ。IMEタグと並ぶため、色を変えて役割を区別する */
-.team-tag{font-size:12px;color:#7a4a10;background:#f7e6c8;padding:2px 8px;border-radius:4px;}
+.team-tag{font-size:12px;color:#7a4a10;background:#f7e6c8;padding:2px 8px;border-radius:4px;
+  /* チーム名はホストの自由入力なので、極端に長い・幅の広い名前でも一定幅で省略する */
+  display:inline-block; max-width:10em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle;}
+/* ===プレイヤー名・チーム名の表示幅の制御===
+   名前は20文字までだが、1文字で非常に幅の広い文字（例：U+FDFD「﷽」は通常の約7倍の幅）を
+   並べると、空白がなく折り返せないため表やパネルが横に広がり、得点などの列が押し出されていた。
+   名前は1行に収めて末尾を「…」で省略し（全文はホバーで表示）、横に並ぶ札は幅が足りなければ
+   次の行へ回す。 */
+.name-wrap{display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; min-width:0;}
+.name-text{min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.name-wrap > :not(.name-text){flex-shrink:0;}
+/* チーム名の札は、置き場所が10emより狭いとき（スマホ幅の順位表など）はさらに縮めて省略する。
+   幅の上限をパーセントで指定すると、表やグリッドの幅を決める段階では基準が定まらず
+   札の本来の文字幅で計算されてしまうため、縮められる（flex-shrink）指定で対応する */
+.name-wrap > .team-tag{flex-shrink:1; min-width:0;}
+/* 順位表の名前セルは、中身が何であっても隣の列にはみ出さないようにする */
+#ranking-table td:nth-child(2){overflow:hidden;}
+/* 対戦設定のチーム名の一覧。チームごとに省略表示し、1チームが何行にも折り返されないようにする */
+.room-team-list{display:flex; flex-wrap:wrap; gap:4px 6px; margin-top:4px;}
+.room-team-list .team-tag{font-size:12.5px; flex-shrink:1; min-width:0;}
 /* ロビーのルームID表示。「参加者」ボックスの真上に置き、共有すべき情報だと
    一目で伝わるようにする（初見でも迷わないよう説明文を添える） */
 .room-id-card{text-align:center;}
@@ -518,7 +540,8 @@ input[type="file"]{display:none;}
    letter-spacing で末尾に付く余白は負のマージンで打ち消す */
 /* ロビーの対戦設定（項目名＋値の一覧） */
 .room-settings{
-  display:grid; grid-template-columns:auto 1fr; gap:8px 18px;
+  /* 値の列は minmax(0,1fr)：中身（長いチーム名など）の文字幅で列が押し広げられないようにする */
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px 18px;
   background:#eaf0fa; border:1px solid #b3c3e2; border-radius:6px; padding:10px 14px;
 }
 .room-settings dt{font-size:13px; color:#4658a8; white-space:nowrap;}
@@ -567,6 +590,8 @@ input[type="file"]{display:none;}
 .team-choice{
   padding:9px 16px; background:#ffffff; border:1.5px solid #9fb1da; border-radius:8px;
   color:#2e3658; font-size:14px; font-family:inherit; cursor:pointer; transition:all .15s;
+  /* チーム名が極端に長い・幅の広い場合でも、ボタンが一覧の幅を超えないよう省略する */
+  max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .team-choice:hover{border-color:var(--cyan); background:#f4fbfd;}
 .team-choice.selected{
@@ -773,6 +798,24 @@ input[type="file"]{display:none;}
 
 /* マルチリザルト：順位表 */
 .ranking-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px;}
+/* 順位表・チーム合計得点は列幅を固定する。自動レイアウトだと、名前に折り返せない
+   幅の広い文字列があったとき名前の列が表全体を押し広げ、得点などの列がカードの外へ出てしまう。
+   数値の列に必要な幅を割り当て、名前（チーム名）の列は残りの幅で省略表示する。 */
+#ranking-table, #team-score-table{table-layout:fixed;}
+#ranking-table th:nth-child(1), #team-score-table th:nth-child(1){width:3.8em;}
+#ranking-table th:nth-child(3){width:5.6em;}  /* 得点（失格・正確賞の札は次の行に回る） */
+#ranking-table th:nth-child(4){width:5.8em;}  /* 総字数／換算字数 */
+#ranking-table th:nth-child(5){width:4.8em;}  /* エラー */
+#team-score-table th:nth-child(3){width:5.6em;}
+#team-score-table th:nth-child(4){width:4.5em;}
+#team-score-table td:nth-child(2){overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+@media (max-width:520px){
+  #ranking-table th, #ranking-table td, #team-score-table th, #team-score-table td{padding-left:6px; padding-right:6px;}
+  #ranking-table th:nth-child(1), #team-score-table th:nth-child(1){width:3em;}
+  #ranking-table th:nth-child(3){width:4.6em;}
+  #ranking-table th:nth-child(4){width:5em;}
+  #ranking-table th:nth-child(5){width:4em;}
+}
 .ranking-table th{background:#8098D6;color:#ffffff;padding:6px 10px;text-align:left;font-weight:500;}
 .ranking-table td{padding:7px 10px;border-bottom:1.5px solid #8098D6;color:#2e3658;}
 .ranking-table tr:last-child td{border-bottom:none;}
@@ -1304,7 +1347,7 @@ input[type="file"]{display:none;}
   <section id="team-score-section" class="mcard" style="display:none;">
     <h2 class="mcard-title">チーム合計得点</h2>
     <p class="mcard-desc">各チームのメンバー合計点です（失格者除く）。</p>
-    <table class="ranking-table">
+    <table class="ranking-table" id="team-score-table">
       <thead><tr><th>順位</th><th>チーム</th><th id="team-point-head">得点</th><th>人数</th></tr></thead>
       <tbody id="team-score-body"></tbody>
     </table>
@@ -1315,7 +1358,7 @@ input[type="file"]{display:none;}
   <section id="ranking-section" class="result-card" style="display:none;">
    <div class="result-body">
     <h2 class="mcard-title">順位表</h2>
-    <table class="ranking-table">
+    <table class="ranking-table" id="ranking-table">
       <thead><tr><th>順位</th><th>名前</th><th id="rank-point-head">得点</th><th id="rank-total-head">総字数</th><th>エラー</th></tr></thead>
       <tbody id="ranking-body"></tbody>
     </table>
@@ -2091,6 +2134,7 @@ function renderTeamChoices(){
     btn.type='button';
     btn.className='team-choice'+(myTeamChosen&&myTeamId===teamId?' selected':'');
     btn.textContent=label;
+    btn.title=label; // 長いチーム名は省略表示されるため、全文をホバーで表示する
     btn.onclick=()=>selectTeam(teamId);
     list.appendChild(btn);
   };
@@ -2146,14 +2190,25 @@ function renderRoomSettings(state){
     : (isHost ? '未選択（下の「課題文を指定」で選んでください）' : '未選択（ホストが選択中です）'), !state.textName]);
   if(state.duration) rows.push(['プレイ時間', (state.duration/60)+'分']);
   if(state.defaultRule) rows.push(['採点方式', RULE_LABELS[state.defaultRule]||state.defaultRule]);
-  rows.push(['対戦形式', (state.mode==='team' && state.teams)
-    ? `団体戦（${state.teams.join('・')}）` : '個人戦']);
+  const isTeam=(state.mode==='team' && state.teams);
+  rows.push(['対戦形式', isTeam ? '団体戦' : '個人戦']);
   const dl=document.getElementById('lobby-room-settings');
   dl.innerHTML='';
   for(const [k,v,pending] of rows){
     const dt=document.createElement('dt'); dt.textContent=k;
     const dd=document.createElement('dd'); dd.textContent=v;
     if(pending) dd.className='pending';
+    // 団体戦のチーム名は、チームごとの札にして並べる（長い名前は札の中で省略。全文はホバーで表示）
+    if(k==='対戦形式' && isTeam){
+      const list=document.createElement('div');
+      list.className='room-team-list';
+      for(const name of state.teams){
+        const tag=document.createElement('span');
+        tag.className='team-tag'; tag.textContent=name; tag.title=name;
+        list.appendChild(tag);
+      }
+      dd.appendChild(list);
+    }
     dl.appendChild(dt); dl.appendChild(dd);
   }
 }
@@ -2207,18 +2262,21 @@ function renderLobby(state){
   for(const p of state.players){
     const row=document.createElement('div');
     row.className='player-row';
+    // 名前と札（チーム・IME・状態）。名前が長い・幅の広い場合は省略し、札は次の行に回す
     const leftWrap=document.createElement('span');
-    leftWrap.style.display='flex'; leftWrap.style.alignItems='center'; leftWrap.style.gap='10px';
+    leftWrap.className='name-wrap';
     const nameEl=document.createElement('span');
-    nameEl.className='player-name';
+    nameEl.className='player-name name-text';
     // ホストであることは右端の「ホスト」バッジで示すため、名前には付けない
     nameEl.textContent=p.name;
+    nameEl.title=p.name; // 省略されたときもホバーで全文を確認できるように
     leftWrap.appendChild(nameEl);
     // 団体戦では所属チームを名前の隣に出す（未選択は「チームなし」と明示）
     if(multiMode==='team'&&multiTeams){
       const teamTag=document.createElement('span');
       teamTag.className='team-tag';
       teamTag.textContent=(p.teamId==null) ? 'チームなし' : (multiTeams[p.teamId]||'—');
+      teamTag.title=teamTag.textContent;
       leftWrap.appendChild(teamTag);
     }
     if(p.imeRule){
@@ -3149,15 +3207,18 @@ function renderRanking(results){
     const isSelf=(myPlayerId!=null && r.id===myPlayerId);
     if(isSelf) tr.classList.add('rank-self');
     const tdRank=document.createElement('td'); tdRank.textContent=done?(i+1):'—';
-    // 名前セル内に IMEルールバッジを並べる
+    // 名前セル内に チーム・IMEルールの札を並べる。名前は列の幅で省略し（全文はホバーで表示）、
+    // 札は幅が足りなければ次の行へ回す
     const tdName=document.createElement('td');
     const nameWrap=document.createElement('span');
-    nameWrap.style.display='inline-flex'; nameWrap.style.alignItems='center'; nameWrap.style.gap='8px';
-    const nameText=document.createElement('span'); nameText.textContent=r.name;
+    nameWrap.className='name-wrap';
+    const nameText=document.createElement('span'); nameText.className='name-text';
+    nameText.textContent=r.name; nameText.title=r.name;
     nameWrap.appendChild(nameText);
     if(multiMode==='team'&&multiTeams){
       const teamTag=document.createElement('span'); teamTag.className='team-tag';
       teamTag.textContent=(r.teamId==null) ? 'チームなし' : (multiTeams[r.teamId]||'—');
+      teamTag.title=teamTag.textContent;
       nameWrap.appendChild(teamTag);
     }
     if(r.imeRule){
@@ -3222,7 +3283,8 @@ function renderTeamScores(results){
     const tr=document.createElement('tr');
     if(i===0) tr.className='rank-1';
     const tdRank=document.createElement('td'); tdRank.textContent=(i+1);
-    const tdName=document.createElement('td'); tdName.textContent=t.name;
+    // チーム名は列の幅で省略される（#team-score-table の指定）ため、全文はホバーで表示する
+    const tdName=document.createElement('td'); tdName.textContent=t.name; tdName.title=t.name;
     const tdPts=document.createElement('td'); tdPts.textContent=t.points;
     const tdMembers=document.createElement('td'); tdMembers.textContent=t.members+'人';
     tr.appendChild(tdRank); tr.appendChild(tdName); tr.appendChild(tdPts); tr.appendChild(tdMembers);
