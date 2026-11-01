@@ -11,6 +11,10 @@
   --navy:#1A1E3F;--blue:#8098D6;--blue-mid:#b8c8ea;
   --white:#ffffff;--bg:#94ADE4;--text:#1a1e3f;--muted:#5a6490;--border:#d0d8ee;
   --del-bg:#fde8e8;--del-text:#8b1c1c;--ins-bg:#e6f4ea;--ins-text:#14532d;
+  /* 余分な入力・誤った入力（差分表示の挿入側と、余字の件数）。
+     緑だと正解のように見えるため、注意を表す黄色系にする。
+     緑（--ins-*）は「正確賞」など達成を示す表示にだけ使う。 */
+  --extra-bg:#fff1bf;--extra-text:#6e4a00;--extra-border:#e0b12e;
   /* アクセント（シアン）：選択状態・主要アクション・得点に限定して使用 */
   --cyan:#0E9BBD;--cyan-bright:#35D6F4;--cyan-pale:#E3F6FB;--cyan-deep:#0B7E9A;
   /* 分割レイアウトの右側パネル（ブランドのnavyとカードの明色をつなぐ中間色） */
@@ -764,10 +768,10 @@ input[type="file"]{display:none;}
    内訳の後ろに別の項目が並んでも終端が崩れないよう、:last-childではなく
    最終項目のクラスを直接指定している。 */
 .score-sub.bd-yoji::before{bottom:50%;}
-/* 意味色：誤字・脱字＝赤系、余字＝緑系 */
+/* 意味色：誤字・脱字＝赤系、余字＝黄系（差分表示の「未入力」「余分な入力」と同じ色分け） */
 .score-sub.bd-goji dd b, .score-sub.bd-goji dd{color:#8b1c1c;}
 .score-sub.bd-datsuji dd b, .score-sub.bd-datsuji dd{color:#8b1c1c;}
-.score-sub.bd-yoji dd b, .score-sub.bd-yoji dd{color:#14532d;}
+.score-sub.bd-yoji dd b, .score-sub.bd-yoji dd{color:var(--extra-text);}
 .diff-card{background:#CAD7EE;border:1px solid #aebfe0;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;}
 /* diffカードの折りたたみ見出し */
 .diff-card > summary{list-style:none;cursor:pointer;user-select:none;}
@@ -794,7 +798,7 @@ input[type="file"]{display:none;}
 .ld-dot{width:14px;height:14px;border-radius:3px;}
 .diff-content{font-size:14px;line-height:2.0;white-space:pre-wrap;font-family:'Noto Sans JP',sans-serif;color:#2e3658;padding:4px 2px;}
 .d-del{background:var(--del-bg);color:var(--del-text);text-decoration:line-through;border-radius:2px;}
-.d-ins{background:var(--ins-bg);color:var(--ins-text);border-radius:2px;}
+.d-ins{background:var(--extra-bg);color:var(--extra-text);border-radius:2px;}
 
 /* マルチリザルト：順位表 */
 .ranking-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px;}
@@ -1410,7 +1414,7 @@ input[type="file"]{display:none;}
     </div>
     <div class="legend">
       <div class="ld"><div class="ld-dot" style="background:var(--del-bg);border:1px solid #f87171;"></div>未入力</div>
-      <div class="ld"><div class="ld-dot" style="background:var(--ins-bg);border:1px solid #4ade80;"></div>余分な入力・誤った入力</div>
+      <div class="ld"><div class="ld-dot" style="background:var(--extra-bg);border:1px solid var(--extra-border);"></div>余分な入力・誤った入力</div>
     </div>
     <div class="diff-content" id="diff-output"></div>
   </details>
